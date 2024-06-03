@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="card">High Card</string>
+    <string name="pair">Pair</string>
+    <string name="two_pairs">Two Pair</string>
+    <string name="trips">Three of a Kind</string>
+    <string name="straight">Straight</string>
+    <string name="flush">Flush</string>
+    <string name="full_house">Full House</string>
+    <string name="poker">Four of a Kind</string>
+    <string name="straight_flush">Straight Flush</string>
+    <string name="royal_flush">Royal Flush</string>
+</resources>

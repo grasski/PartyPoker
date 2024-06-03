@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connect_local">Connect to local game</string>
+    <string name="create_local">Create local game</string>
+
+</resources>

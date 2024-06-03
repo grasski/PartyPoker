@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="connect_local">Připojit se k lokální hře</string>
+    <string name="create_local">Vytvoř lokální hru</string>
+
+</resources>
