@@ -3,6 +3,7 @@ package com.dabi.partypoker.featureServer.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dabi.partypoker.R
 import com.dabi.partypoker.managers.GameEvents
 import com.dabi.partypoker.managers.GameManager
 import com.dabi.partypoker.featureClient.model.data.PlayerState
@@ -12,12 +13,12 @@ import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.managers.ServerEvents
 import com.dabi.partypoker.utils.ClientPayloadType
 import com.dabi.partypoker.utils.ServerPayloadType
+import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.toServerPayload
 import com.google.android.gms.nearby.connection.ConnectionsClient
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -38,6 +39,12 @@ open class ServerOwnerViewModel@Inject constructor(
 
     val serverBridge = ServerBridge(connectionsClient, this::onServerBridgeEvent)
 
+    override fun onCleared() {
+        super.onCleared()
+
+        _gameState.update { GameState() }
+        serverBridge.killServer()
+    }
     init {
         viewModelScope.launch {
             _gameState.collect { gameState ->
@@ -64,15 +71,14 @@ open class ServerOwnerViewModel@Inject constructor(
                 }
             }
 
-            GameEvents.CloseGame -> TODO()
+            GameEvents.CloseGame -> {
+                serverBridge.killServer()
+            }
         }
     }
 
     private fun handlePlayingPlayer(timeInSeconds: Int = 10){
         _playerMoveTimer.update { timeInSeconds }
-
-        //TODO: send message to playingNow player with his possible moves
-//        serverBridge.sendPayload()
 
         timerJob?.cancel()
 //        timerJob = this.viewModelScope.launch {
@@ -98,7 +104,9 @@ open class ServerOwnerViewModel@Inject constructor(
                     val updatedPlayers = gameState.players.filter { it.key != clientID }
                     gameState.copy(
                         players = updatedPlayers,
-                        gameReadyPlayers = updatedPlayers.filter { it.value.isReadyToPlay }.keys
+                        gameReadyPlayers = updatedPlayers.filter { it.value.isReadyToPlay }.keys,
+
+                        messages = gameState.messages.plus(UiTexts.StringResource(R.string.client_disconnected))
                     )
                 }
             }
@@ -118,7 +126,8 @@ open class ServerOwnerViewModel@Inject constructor(
 
                         _gameState.update { gameState ->
                             gameState.copy(
-                                players = _gameState.value.players + (clientID to player)
+                                players = _gameState.value.players + (clientID to player),
+                                messages = gameState.messages.plus(UiTexts.StringResource(R.string.client_connected, player.nickname))
                             )
                         }
                     }

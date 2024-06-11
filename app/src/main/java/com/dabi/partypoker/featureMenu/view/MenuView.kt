@@ -2,6 +2,7 @@ package com.dabi.partypoker.featureMenu.view
 
 import android.Manifest
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
@@ -10,12 +11,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -23,23 +25,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.ImeAction
 import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.dabi.partypoker.MenuScreen
 import com.dabi.partypoker.PlayerScreen
 import com.dabi.partypoker.R
-import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
-import com.dabi.partypoker.managers.ClientEvents
-import com.dabi.partypoker.managers.GameEvents
-import com.dabi.partypoker.managers.ServerEvents
+import com.dabi.partypoker.ServerScreen
 import com.dabi.partypoker.managers.ServerType
-import com.dabi.partypoker.featureClient.viewmodel.PlayerViewModel
-import com.dabi.partypoker.featureServer.viewmodel.ServerOwnerViewModel
-import com.dabi.partypoker.featureServer.viewmodel.ServerPlayerViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -60,12 +57,14 @@ fun MenuView(
     val context = LocalContext.current
     var viewPosition by rememberSaveable { mutableStateOf(ViewPosition.MENU) }
     var nickname by rememberSaveable { mutableStateOf("") }
+    Log.e("", "POZICE: " + viewPosition)
 
     var permissions: MultiplePermissionsState = rememberMultiplePermissionsState(emptyList())
     CheckPermissions(permissionsState = { permissions = it })
+    BackHandler(true) {  }
 
-    Crossfade(targetState = viewPosition) {
-        when (it) {
+    Crossfade(targetState = viewPosition) {position ->
+        when (position) {
             ViewPosition.MENU -> {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -97,106 +96,41 @@ fun MenuView(
 
                         if (permissions.allPermissionsGranted) {
                             var localServerPlaying by rememberSaveable { mutableStateOf(false) }
-                            Row{
-                                Text(text = "Are you playing?")
-                                Checkbox(
-                                    checked = localServerPlaying,
-                                    onCheckedChange = { localServerPlaying = it }
-                                )
-                            }
-                            
-                            val serverPlayeriewModel: ServerPlayerViewModel = hiltViewModel()
-                            val serverState by serverPlayeriewModel.serverBridge.serverState.collectAsStateWithLifecycle()
-                            val gameState by serverPlayeriewModel.gameState.collectAsStateWithLifecycle()
-                            val playerState by serverPlayeriewModel.playerState.collectAsStateWithLifecycle()
-                            LaunchedEffect(playerState, gameState) {
-                                
-                            }
-
-                            serverPlayeriewModel.serverBridge.onServerEvent(ServerEvents.StartServer(context, ServerType.IS_TABLE))
-                            Column(){
-                                Text(text = serverState.toString())
-
-                                Button(onClick = {
-                                    serverPlayeriewModel.onGameEvent(GameEvents.StartGame)
-                                }) {
-                                    Text("START")
-                                }
-
-                                Text(text = "READY = ${playerState.isReadyToPlay}, money = ${playerState.money}")
-                                Button(onClick = {
-                                    serverPlayeriewModel.onPlayerEvent(PlayerEvents.Ready)
-                                }){
-                                    Text(text = "READY")
-                                }
-
-                                Text(text = "PLAYING = ${playerState.isPlayingNow}, called = ${playerState.called}")
-                                Text("ROUND = ${gameState.round}, raiser: ${gameState.activeRaise}\nBANK = ${gameState.bank}")
-
-                                Row (
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceEvenly
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Button(
-                                        onClick = {
-                                            serverPlayeriewModel.onPlayerEvent(PlayerEvents.Check)
-                                        },
-                                        enabled = serverPlayeriewModel.checkEnabled()
-                                    ) {
-                                        Text(text = "CHECK")
-                                    }
-
-                                    val callAmount = serverPlayeriewModel.activeCallValue()
-                                    Button(
-                                        onClick = {
-                                            serverPlayeriewModel.onPlayerEvent(PlayerEvents.Call(callAmount))
-                                        },
-                                        enabled = callAmount > 0
-                                    ) {
-                                        Text(text = "CALL $callAmount")
-                                    }
-
-                                    val raisingAmount = 30
-                                    Button(
-                                        onClick = {
-                                            // So that is at least 30 + smallBlindValue
-                                            serverPlayeriewModel.onPlayerEvent(PlayerEvents.Raise(serverPlayeriewModel.minimalRaise() + raisingAmount))
-                                        },
-                                        enabled = playerState.isPlayingNow
-                                    ) {
-                                        Text(text = "min RAISE ${serverPlayeriewModel.minimalRaise()}\nRaising: ${serverPlayeriewModel.minimalRaise() + raisingAmount}")
-                                    }
-
-                                    Button(
-                                        onClick = { /*TODO*/ },
-                                        enabled = playerState.isPlayingNow
-                                    ) {
-                                        Text(text = "FOLD")
+                                    Text(text = "Are you playing?")
+                                    Checkbox(
+                                        checked = localServerPlaying,
+                                        onCheckedChange = { localServerPlaying = it }
+                                    )
+                                }
+                                Crossfade(targetState = localServerPlaying) { isPlaying ->
+                                    if (isPlaying) {
+                                        TextField(
+                                            value = nickname,
+                                            onValueChange = { nickname = it }
+                                        )
                                     }
                                 }
 
-                                Text(text = "BB: ${gameState.bigBlindId}, SB: ${gameState.smallBlindId}, dealer: ${gameState.dealerId}, now= ${gameState.playingNow}")
-
-                                gameState.players.forEach{
-                                    Text(text = "Hrac: ${it.value.nickname}, ${it.value.id}")
+                                Button(
+                                    onClick = { navController.navigate(ServerScreen(
+                                        serverType = if(localServerPlaying) ServerType.IS_PLAYER.toString() else ServerType.IS_TABLE.toString(),
+                                        serverName = nickname.ifEmpty { "ServerOwner" }
+                                    )) {
+                                        popUpTo(MenuScreen){inclusive = true}
+                                    } }
+                                ){
+                                    Text(text = "START SERVER")
                                 }
                             }
-
-
-//                            Button(onClick = {
-//                                navController.navigate(
-//                                    Routes.LocalServer.route +
-//                                            "/${
-//                                                if (localServerPlaying) {
-//                                                    ServerType.PLAYER
-//                                                } else {
-//                                                    ServerType.TABLE}
-//                                            }"
-//                                )
-//                                { popUpTo(Routes.Menu.route){inclusive = true} }
-//                            }) {
-//                                Text(text = "Host a game")
-//                            }
                         } else{
                             Text("Not possible to Host a game without accepting permissions")
                         }
@@ -204,16 +138,40 @@ fun MenuView(
                 }
             }
             ViewPosition.LOCAL_PLAYER -> {
-                val playerViewModel: PlayerViewModel = hiltViewModel()
-                Column {
-                    Button(onClick = {
-                        playerViewModel.clientBridge.onClientEvent(ClientEvents.Connect(context, "dabi"))
-                        navController.navigate(PlayerScreen)
-                    }) {
-                        Text("KLIK")
-                    }
+                BackHandler(true) {
+                    viewPosition = ViewPosition.MENU
                 }
 
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    item {
+                        if (permissions.allPermissionsGranted) {
+                            TextField(
+                                value = nickname,
+                                onValueChange = { nickname = it },
+                                placeholder = { Text("Enter your nick name.") },
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+                            )
+
+                            Button(onClick = {
+                                if (nickname.isNotBlank()){
+                                    navController.navigate(
+                                        PlayerScreen(nickname)
+                                    )
+                                    { popUpTo(MenuScreen){inclusive = true} }
+                                }
+                            }
+                            ){
+                                Text("Login")
+                            }
+                        } else{
+                            Text("Not possible to Join a game without accepting permissions")
+                        }
+                    }
+                }
             }
         }
     }

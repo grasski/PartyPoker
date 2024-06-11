@@ -1,5 +1,6 @@
 package com.dabi.partypoker.featureClient.model
 
+import android.util.Log
 import com.dabi.partypoker.managers.ClientEvents
 import com.dabi.partypoker.managers.ClientManager
 import com.dabi.partypoker.managers.ConnectionStatusEnum
@@ -32,11 +33,26 @@ class ClientBridge (
     private val _clientState = MutableStateFlow(ClientState())
     val clientState = _clientState.asStateFlow()
 
+    fun killClient(){
+        _clientState.update { ClientState() }
+        connectionsClient.stopDiscovery()
+        connectionsClient.stopAdvertising()
+        connectionsClient.stopAllEndpoints()
+    }
+
+    fun disconnect(){
+        _clientState.update { it.copy(
+            connectionStatus = ConnectionStatusEnum.DISCONNECTED
+        ) }
+    }
+
     fun onClientEvent(event: ClientEvents){
         when(event){
             is ClientEvents.Connect -> {
-                ClientManager(connectionsClient, this::onClientEvent).startDiscovery(event.context, event.nickname)
-                bridgeEvent(ClientBridgeEvents.Connect(event.nickname))
+                if (_clientState.value.connectionStatus == ConnectionStatusEnum.NONE || _clientState.value.connectionStatus == ConnectionStatusEnum.FAILED_TO_CONNECT){
+                    ClientManager(connectionsClient, this::onClientEvent).startDiscovery(event.context, event.nickname)
+                    bridgeEvent(ClientBridgeEvents.Connect(event.nickname))
+                }
             }
             is ClientEvents.Connected -> {
                 _clientState.update { it.copy(
@@ -48,6 +64,11 @@ class ClientBridge (
                 bridgeEvent(ClientBridgeEvents.ClientConnected)
             }
             is ClientEvents.ConnectionStatus -> {
+                if (event.status == ConnectionStatusEnum.DISCONNECTED && _clientState.value.connectionStatus == ConnectionStatusEnum.NONE){
+                    Log.e("", "Client disconnected MANUALY")
+                    // Manual disconnection
+                    return
+                }
                 _clientState.update { it.copy(
                     connectionStatus = event.status
                 ) }
@@ -65,6 +86,7 @@ class ClientBridge (
                         ) }
                     }
                     ServerPayloadType.UPDATE_CLIENT -> {
+                        Log.e("", "DATA: " + data)
                         val playerState = Gson().fromJson(data.toString(), PlayerState::class.java)
                         bridgeEvent(ClientBridgeEvents.UpdateClient(playerState))
                     }

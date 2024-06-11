@@ -4,6 +4,7 @@ import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.model.data.endpointID
 import com.dabi.partypoker.utils.Card
 import com.dabi.partypoker.utils.CardsCombination
+import com.dabi.partypoker.utils.UiTexts
 
 
 data class GameState(
@@ -32,6 +33,8 @@ data class GameState(
 
     var round: Int = 0,
     var games: Int = 0,
+
+    var messages: List<UiTexts.StringResource> = emptyList(),
 
     var winners: List<PlayerState> = emptyList(),
     var winningCombination: CardsCombination = CardsCombination.NONE,

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.dabi.partypoker.featureClient.model.ClientBridge
 import com.dabi.partypoker.featureClient.model.ClientBridgeEvents
 import com.dabi.partypoker.featureClient.model.data.PlayerState
+import com.dabi.partypoker.featureCore.interfaces.PlayerCoreInterface
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.utils.ClientPayloadType
 import com.dabi.partypoker.utils.toClientPayload
@@ -31,19 +32,34 @@ sealed class PlayerEvents{
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
     private val connectionsClient: ConnectionsClient
-): ViewModel() {
+): ViewModel(), PlayerCoreInterface {
     private val _playerState: MutableStateFlow<PlayerState> = MutableStateFlow(PlayerState())
     val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
 
     private val _gameState = MutableStateFlow(GameState())
     val gameState = _gameState.asStateFlow()
 
+    val clientBridge: ClientBridge = ClientBridge(connectionsClient, this::onClientBridgeEvent)
 
-    fun onPlayerEvent(event: PlayerEvents){
+    init {
+        clientBridge.killClient()
+        _gameState.update { GameState() }
+        _playerState.update { PlayerState() }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Log.e("", "PLAYER CLEARED")
+
+        clientBridge.killClient()
+        _gameState.update { GameState() }
+        _playerState.update { PlayerState() }
+    }
+
+    override fun onPlayerEvent(event: PlayerEvents){
         when(event){
             PlayerEvents.Disconnect -> {
-                val clientPayload = toClientPayload(ClientPayloadType.ACTION_DISCONNECTED, null)
-                clientBridge.sendPayload(clientPayload)
+                clientBridge.disconnect()
             }
 
             PlayerEvents.Ready -> {
@@ -70,8 +86,15 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
+    override fun getPlayerState(): PlayerState {
+        return _playerState.value
+    }
 
-    val clientBridge: ClientBridge = ClientBridge(connectionsClient, this::onClientBridgeEvent)
+    override fun getGameState(): GameState {
+        return _gameState.value
+    }
+
+
     private fun onClientBridgeEvent(event: ClientBridgeEvents){
         when(event){
             is ClientBridgeEvents.Connect -> {
@@ -91,31 +114,5 @@ class PlayerViewModel @Inject constructor(
                 _gameState.update { event.gameState }
             }
         }
-    }
-
-
-    fun checkEnabled(): Boolean{
-        return activeCallValue() == 0 && _playerState.value.isPlayingNow
-    }
-    fun activeCallValue(): Int{
-        if (!_playerState.value.isPlayingNow || _gameState.value.activeRaise == null || _gameState.value.round == 0){
-            return 0
-        }
-        _gameState.value.activeRaise?.let { (playerId, amount) ->
-            if (playerId != _playerState.value.id){
-                return amount - _playerState.value.called
-            }
-        }
-        return 0
-    }
-    fun minimalRaise(): Int{
-        return activeCallValue() + _gameState.value.smallBlindAmount
-//        _gameState.value.activeRaise?.let { (playerId, amount) ->
-//            if (playerId == _playerState.value.id){     // Should happen only for BigBlind in the round = 1
-//                return _gameState.value.smallBlindAmount
-//            }
-//            return amount - _playerState.value.called + _gameState.value.smallBlindAmount
-//        }
-//        return _gameState.value.smallBlindAmount
     }
 }

@@ -15,7 +15,11 @@ import com.google.android.gms.nearby.connection.Strategy
 
 
 sealed class ServerEvents{
-    data class StartServer(val context: Context, val serverType: ServerType): ServerEvents()
+    data class StartServer(
+        val context: Context,
+        val serverType: ServerType,
+        val serverName: String
+    ): ServerEvents()
     data class ServerStatus(val status: ServerStatusEnum): ServerEvents()
 
     data class ClientConnected(val endpointId: String): ServerEvents()
@@ -47,7 +51,7 @@ class ServerManager(
         connectionsClient.stopAllEndpoints()
     }
 
-    fun startAdvertising(context: Context, strategy: Strategy = Strategy.P2P_STAR, name: String = "Server Owner") {
+    fun startAdvertising(context: Context, strategy: Strategy = Strategy.P2P_STAR, name: String) {
         val advertisingOptions: AdvertisingOptions = AdvertisingOptions.Builder()
             .setStrategy(strategy).build()
         connectionsClient.stopAdvertising()

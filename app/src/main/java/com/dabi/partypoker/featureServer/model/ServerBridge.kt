@@ -1,5 +1,6 @@
 package com.dabi.partypoker.featureServer.model
 
+import android.util.Log
 import com.dabi.partypoker.managers.ServerEvents
 import com.dabi.partypoker.managers.ServerManager
 import com.dabi.partypoker.managers.ServerStatusEnum
@@ -29,14 +30,23 @@ class ServerBridge(
     private val bridgeEvent: (ServerBridgeEvents) -> Unit
 ) {
     private val _serverState = MutableStateFlow(ServerState())
-    val serverState: StateFlow<ServerState> = _serverState.asStateFlow()
+    val serverState: StateFlow<ServerState> = _serverState
 
+    fun killServer(){
+        _serverState.update { ServerState() }
+        connectionsClient.stopDiscovery()
+        connectionsClient.stopAdvertising()
+        connectionsClient.stopAllEndpoints()
+    }
 
     fun onServerEvent(event: ServerEvents){
         when(event) {
             is ServerEvents.StartServer -> {
                 if (_serverState.value.serverStatus == ServerStatusEnum.OFF){
-                    ServerManager(connectionsClient, this::onServerEvent).startAdvertising(event.context)
+                    ServerManager(connectionsClient, this::onServerEvent).startAdvertising(
+                        context = event.context,
+                        name = event.serverName
+                    )
 
                     _serverState.update { it.copy(
                         serverType = event.serverType
@@ -54,6 +64,8 @@ class ServerBridge(
                 _serverState.update { it.copy(
                     connectedClients = it.connectedClients.plus(clientEndpointId)
                 )}
+
+                Log.e("", "CLIENT CONNECTED: " + _serverState.value.connectedClients)
 
                 val serverPayload = toServerPayload(ServerPayloadType.CLIENT_CONNECTED, _serverState.value.serverType)
                 connectionsClient.sendPayload(clientEndpointId, serverPayload)

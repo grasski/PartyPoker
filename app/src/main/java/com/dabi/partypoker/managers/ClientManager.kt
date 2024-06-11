@@ -25,10 +25,11 @@ sealed class ClientEvents{
 }
 
 enum class ConnectionStatusEnum{
-    DISCONNECTED,
+    NONE,
     CONNECTING,
     FAILED_TO_CONNECT,
-    CONNECTED
+    CONNECTED,
+    DISCONNECTED
 }
 
 
@@ -49,12 +50,6 @@ class ClientManager(
                 Log.e("", "CLIENT DISCOVERY FAILURE " + it.message)
                 events(ClientEvents.ConnectionStatus(ConnectionStatusEnum.FAILED_TO_CONNECT))
             }
-    }
-
-    fun disconnect(){
-        connectionsClient.stopAdvertising()
-        connectionsClient.stopDiscovery()
-        connectionsClient.stopAllEndpoints()
     }
 
     val endpointDiscoveryCallback: (String) -> EndpointDiscoveryCallback = { nickname ->

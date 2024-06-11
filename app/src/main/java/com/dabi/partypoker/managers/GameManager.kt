@@ -4,7 +4,6 @@ import android.util.Log
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.utils.generateDeck
 import com.dabi.partypoker.utils.getCards
-import kotlin.math.round
 
 
 sealed class GameEvents{
@@ -151,6 +150,7 @@ class GameManager {
                 }
                 if (gameState.round == 5){
                     Log.e("", "HOTOVO, HRA SKONCILA V 5. KOLE")
+                    //TODO()
                     return startGame(gameState, gameState.bank)
                 }
 

@@ -3,4 +3,6 @@
     <string name="connect_local">Connect to local game</string>
     <string name="create_local">Create local game</string>
 
+    <string name="client_disconnected">Player disconnected from the game.</string>
+    <string name="client_connected">%1$s connected to the game.</string>
 </resources>
