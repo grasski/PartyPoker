@@ -5,4 +5,12 @@
 
     <string name="client_disconnected">Player disconnected from the game.</string>
     <string name="client_connected">%1$s connected to the game.</string>
+    <string name="server_starting">Server is starting, please wait.</string>
+    <string name="client_connecting">Connecting to server, please wait.</string>
+
+
+    <string name="action_check">CHECK</string>
+    <string name="action_call">CALL</string>
+    <string name="action_raise">RAISE</string>
+    <string name="action_fold">FOLD</string>
 </resources>

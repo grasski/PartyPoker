@@ -57,7 +57,6 @@ fun MenuView(
     val context = LocalContext.current
     var viewPosition by rememberSaveable { mutableStateOf(ViewPosition.MENU) }
     var nickname by rememberSaveable { mutableStateOf("") }
-    Log.e("", "POZICE: " + viewPosition)
 
     var permissions: MultiplePermissionsState = rememberMultiplePermissionsState(emptyList())
     CheckPermissions(permissionsState = { permissions = it })

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.dabi.partypoker.featureClient.model.ClientBridge
 import com.dabi.partypoker.featureClient.model.ClientBridgeEvents
 import com.dabi.partypoker.featureClient.model.data.PlayerState
+import com.dabi.partypoker.featureCore.data.PlayerActionsState
 import com.dabi.partypoker.featureCore.interfaces.PlayerCoreInterface
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.utils.ClientPayloadType
@@ -39,13 +40,10 @@ class PlayerViewModel @Inject constructor(
     private val _gameState = MutableStateFlow(GameState())
     val gameState = _gameState.asStateFlow()
 
-    val clientBridge: ClientBridge = ClientBridge(connectionsClient, this::onClientBridgeEvent)
+    private val _playerActionsState: MutableStateFlow<PlayerActionsState> = MutableStateFlow(PlayerActionsState())
+    val playerActionsState = _playerActionsState.asStateFlow()
 
-    init {
-        clientBridge.killClient()
-        _gameState.update { GameState() }
-        _playerState.update { PlayerState() }
-    }
+    val clientBridge: ClientBridge = ClientBridge(connectionsClient, this::onClientBridgeEvent)
 
     override fun onCleared() {
         super.onCleared()
@@ -101,6 +99,7 @@ class PlayerViewModel @Inject constructor(
                 _playerState.update { it.copy(
                     nickname = event.nickname
                 ) }
+                connectionsClient.stopDiscovery()
             }
             ClientBridgeEvents.ClientConnected -> {
                 val clientPayload = toClientPayload(ClientPayloadType.CONNECTED, _playerState.value.nickname)
@@ -114,5 +113,12 @@ class PlayerViewModel @Inject constructor(
                 _gameState.update { event.gameState }
             }
         }
+
+        _playerActionsState.update { it.copy(
+            canCheck = checkEnabled(),
+            callAmount = activeCallValue(),
+            raiseAmount = minimalRaise(),
+            canFold = _playerState.value.isPlayingNow
+        ) }
     }
 }

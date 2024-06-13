@@ -16,9 +16,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.dabi.partypoker.featureClient.view.PlayerGameView
+import com.dabi.partypoker.featureClient.view.PlayerViewServer
 import com.dabi.partypoker.featureClient.viewmodel.PlayerViewModel
 import com.dabi.partypoker.featureMenu.view.MenuView
 import com.dabi.partypoker.featureServer.view.ServerOwnerView
+import com.dabi.partypoker.featureServer.viewmodel.ServerOwnerViewModel
+import com.dabi.partypoker.featureServer.viewmodel.ServerPlayerViewModel
 import com.dabi.partypoker.managers.ServerType
 import kotlinx.serialization.Serializable
 
@@ -35,34 +38,20 @@ fun Navigation() {
         composable<PlayerScreen> {
             BackHandler(true) {  }
 
-            val playerViewModel: PlayerViewModel = hiltViewModel()
-            val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
-            val clientState = playerViewModel.clientBridge.clientState.collectAsStateWithLifecycle()
-
             PlayerGameView(
                 navController,
                 it.toRoute<PlayerScreen>().nickname,
-                playerState,
-                clientState.value,
-                playerViewModel::onPlayerEvent,
-                playerViewModel.clientBridge::onClientEvent
             )
         }
 
         composable<ServerScreen> {
-            val serverScreen: ServerScreen = it.toRoute()
-            val serverType = ServerType.valueOf(serverScreen.serverType)
-
             BackHandler(true) {  }
 
-            if (serverType == ServerType.IS_TABLE){
-                ServerOwnerView(
-                    navController = navController,
-                    serverScreen = serverScreen
-                )
-            } else{
-                // TODO()
-            }
+            val serverScreen: ServerScreen = it.toRoute()
+            ServerOwnerView(
+                navController = navController,
+                serverScreen = serverScreen
+            )
         }
     }
 }

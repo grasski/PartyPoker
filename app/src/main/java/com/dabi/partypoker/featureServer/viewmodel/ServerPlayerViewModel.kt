@@ -3,6 +3,7 @@ package com.dabi.partypoker.featureServer.viewmodel
 import androidx.lifecycle.viewModelScope
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
+import com.dabi.partypoker.featureCore.data.PlayerActionsState
 import com.dabi.partypoker.featureCore.interfaces.PlayerCoreInterface
 import com.dabi.partypoker.featureServer.model.ServerBridgeEvents
 import com.dabi.partypoker.featureServer.model.data.GameState
@@ -25,10 +26,16 @@ class ServerPlayerViewModel @Inject constructor(
     private val _playerState: MutableStateFlow<PlayerState> = MutableStateFlow(PlayerState())
     val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
 
+    private val _playerActionsState: MutableStateFlow<PlayerActionsState> = MutableStateFlow(
+        PlayerActionsState()
+    )
+    val playerActionsState = _playerActionsState.asStateFlow()
+
     init {
         val player = PlayerState(
             nickname = "ServerPlayer",
             id = "ServerPlayer",
+            isServer = true,
             money = 1000,
             isReadyToPlay = true
         )
@@ -41,6 +48,13 @@ class ServerPlayerViewModel @Inject constructor(
             _gameState.collect{ gs ->
                 val playerUpdate = gs.players[_playerState.value.id]!!
                 _playerState.update { playerUpdate }
+
+                _playerActionsState.update { it.copy(
+                    canCheck = checkEnabled(),
+                    callAmount = activeCallValue(),
+                    raiseAmount = minimalRaise(),
+                    canFold = _playerState.value.isPlayingNow
+                ) }
             }
         }
     }

@@ -5,106 +5,103 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.dabi.partypoker.MenuScreen
 import com.dabi.partypoker.PlayerScreen
+import com.dabi.partypoker.R
+import com.dabi.partypoker.ServerScreen
 import com.dabi.partypoker.featureClient.model.data.ClientState
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureClient.viewmodel.PlayerViewModel
+import com.dabi.partypoker.featureCore.data.PlayerActionsState
 import com.dabi.partypoker.featureCore.views.GamePopUpMenu
+import com.dabi.partypoker.featureCore.views.GameTable
+import com.dabi.partypoker.featureCore.views.LoadingAnimation
+import com.dabi.partypoker.featureCore.views.PlayerDrawItself
+import com.dabi.partypoker.featureCore.views.PlayerDrawPlayers
+import com.dabi.partypoker.featureCore.views.ServerDrawPlayers
+import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.managers.ClientEvents
 import com.dabi.partypoker.managers.ConnectionStatusEnum
+import com.dabi.partypoker.managers.GameEvents
+import com.dabi.partypoker.managers.ServerType
+import com.dabi.partypoker.utils.Card
+import com.dabi.partypoker.utils.CardType
 
 
 @Composable
 fun PlayerGameView(
     navController: NavController,
     nickname: String,
-    playerState: PlayerState,
-    clientState: ClientState,
-    onPlayerEvent: (PlayerEvents) -> Unit,
-    onClientEvent: (ClientEvents) -> Unit
 ) {
+    val playerViewModel: PlayerViewModel = hiltViewModel()
+    val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
+    val playerActionsState by playerViewModel.playerActionsState.collectAsStateWithLifecycle()
+    val clientState by playerViewModel.clientBridge.clientState.collectAsStateWithLifecycle()
+
     val context = LocalContext.current
     LaunchedEffect(Unit) {
-        onClientEvent(
+        playerViewModel.clientBridge.onClientEvent(
             ClientEvents.Connect(context, nickname)
         )
-
-//        (context as Activity).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
     }
-    
+
     var showPopUpMenu by rememberSaveable { mutableStateOf(false) }
-    
+
     Crossfade(targetState = clientState.connectionStatus) { connectionStatus ->
-        when (connectionStatus){
-            ConnectionStatusEnum.NONE -> {
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .padding(16.dp)
-//                ){
-//                    IconButton(onClick = {
-//                        showPopUpMenu = true
-//                    }) {
-//                        Icon(Icons.Default.Menu, contentDescription = "Menu")
-//                    }
-//                }
-            }
-            ConnectionStatusEnum.CONNECTING -> {
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .padding(16.dp)
-//                ){
-//                    IconButton(onClick = {
-//                        showPopUpMenu = true
-//                    }) {
-//                        Icon(Icons.Default.Menu, contentDescription = "Menu")
-//                    }
-//                }
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(text = "Connecting to the server, please wait.")
-                        CircularProgressIndicator()
-                    }
+        when (connectionStatus) {
+            ConnectionStatusEnum.NONE, ConnectionStatusEnum.CONNECTING -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LoadingAnimation(
+                        modifier = Modifier
+                            .fillMaxSize(0.4f),
+                        text = stringResource(R.string.client_connecting),
+                        onCancelRequest = {
+                            playerViewModel.onPlayerEvent(PlayerEvents.Disconnect)
+                        }
+                    )
                 }
             }
+
             ConnectionStatusEnum.FAILED_TO_CONNECT -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(text = "Failed to connect to the server, please try again.")
                         Button(onClick = {
-                            onClientEvent(
+                            playerViewModel.clientBridge.onClientEvent(
                                 ClientEvents.Connect(context, nickname)
                             )
                         }) {
@@ -113,39 +110,38 @@ fun PlayerGameView(
                     }
                 }
             }
+
             ConnectionStatusEnum.CONNECTED -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                ){
-                    Column {
-                        IconButton(onClick = {
-                            showPopUpMenu = true
-                        }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
-                        }
-
-                        Text(text = "Connected to the server!")
-
-                        Button(onClick = {
-                            onPlayerEvent(PlayerEvents.Ready)
-                        }){
-                            Text(text = "READY")
-                        }
-
-                        Button(onClick = {
-                            onPlayerEvent(PlayerEvents.Disconnect)
-                        }) {
-                            Text(text = "Disconnect")
-                        }
+                when(clientState.serverType){
+                    ServerType.IS_TABLE -> {
+                        PlayerViewPrivate(
+                            navController,
+                            playerState,
+                            playerActionsState,
+                            onPlayerEvent = playerViewModel::onPlayerEvent
+                        )
+                    }
+                    ServerType.IS_PLAYER -> {
+                        val gameState by playerViewModel.gameState.collectAsStateWithLifecycle()
+                        PlayerViewServer(
+                            navController,
+                            gameState,
+                            playerState,
+                            playerActionsState,
+                            onPlayerEvent = playerViewModel::onPlayerEvent,
+                            onGameEvent = {}
+                        )
                     }
                 }
             }
 
             ConnectionStatusEnum.DISCONNECTED -> {
                 LaunchedEffect(key1 = connectionStatus) {
-                    navController.navigate(MenuScreen) { popUpTo(PlayerScreen(nickname)) { inclusive = true } }
+                    navController.navigate(MenuScreen) {
+                        popUpTo(PlayerScreen(nickname)) {
+                            inclusive = true
+                        }
+                    }
                 }
             }
         }
@@ -155,79 +151,182 @@ fun PlayerGameView(
                 navController,
                 true,
                 onDismissRequest = { showPopUpMenu = false },
-                onLeaveRequest = { onPlayerEvent(PlayerEvents.Disconnect) }
+                onLeaveRequest = { playerViewModel.onPlayerEvent(PlayerEvents.Disconnect) }
             )
         }
     }
+}
 
 
-//    val gameState by playerViewModel.gameState.collectAsStateWithLifecycle()
-//    LaunchedEffect(key1 = gameState) {}
-//
-//    Column {
-//        Text("Player Name: ${playerState.nickname} and ID: ${playerState.id}")
-//        Text("Server: ${clientState.serverID}, status: ${clientState.connectionStatus}")
-//
-//        Button(onClick = {
-//            playerViewModel.onPlayerEvent(PlayerEvents.Disconnect)
-//        }) {
-//            Text(text = "DISCONNECT")
-//        }
-//
-//        Spacer(modifier = Modifier.height(10.dp))
-//
-//        Text(text = "READY = ${playerState.isReadyToPlay}, money = ${playerState.money}")
-//        Button(onClick = {
-//            playerViewModel.onPlayerEvent(PlayerEvents.Ready)
-//        }){
-//            Text(text = "READY")
-//        }
-//
-//        Text(text = "PLAYING = ${playerState.isPlayingNow}, called = ${playerState.called}")
-//        Text("ROUND = ${gameState.round}, raiser: ${gameState.activeRaise}\nBANK = ${gameState.bank}")
-//
-//        Row (
-//            modifier = Modifier.fillMaxWidth(),
-//            horizontalArrangement = Arrangement.SpaceEvenly
-//        ) {
-//            Button(
-//                onClick = {
-//                    playerViewModel.onPlayerEvent(PlayerEvents.Check)
-//                },
-//                enabled = playerViewModel.checkEnabled()
-//            ) {
-//                Text(text = "CHECK")
-//            }
-//
-//            val callAmount = playerViewModel.activeCallValue()
-//            Button(
-//                onClick = {
-//                    playerViewModel.onPlayerEvent(PlayerEvents.Call(callAmount))
-//                },
-//                enabled = callAmount > 0
-//            ) {
-//                Text(text = "CALL $callAmount")
-//            }
-//
-//            val raisingAmount = 30
-//            Button(
-//                onClick = {
-//                    // So that is at least 30 + bigBlindValue
-//                    playerViewModel.onPlayerEvent(PlayerEvents.Raise(playerViewModel.minimalRaise() + raisingAmount))
-//                },
-//                enabled = playerState.isPlayingNow
-//            ) {
-//                Text(text = "min RAISE ${playerViewModel.minimalRaise()}\nRaising: ${playerViewModel.minimalRaise() + raisingAmount}")
-//            }
-//
-//            Button(
-//                onClick = {
-//                    playerViewModel.onPlayerEvent(PlayerEvents.Fold)
-//                },
-//                enabled = playerState.isPlayingNow
-//            ) {
-//                Text(text = "FOLD")
-//            }
-//        }
-//    }
+@Composable
+fun PlayerViewPrivate(
+    navController: NavController,
+    playerState: PlayerState,
+    playerActionsState: PlayerActionsState,
+    onPlayerEvent: (PlayerEvents) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Column {
+            IconButton(onClick = {
+//                showPopUpMenu = true
+                // TODO()
+            }) {
+                Icon(Icons.Default.Menu, contentDescription = "Menu")
+            }
+
+            Text(text = "Connected to the server!")
+
+            Button(onClick = {
+                onPlayerEvent(PlayerEvents.Ready)
+            }) {
+                Text(text = "READY")
+            }
+
+            Button(onClick = {
+                onPlayerEvent(PlayerEvents.Disconnect)
+            }) {
+                Text(text = "Disconnect")
+            }
+
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(
+                    onClick = {
+                        onPlayerEvent(PlayerEvents.Check)
+                    },
+                    enabled = playerActionsState.canCheck
+                ) {
+                    Text(text = "CHECK")
+                }
+                val callAmount = playerActionsState.callAmount
+                Button(
+                    onClick = {
+                        onPlayerEvent(PlayerEvents.Call(callAmount))
+                    },
+                    enabled = callAmount > 0
+                ) {
+                    Text(text = "CALL $callAmount")
+                }
+                val raisingAmount = 30
+                Button(
+                    onClick = {
+                        // So that is at least 30 + bigBlindValue
+                        onPlayerEvent(PlayerEvents.Raise(playerActionsState.raiseAmount + raisingAmount))
+                    },
+                    enabled = playerState.isPlayingNow
+                ) {
+                    Text(text = "min RAISE ${playerActionsState.raiseAmount}\nRaising: ${playerActionsState.raiseAmount + raisingAmount}")
+                }
+                Button(
+                    onClick = {
+                        onPlayerEvent(PlayerEvents.Fold)
+                    },
+                    enabled = playerActionsState.canFold
+                ) {
+                    Text(text = "FOLD")
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun PlayerViewServer(
+    navController: NavController,
+    gameState: GameState,
+    playerState: PlayerState,
+    playerActionsState: PlayerActionsState,
+    onPlayerEvent: (PlayerEvents) -> Unit,
+
+    onGameEvent: (GameEvents) -> Unit
+) {
+    var showPopUpMenu by rememberSaveable { mutableStateOf(false) }
+    IconButton(onClick = {
+        showPopUpMenu = true
+    }) {
+        Icon(Icons.Default.Menu, contentDescription = "Menu")
+    }
+    if (showPopUpMenu) {
+        GamePopUpMenu(
+            navController = navController,
+            isPlayer = false,
+            onDismissRequest = { showPopUpMenu = false },
+            onLeaveRequest = {
+                onGameEvent(GameEvents.CloseGame)
+                navController.navigate(MenuScreen) { popUpTo(navController.currentDestination?.route ?: "") { inclusive = true } }
+            }
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ){
+        var tablePosition by remember { mutableStateOf(Offset.Zero) }
+        var tableSize by remember { mutableStateOf(IntSize.Zero) }
+
+        GameTable(
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .padding(vertical = 50.dp)
+                .padding(horizontal = 16.dp),
+            gameState = gameState,
+
+            isServer = playerState.isServer,
+            onGameEvent = onGameEvent,
+
+            tableInfo = { p, s ->
+                tablePosition = p
+                tableSize = s
+            }
+        )
+
+        PlayerDrawItself(
+            player = playerState,
+            playerActionsState = playerActionsState,
+            onPlayerEvent = onPlayerEvent,
+            tablePosition = tablePosition,
+            tableSize = tableSize
+        )
+
+        ServerDrawPlayers(
+            gameState = gameState.copy(players = mapOf(
+                "0" to PlayerState("0", "0"),
+                "1" to PlayerState("1", "1", isReadyToPlay = true, called = 50, isDealer = false, isSmallBlind = true, holeCards = listOf(
+                    Card(CardType.CLUB, 10),
+                    Card(CardType.CLUB, 10)
+                )),
+                "2" to PlayerState("2", "2", isReadyToPlay = true, isPlayingNow = true),
+                "3" to PlayerState("3", "3", isReadyToPlay = true, called = 50),
+                "4" to PlayerState("4", "4", isReadyToPlay = true, isSmallBlind = true, isDealer = true, holeCards = listOf(
+                    Card(CardType.CLUB, 10),
+                    Card(CardType.CLUB, 10)
+                ), called = 521500),
+                "5" to PlayerState("5", "5", isReadyToPlay = true),
+                "6" to PlayerState("6", "6", isReadyToPlay = true, isSmallBlind = true, isDealer = true, holeCards = listOf(
+                    Card(CardType.CLUB, 10),
+                    Card(CardType.CLUB, 10)
+                ), called = 521500),
+                "7" to PlayerState("7", "7", isReadyToPlay = true),
+            )),
+            tablePosition = tablePosition,
+            tableSize = tableSize
+        )
+
+//        PlayerDrawPlayers(
+//            player = playerState,
+//            players = gameState.players.values.toList(),
+//            tablePosition = tablePosition,
+//            tableSize = tableSize
+//        )
+    }
 }

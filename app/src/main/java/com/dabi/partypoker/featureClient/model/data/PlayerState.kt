@@ -8,6 +8,8 @@ data class PlayerState(
     var nickname: String = "",
     var id: endpointID = "",
 
+    var isServer: Boolean = false,
+
     var isReadyToPlay: Boolean = false,
     var isFolded: Boolean = false,
 

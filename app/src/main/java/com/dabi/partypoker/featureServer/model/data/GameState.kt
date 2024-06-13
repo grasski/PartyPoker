@@ -35,6 +35,7 @@ data class GameState(
     var games: Int = 0,
 
     var messages: List<UiTexts.StringResource> = emptyList(),
+    var playerTimerDuration: Int = 12,
 
     var winners: List<PlayerState> = emptyList(),
     var winningCombination: CardsCombination = CardsCombination.NONE,

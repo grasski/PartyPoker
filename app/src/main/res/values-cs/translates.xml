@@ -6,4 +6,12 @@
 
     <string name="client_disconnected">Player se odpojil ze hry.</string>
     <string name="client_connected">%1$s se připojil do hry.</string>
+    <string name="server_starting">Server se zapíná, prosím čekejte.</string>
+    <string name="client_connecting">Připojování k serveru, prosím čekejte.</string>
+
+
+    <string name="action_check">CHECK</string>
+    <string name="action_call">Dorovnat</string>
+    <string name="action_raise">Navýšit</string>
+    <string name="action_fold">Složit</string>
 </resources>

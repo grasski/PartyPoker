@@ -73,6 +73,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    implementation(libs.androidx.compose.icons)
 
     implementation(libs.androidx.navigation)
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -95,4 +96,6 @@ dependencies {
 
     // Coil images
     implementation(libs.coil)
+    // Lottie
+    implementation(libs.lottie)
 }

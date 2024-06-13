@@ -77,8 +77,8 @@ open class ServerOwnerViewModel@Inject constructor(
         }
     }
 
-    private fun handlePlayingPlayer(timeInSeconds: Int = 10){
-        _playerMoveTimer.update { timeInSeconds }
+    private fun handlePlayingPlayer(){
+        _playerMoveTimer.update { _gameState.value.playerTimerDuration }
 
         timerJob?.cancel()
 //        timerJob = this.viewModelScope.launch {
@@ -89,7 +89,7 @@ open class ServerOwnerViewModel@Inject constructor(
 //                Log.e("ServerOwnerViewModel", "Timer: " + _playerMoveTimer.value)
 //            }
 //            Log.e("ServerOwnerViewModel", "KONEC TIMER")
-//            //TODO: playingNow player did not send any action - if CHECK possible do auto CHECK, otherwise auto FOLD
+//            //TODO: playingNow player did not send any action - if CHECK is possible do auto CHECK, otherwise do auto FOLD
 //            return@launch
 //        }
     }
