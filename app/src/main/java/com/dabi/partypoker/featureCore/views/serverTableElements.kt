@@ -65,8 +65,129 @@ import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
 import com.dabi.partypoker.featureCore.data.colors
 import com.dabi.partypoker.featureServer.model.data.GameState
+import com.dabi.partypoker.managers.ServerType
 import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.formatNumberToString
+
+
+@Composable
+fun DrawPlayers(
+    players: List<PlayerState>,
+    serverType: ServerType,
+    tablePosition: Offset,
+    tableSize: IntSize,
+) {
+    var playerBoxSize by remember { mutableStateOf(DpSize.Zero) }
+    var fontSize by remember { mutableStateOf(20.sp) }
+    CalculatePlayerBoxSize(
+        playerBoxSize = { playerBoxSize = it },
+        fontSize = { fontSize = it }
+    )
+
+    val density = LocalDensity.current
+    val topLeftHorizontal = with(density) { DpOffset(
+        x = tablePosition.x.toDp() - playerBoxSize.width / 2,
+        y = tablePosition.y.toDp() - playerBoxSize.height / 2 - playerBoxSize.height / 3
+    ) }
+    val bottomLeftHorizontal = with(density) { DpOffset(
+        x = tablePosition.x.toDp() - playerBoxSize.width / 2,
+        y = tablePosition.y.toDp() + tableSize.height.toDp() - playerBoxSize.height / 2 + playerBoxSize.height / 3
+    ) }
+
+
+    val topLeftVertical = with(density) { DpOffset(
+        x = tablePosition.x.toDp() - playerBoxSize.width / 2 - playerBoxSize.width / 5,
+        y = tablePosition.y.toDp() + playerBoxSize.height / 2
+    ) }
+    val topRightVertical = with(density) { DpOffset(
+        x = tablePosition.x.toDp() + tableSize.width.toDp() - playerBoxSize.width / 2 + playerBoxSize.width / 5,
+        y = tablePosition.y.toDp() + playerBoxSize.height / 2
+    ) }
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        val totalPlayersHorizontal = 4
+        val totalPlayersVertical = if (serverType == ServerType.IS_TABLE) 1 else 2
+
+        var seatIndex = 0
+        // Left side
+        Column(
+            modifier = Modifier
+                .offset(topLeftVertical.x, topLeftVertical.y)
+                .size(
+                    width = playerBoxSize.width,
+                    height = with(density) { tableSize.height.toDp() - playerBoxSize.height }
+                ),
+            verticalArrangement = Arrangement.SpaceEvenly
+        ){
+            for (i in totalPlayersVertical - 1 downTo 0){
+                players.getOrNull(i)?.let {
+                    PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = it, layoutDirection = PlayerLayoutDirection.LEFT)
+                    seatIndex ++
+                }
+            }
+        }
+
+        // Top side
+        Row(
+            modifier = Modifier
+                .offset(topLeftHorizontal.x, topLeftHorizontal.y)
+                .size(
+                    width = with(density) { tableSize.width.toDp() + playerBoxSize.width },
+                    height = playerBoxSize.height
+                ),
+            horizontalArrangement = Arrangement.spacedBy(playerBoxSize.width/4, Alignment.CenterHorizontally)
+        ){
+            for (i in seatIndex..<totalPlayersHorizontal + totalPlayersVertical){
+                players.getOrNull(i)?.let {
+                    PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = it, layoutDirection = PlayerLayoutDirection.TOP)
+                    seatIndex = i + 1
+                }
+            }
+        }
+
+        // Right side
+        Column(
+            modifier = Modifier
+                .offset(topRightVertical.x, topRightVertical.y)
+                .size(
+                    width = playerBoxSize.width,
+                    height = with(density) { tableSize.height.toDp() - playerBoxSize.height }
+                ),
+            verticalArrangement = Arrangement.SpaceEvenly
+        ){
+            for (i in seatIndex..<(2*totalPlayersVertical + totalPlayersHorizontal)){
+                players.getOrNull(i)?.let {
+                    PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = it, layoutDirection = PlayerLayoutDirection.RIGHT)
+                    seatIndex = i + 1
+                }
+            }
+        }
+
+        // Bottom side
+        Row(
+            modifier = Modifier
+                .offset(bottomLeftHorizontal.x, bottomLeftHorizontal.y)
+                .size(
+                    width = with(density) { tableSize.width.toDp() + playerBoxSize.width },
+                    height = playerBoxSize.height
+                ),
+            horizontalArrangement =
+                if (serverType == ServerType.IS_TABLE)
+                    Arrangement.spacedBy(playerBoxSize.width/4, Alignment.CenterHorizontally)
+                else
+                    Arrangement.Start
+        ){
+            for (i in (2*totalPlayersHorizontal + 2*totalPlayersVertical -1) downTo seatIndex ){
+                players.getOrNull(i)?.let {
+                    PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = it, layoutDirection = PlayerLayoutDirection.BOTTOM)
+                    seatIndex ++
+                }
+            }
+        }
+    }
+}
 
 
 @Composable
@@ -236,8 +357,7 @@ fun PlayerBox(
                         .offset(x = size.width * 65 / 100 - 5.dp)
                         .height((size.height / 3).times(2)),
                     fontSize = fontSize,
-                    isLeft = true,
-                    buttonsWidth = size.height / 3
+                    isLeft = true
                 )
             }
             PlayerLayoutDirection.TOP -> {
@@ -260,8 +380,7 @@ fun PlayerBox(
                         .offset(x = -(size.width * 65 / 100 - 5.dp))
                         .height((size.height / 3).times(2)),
                     fontSize = fontSize,
-                    isLeft = false,
-                    buttonsWidth = size.height / 3
+                    isLeft = false
                 )
             }
             PlayerLayoutDirection.BOTTOM -> {
@@ -353,7 +472,7 @@ fun PlayerBox(
                                         ),
                                         bottomLeft = CornerRadius(16.dp.toPx()),
                                         topLeft = CornerRadius(16.dp.toPx())
-                                     )
+                                    )
                                 }
                             )
                         }
@@ -469,8 +588,7 @@ private fun VerticalPlayerItems(
     playerState: PlayerState,
     modifier: Modifier,
     fontSize: TextUnit,
-    isLeft: Boolean,
-    buttonsWidth: Dp
+    isLeft: Boolean
 ){
     Column(
         modifier = modifier,

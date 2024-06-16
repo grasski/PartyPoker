@@ -85,6 +85,10 @@ class ClientBridge (
                             serverType = ServerType.valueOf(result.second.toString()),
                         ) }
                     }
+                    ServerPayloadType.ROOM_IS_FULL -> {
+                        Log.e("", "ROOM IS FULL")
+                    }
+
                     ServerPayloadType.UPDATE_CLIENT -> {
                         Log.e("", "DATA: " + data)
                         val playerState = Gson().fromJson(data.toString(), PlayerState::class.java)

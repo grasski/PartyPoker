@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -31,11 +32,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.dabi.partypoker.MenuScreen
 import com.dabi.partypoker.PlayerScreen
 import com.dabi.partypoker.R
 import com.dabi.partypoker.ServerScreen
+import com.dabi.partypoker.featureClient.viewmodel.PlayerViewModel
+import com.dabi.partypoker.featureServer.viewmodel.ServerOwnerViewModel
+import com.dabi.partypoker.managers.ClientEvents
+import com.dabi.partypoker.managers.ServerEvents
 import com.dabi.partypoker.managers.ServerType
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -129,6 +135,18 @@ fun MenuView(
                                 ){
                                     Text(text = "START SERVER")
                                 }
+
+
+                                val serverViewModel: ServerOwnerViewModel = hiltViewModel()
+                                val serverState by serverViewModel.serverBridge.serverState.collectAsStateWithLifecycle()
+
+
+                                LaunchedEffect(true) {
+                                    Log.e("", "HALOO???")
+                                    serverViewModel.serverBridge.onServerEvent(
+                                        ServerEvents.StartServer(context, ServerType.IS_TABLE, "Server")
+                                    )
+                                }
                             }
                         } else{
                             Text("Not possible to Host a game without accepting permissions")
@@ -166,6 +184,20 @@ fun MenuView(
                             ){
                                 Text("Login")
                             }
+
+
+                            val playerViewModel: PlayerViewModel = hiltViewModel()
+                            val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
+                            val playerActionsState by playerViewModel.playerActionsState.collectAsStateWithLifecycle()
+                            val clientState by playerViewModel.clientBridge.clientState.collectAsStateWithLifecycle()
+
+                            LaunchedEffect(Unit) {
+                                playerViewModel.clientBridge.onClientEvent(
+                                    ClientEvents.Connect(context, nickname)
+                                )
+                            }
+
+
                         } else{
                             Text("Not possible to Join a game without accepting permissions")
                         }

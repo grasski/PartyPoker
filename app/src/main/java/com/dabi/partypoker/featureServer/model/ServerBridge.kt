@@ -61,6 +61,17 @@ class ServerBridge(
 
             is ServerEvents.ClientConnected -> {
                 val clientEndpointId = event.endpointId
+
+                if (_serverState.value.connectedClients.size >= 10){
+                    Log.e("", "TABLE IS FULL")
+
+                    val serverPayload = toServerPayload(ServerPayloadType.ROOM_IS_FULL, null)
+                    connectionsClient.sendPayload(clientEndpointId, serverPayload)
+
+                    // TODO: Remove player from game
+                    return
+                }
+
                 _serverState.update { it.copy(
                     connectedClients = it.connectedClients.plus(clientEndpointId)
                 )}

@@ -48,6 +48,7 @@ import com.dabi.partypoker.featureCore.views.PlayerDrawItself
 import com.dabi.partypoker.featureCore.views.PlayerDrawPlayers
 import com.dabi.partypoker.featureCore.views.ServerDrawPlayers
 import com.dabi.partypoker.featureServer.model.data.GameState
+import com.dabi.partypoker.featureServer.model.data.SeatPosition
 import com.dabi.partypoker.managers.ClientEvents
 import com.dabi.partypoker.managers.ConnectionStatusEnum
 import com.dabi.partypoker.managers.GameEvents
@@ -73,88 +74,92 @@ fun PlayerGameView(
         )
     }
 
+    Column {
+        Text(text = playerState.toString())
+        Text(text = clientState.toString())
+    }
     var showPopUpMenu by rememberSaveable { mutableStateOf(false) }
 
-    Crossfade(targetState = clientState.connectionStatus) { connectionStatus ->
-        when (connectionStatus) {
-            ConnectionStatusEnum.NONE, ConnectionStatusEnum.CONNECTING -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    LoadingAnimation(
-                        modifier = Modifier
-                            .fillMaxSize(0.4f),
-                        text = stringResource(R.string.client_connecting),
-                        onCancelRequest = {
-                            playerViewModel.onPlayerEvent(PlayerEvents.Disconnect)
-                        }
-                    )
-                }
-            }
-
-            ConnectionStatusEnum.FAILED_TO_CONNECT -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(text = "Failed to connect to the server, please try again.")
-                        Button(onClick = {
-                            playerViewModel.clientBridge.onClientEvent(
-                                ClientEvents.Connect(context, nickname)
-                            )
-                        }) {
-                            Text(text = "Try again")
-                        }
-                    }
-                }
-            }
-
-            ConnectionStatusEnum.CONNECTED -> {
-                when(clientState.serverType){
-                    ServerType.IS_TABLE -> {
-                        PlayerViewPrivate(
-                            navController,
-                            playerState,
-                            playerActionsState,
-                            onPlayerEvent = playerViewModel::onPlayerEvent
-                        )
-                    }
-                    ServerType.IS_PLAYER -> {
-                        val gameState by playerViewModel.gameState.collectAsStateWithLifecycle()
-                        PlayerViewServer(
-                            navController,
-                            gameState,
-                            playerState,
-                            playerActionsState,
-                            onPlayerEvent = playerViewModel::onPlayerEvent,
-                            onGameEvent = {}
-                        )
-                    }
-                }
-            }
-
-            ConnectionStatusEnum.DISCONNECTED -> {
-                LaunchedEffect(key1 = connectionStatus) {
-                    navController.navigate(MenuScreen) {
-                        popUpTo(PlayerScreen(nickname)) {
-                            inclusive = true
-                        }
-                    }
-                }
-            }
-        }
-
-        if (showPopUpMenu) {
-            GamePopUpMenu(
-                navController,
-                true,
-                onDismissRequest = { showPopUpMenu = false },
-                onLeaveRequest = { playerViewModel.onPlayerEvent(PlayerEvents.Disconnect) }
-            )
-        }
-    }
+//    Crossfade(targetState = clientState.connectionStatus) { connectionStatus ->
+//        when (connectionStatus) {
+//            ConnectionStatusEnum.NONE, ConnectionStatusEnum.CONNECTING -> {
+//                Box(
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    LoadingAnimation(
+//                        modifier = Modifier
+//                            .fillMaxSize(0.4f),
+//                        text = stringResource(R.string.client_connecting),
+//                        onCancelRequest = {
+//                            playerViewModel.onPlayerEvent(PlayerEvents.Disconnect)
+//                        }
+//                    )
+//                }
+//            }
+//
+//            ConnectionStatusEnum.FAILED_TO_CONNECT -> {
+//                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//                    Column(
+//                        verticalArrangement = Arrangement.spacedBy(16.dp),
+//                        horizontalAlignment = Alignment.CenterHorizontally
+//                    ) {
+//                        Text(text = "Failed to connect to the server, please try again.")
+//                        Button(onClick = {
+//                            playerViewModel.clientBridge.onClientEvent(
+//                                ClientEvents.Connect(context, nickname)
+//                            )
+//                        }) {
+//                            Text(text = "Try again")
+//                        }
+//                    }
+//                }
+//            }
+//
+//            ConnectionStatusEnum.CONNECTED -> {
+//                when(clientState.serverType){
+//                    ServerType.IS_TABLE -> {
+//                        PlayerViewPrivate(
+//                            navController,
+//                            playerState,
+//                            playerActionsState,
+//                            onPlayerEvent = playerViewModel::onPlayerEvent
+//                        )
+//                    }
+//                    ServerType.IS_PLAYER -> {
+//                        val gameState by playerViewModel.gameState.collectAsStateWithLifecycle()
+//                        PlayerViewServer(
+//                            navController,
+//                            gameState,
+//                            playerState,
+//                            playerActionsState,
+//                            onPlayerEvent = playerViewModel::onPlayerEvent,
+//                            onGameEvent = {}
+//                        )
+//                    }
+//                }
+//            }
+//
+//            ConnectionStatusEnum.DISCONNECTED -> {
+//                LaunchedEffect(key1 = connectionStatus) {
+//                    navController.navigate(MenuScreen) {
+//                        popUpTo(PlayerScreen(nickname)) {
+//                            inclusive = true
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        if (showPopUpMenu) {
+//            GamePopUpMenu(
+//                navController,
+//                true,
+//                onDismissRequest = { showPopUpMenu = false },
+//                onLeaveRequest = { playerViewModel.onPlayerEvent(PlayerEvents.Disconnect) }
+//            )
+//        }
+//    }
 }
 
 
@@ -298,35 +303,27 @@ fun PlayerViewServer(
             tableSize = tableSize
         )
 
-        ServerDrawPlayers(
-            gameState = gameState.copy(players = mapOf(
-                "0" to PlayerState("0", "0"),
-                "1" to PlayerState("1", "1", isReadyToPlay = true, called = 50, isDealer = false, isSmallBlind = true, holeCards = listOf(
-                    Card(CardType.CLUB, 10),
-                    Card(CardType.CLUB, 10)
-                )),
-                "2" to PlayerState("2", "2", isReadyToPlay = true, isPlayingNow = true),
-                "3" to PlayerState("3", "3", isReadyToPlay = true, called = 50),
-                "4" to PlayerState("4", "4", isReadyToPlay = true, isSmallBlind = true, isDealer = true, holeCards = listOf(
-                    Card(CardType.CLUB, 10),
-                    Card(CardType.CLUB, 10)
-                ), called = 521500),
-                "5" to PlayerState("5", "5", isReadyToPlay = true),
-                "6" to PlayerState("6", "6", isReadyToPlay = true, isSmallBlind = true, isDealer = true, holeCards = listOf(
-                    Card(CardType.CLUB, 10),
-                    Card(CardType.CLUB, 10)
-                ), called = 521500),
-                "7" to PlayerState("7", "7", isReadyToPlay = true),
-            )),
+        var sortedPlayers by remember(gameState){
+            mutableStateOf(gameState.gameReadyPlayers.toList().sortedBy { it.second.position }.toMap() )
+        }
+
+        val meIndex = sortedPlayers.keys.indexOf(playerState.id)
+        if (meIndex <= -1){
+            Log.e("PlayerViewServer", "I was not found.. problem")
+            return
+        }
+        val playersBeforeMe = sortedPlayers.toList().take(meIndex).toMap()
+        sortedPlayers = sortedPlayers.minus(playersBeforeMe.keys)
+        sortedPlayers = sortedPlayers.plus(playersBeforeMe)
+        sortedPlayers = sortedPlayers.minus(playerState.id)
+
+
+
+        PlayerDrawPlayers(
+            player = playerState,
+            players = gameState.players.values.toList(),
             tablePosition = tablePosition,
             tableSize = tableSize
         )
-
-//        PlayerDrawPlayers(
-//            player = playerState,
-//            players = gameState.players.values.toList(),
-//            tablePosition = tablePosition,
-//            tableSize = tableSize
-//        )
     }
 }

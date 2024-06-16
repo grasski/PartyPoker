@@ -2,6 +2,7 @@ package com.dabi.partypoker.managers
 
 import android.util.Log
 import com.dabi.partypoker.featureServer.model.data.GameState
+import com.dabi.partypoker.featureServer.model.data.SeatPosition
 import com.dabi.partypoker.utils.generateDeck
 import com.dabi.partypoker.utils.getCards
 
@@ -23,9 +24,17 @@ class GameManager {
                 player.holeCards = emptyList()
             }
 
-            gameState.gameReadyPlayers = gameState.players.filter { it.value.isReadyToPlay }.keys
+            val readyPlayers = gameState.players.filter { it.value.isReadyToPlay }
+            gameState.gameReadyPlayers = emptyMap()
+            readyPlayers.forEach { (id, _) ->
+                val position = gameState.seatPositions[id]
+                position?.let {
+                    gameState.gameReadyPlayers += id to position
+                }
+            }
 //            // To count correct dealer, smallBlind and bigBlind in new game rounds
-            gameState.playingNow = gameState.gameReadyPlayers.firstOrNull()
+            gameState.playingNow = gameState.gameReadyPlayers.toList().sortedBy { it.second.position }.toMap().keys.firstOrNull()
+//            gameState.playingNow = gameState.gameReadyPlayers.firstOrNull()
 
 
             val dealerId = getPlayingNow(games, gameState)
@@ -70,7 +79,7 @@ class GameManager {
         fun simulateRoundZero(gameStateO: GameState): GameState{
             val gameState = gameStateO.copy()
 
-            gameState.gameReadyPlayers.forEach { playerId ->
+            gameState.gameReadyPlayers.forEach { (playerId, _) ->
                 val player = gameState.players[playerId]
                 player?.let {
                     if (player.isSmallBlind){
@@ -91,7 +100,7 @@ class GameManager {
                 //TODO()
             }
 
-            gameState.gameReadyPlayers.forEach { playerId ->
+            gameState.gameReadyPlayers.forEach { (playerId, _) ->
                 val player = gameState.players[playerId]
                 player?.let {
                     val holeCards = getCards(gameState.cardsDeck.toMutableList(),2)
@@ -208,7 +217,7 @@ class GameManager {
         private fun getPlayingNow(nextFromActualBy: Int = 1, gameState: GameState, afterDealer: Boolean = false): String? {
             var i = nextFromActualBy
 
-            val foldedCount = gameState.gameReadyPlayers.count { playerId ->
+            val foldedCount = gameState.gameReadyPlayers.count { (playerId, _) ->
                 val player = gameState.players[playerId]
                 player?.isFolded ?: false
             }
@@ -217,12 +226,15 @@ class GameManager {
                 return null
             }
 
-            val sortedPlayers = gameState.gameReadyPlayers.sorted()
-            val currentIndex = sortedPlayers.indexOfFirst { it == gameState.playingNow } // Získáme index aktuálního hráče
-            val dealerId = sortedPlayers.indexOfFirst { it == gameState.dealerId }
+            val sortedSeatsWithPlayers = gameState.seatPositions.toList().sortedBy { (_, value) -> value.position }.toMap()
+//            val sortedPlayers = gameState.gameReadyPlayers.sorted()
+
+            val currentIndex = sortedSeatsWithPlayers.toList().indexOfFirst { it.first == gameState.playingNow } // Získáme index aktuálního hráče
+            val dealerId = sortedSeatsWithPlayers.toList().indexOfFirst { it.first == gameState.dealerId }
             while (true){
-                val nextIndex = ((if (afterDealer) dealerId else currentIndex) + i) % sortedPlayers.size // Vypočítáme index následujícího hráče
-                val playerId = sortedPlayers[nextIndex]
+                val nextIndex = ((if (afterDealer) dealerId else currentIndex) + i) % sortedSeatsWithPlayers.size // Vypočítáme index následujícího hráče
+//                val playerId = sortedPlayers[nextIndex]
+                val playerId = sortedSeatsWithPlayers.keys.toList()[nextIndex]
 
                 if (playerId == gameState.roundStartedId && !afterDealer){
                     return playerId

@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken
 
 enum class ServerPayloadType{
     CLIENT_CONNECTED,
+    ROOM_IS_FULL,
 
     UPDATE_CLIENT,
     UPDATE_GAME_STATE,

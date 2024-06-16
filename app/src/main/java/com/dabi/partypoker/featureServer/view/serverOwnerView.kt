@@ -2,8 +2,10 @@ package com.dabi.partypoker.featureServer.view
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
+import android.util.Log
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -56,21 +58,23 @@ fun ServerOwnerView(
     navController: NavController,
     serverScreen: ServerScreen,
 ) {
-    val serverViewModel = if (serverScreen.serverType == ServerType.IS_TABLE.toString()){
-        hiltViewModel<ServerOwnerViewModel>()
-    } else{
-        hiltViewModel<ServerPlayerViewModel>()
-    }
+//    val serverViewModel = if (serverScreen.serverType == ServerType.IS_TABLE.toString()){
+//        hiltViewModel<ServerOwnerViewModel>()
+//    } else {
+//        hiltViewModel<ServerPlayerViewModel>()
+//    }
+    val serverViewModel: ServerOwnerViewModel = hiltViewModel()
     val serverState by serverViewModel.serverBridge.serverState.collectAsStateWithLifecycle()
 
 
     val context = LocalContext.current
-    LaunchedEffect(Unit) {
+    LaunchedEffect(true) {
+        Log.e("", "HALOO???")
         serverViewModel.serverBridge.onServerEvent(
             ServerEvents.StartServer(context, ServerType.valueOf(serverScreen.serverType), serverScreen.serverName)
         )
 
-        (context as Activity).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+//        (context as Activity).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
     }
 
     Crossfade(
@@ -103,32 +107,38 @@ fun ServerOwnerView(
             ServerStatusEnum.ADVERTISING, ServerStatusEnum.ACTIVE -> {
                 val gameState by serverViewModel.gameState.collectAsStateWithLifecycle()
 
-                when(ServerType.valueOf(serverScreen.serverType)){
-                    ServerType.IS_PLAYER -> {
-                        val serverPlayerVM = (serverViewModel as ServerPlayerViewModel)
-                        val playerState by serverPlayerVM.playerState.collectAsStateWithLifecycle()
-                        val playerActionsState by serverPlayerVM.playerActionsState.collectAsStateWithLifecycle()
-
-                        PlayerViewServer(
-                            navController = navController,
-                            gameState = gameState,
-                            playerState = playerState,
-                            playerActionsState = playerActionsState,
-                            onPlayerEvent = serverPlayerVM::onPlayerEvent,
-                            onGameEvent = serverViewModel::onGameEvent,
-                        )
-                    }
-                    ServerType.IS_TABLE -> {
-                        ServerGameView(
-                            navController = navController,
-                            gameState = gameState,
-                            serverState = serverState,
-                            serverScreen = serverScreen,
-                            onGameEvent = serverViewModel::onGameEvent,
-                            onServerEvent = serverViewModel.serverBridge::onServerEvent
-                        )
-                    }
+                Column {
+                    Text(text = gameState.toString())
+                    
+                    Text(text = serverState.toString())
                 }
+
+//                when(ServerType.valueOf(serverScreen.serverType)){
+//                    ServerType.IS_PLAYER -> {
+//                        val serverPlayerVM = (serverViewModel as ServerPlayerViewModel)
+//                        val playerState by serverPlayerVM.playerState.collectAsStateWithLifecycle()
+//                        val playerActionsState by serverPlayerVM.playerActionsState.collectAsStateWithLifecycle()
+//
+//                        PlayerViewServer(
+//                            navController = navController,
+//                            gameState = gameState,
+//                            playerState = playerState,
+//                            playerActionsState = playerActionsState,
+//                            onPlayerEvent = serverPlayerVM::onPlayerEvent,
+//                            onGameEvent = serverViewModel::onGameEvent,
+//                        )
+//                    }
+//                    ServerType.IS_TABLE -> {
+//                        ServerGameView(
+//                            navController = navController,
+//                            gameState = gameState,
+//                            serverState = serverState,
+//                            serverScreen = serverScreen,
+//                            onGameEvent = serverViewModel::onGameEvent,
+//                            onServerEvent = serverViewModel.serverBridge::onServerEvent
+//                        )
+//                    }
+//                }
             }
         }
     }
@@ -186,17 +196,19 @@ fun ServerGameView(
             }
         )
         ServerDrawPlayers(
-            gameState = gameState.copy(players = mapOf(
-                "0" to PlayerState("0", "0"),
-                "1" to PlayerState("1", "1", isReadyToPlay = true),
-                "2" to PlayerState("2", "2", isReadyToPlay = true, isPlayingNow = true),
-                "3" to PlayerState("3", "3", isReadyToPlay = true),
-                "4" to PlayerState("4", "4", isReadyToPlay = true),
-                "5" to PlayerState("5", "5", isReadyToPlay = true),
-                "6" to PlayerState("6", "6", isReadyToPlay = true),
-                "7" to PlayerState("7", "7", isReadyToPlay = true),
-                "8" to PlayerState("8", "8", isReadyToPlay = true),
-            )),
+            gameState = gameState
+//                .copy(players = mapOf(
+//                "0" to PlayerState("0", "0"),
+//                "1" to PlayerState("1", "1", isReadyToPlay = true),
+//                "2" to PlayerState("2", "2", isReadyToPlay = true, isPlayingNow = true),
+//                "3" to PlayerState("3", "3", isReadyToPlay = true),
+//                "4" to PlayerState("4", "4", isReadyToPlay = true),
+//                "5" to PlayerState("5", "5", isReadyToPlay = true),
+//                "6" to PlayerState("6", "6", isReadyToPlay = true),
+//                "7" to PlayerState("7", "7", isReadyToPlay = true),
+//                "8" to PlayerState("8", "8", isReadyToPlay = true),
+//            ))
+            ,
             tablePosition = tablePosition,
             tableSize = tableSize
         )

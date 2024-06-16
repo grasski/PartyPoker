@@ -1,6 +1,7 @@
 package com.dabi.partypoker.featureServer.viewmodel
 
 import android.util.Log
+import androidx.annotation.IntRange
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dabi.partypoker.R
@@ -10,7 +11,10 @@ import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureServer.model.ServerBridge
 import com.dabi.partypoker.featureServer.model.ServerBridgeEvents
 import com.dabi.partypoker.featureServer.model.data.GameState
+import com.dabi.partypoker.featureServer.model.data.SeatPosition
+import com.dabi.partypoker.featureServer.model.data.ServerState
 import com.dabi.partypoker.managers.ServerEvents
+import com.dabi.partypoker.managers.ServerType
 import com.dabi.partypoker.utils.ClientPayloadType
 import com.dabi.partypoker.utils.ServerPayloadType
 import com.dabi.partypoker.utils.UiTexts
@@ -101,10 +105,10 @@ open class ServerOwnerViewModel@Inject constructor(
                 val clientID = event.endpointID
 
                 _gameState.update { gameState ->
-                    val updatedPlayers = gameState.players.filter { it.key != clientID }
                     gameState.copy(
-                        players = updatedPlayers,
-                        gameReadyPlayers = updatedPlayers.filter { it.value.isReadyToPlay }.keys,
+                        players = gameState.players.filter { it.key != clientID },
+                        gameReadyPlayers = gameState.gameReadyPlayers.filter { it.key != clientID },
+                        seatPositions = gameState.seatPositions.filter { it.key != clientID },
 
                         messages = gameState.messages.plus(UiTexts.StringResource(R.string.client_disconnected))
                     )
@@ -124,11 +128,33 @@ open class ServerOwnerViewModel@Inject constructor(
                             money = 1000
                         )
 
-                        _gameState.update { gameState ->
-                            gameState.copy(
-                                players = _gameState.value.players + (clientID to player),
-                                messages = gameState.messages.plus(UiTexts.StringResource(R.string.client_connected, player.nickname))
-                            )
+                        if (_gameState.value.players.size >= 10){
+                            Log.e("", "Too many players")
+                            // TODO: Remove player from game
+                            return
+                        }
+
+                        val position: Int? = if (serverBridge.serverState.value.serverType == ServerType.IS_TABLE){
+                            _gameState.value.getAvailableRandomPosition()
+                        } else{
+                            if (_gameState.value.seatPositions.values.isEmpty()){
+                                0
+                            } else{
+                                _gameState.value.seatPositions.values.last().position + 1
+                            }
+                        }
+
+                        position?.let {
+                            _gameState.update { gameState ->
+                                gameState.copy(
+                                    players = gameState.players + (clientID to player),
+                                    seatPositions = gameState.seatPositions + (clientID to SeatPosition(position)),
+                                    messages = gameState.messages.plus(UiTexts.StringResource(R.string.client_connected, player.nickname))
+                                )
+                            }
+                        } ?: run {
+                            Log.e("", "PROBLEM WITH GETTING PLAYER'S SEAT POSITION")
+                            // TODO: Remove player from game
                         }
                     }
                     ClientPayloadType.ACTION_DISCONNECTED -> {
