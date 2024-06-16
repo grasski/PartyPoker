@@ -58,12 +58,11 @@ fun ServerOwnerView(
     navController: NavController,
     serverScreen: ServerScreen,
 ) {
-//    val serverViewModel = if (serverScreen.serverType == ServerType.IS_TABLE.toString()){
-//        hiltViewModel<ServerOwnerViewModel>()
-//    } else {
-//        hiltViewModel<ServerPlayerViewModel>()
-//    }
-    val serverViewModel: ServerOwnerViewModel = hiltViewModel()
+    val serverViewModel = if (serverScreen.serverType == ServerType.IS_TABLE.toString()){
+        hiltViewModel<ServerOwnerViewModel>()
+    } else {
+        hiltViewModel<ServerPlayerViewModel>()
+    }
     val serverState by serverViewModel.serverBridge.serverState.collectAsStateWithLifecycle()
 
 
@@ -74,7 +73,7 @@ fun ServerOwnerView(
             ServerEvents.StartServer(context, ServerType.valueOf(serverScreen.serverType), serverScreen.serverName)
         )
 
-//        (context as Activity).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        (context as Activity).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
     }
 
     Crossfade(
@@ -107,38 +106,32 @@ fun ServerOwnerView(
             ServerStatusEnum.ADVERTISING, ServerStatusEnum.ACTIVE -> {
                 val gameState by serverViewModel.gameState.collectAsStateWithLifecycle()
 
-                Column {
-                    Text(text = gameState.toString())
-                    
-                    Text(text = serverState.toString())
-                }
+                when(ServerType.valueOf(serverScreen.serverType)){
+                    ServerType.IS_PLAYER -> {
+                        val serverPlayerVM = (serverViewModel as ServerPlayerViewModel)
+                        val playerState by serverPlayerVM.playerState.collectAsStateWithLifecycle()
+                        val playerActionsState by serverPlayerVM.playerActionsState.collectAsStateWithLifecycle()
 
-//                when(ServerType.valueOf(serverScreen.serverType)){
-//                    ServerType.IS_PLAYER -> {
-//                        val serverPlayerVM = (serverViewModel as ServerPlayerViewModel)
-//                        val playerState by serverPlayerVM.playerState.collectAsStateWithLifecycle()
-//                        val playerActionsState by serverPlayerVM.playerActionsState.collectAsStateWithLifecycle()
-//
-//                        PlayerViewServer(
-//                            navController = navController,
-//                            gameState = gameState,
-//                            playerState = playerState,
-//                            playerActionsState = playerActionsState,
-//                            onPlayerEvent = serverPlayerVM::onPlayerEvent,
-//                            onGameEvent = serverViewModel::onGameEvent,
-//                        )
-//                    }
-//                    ServerType.IS_TABLE -> {
-//                        ServerGameView(
-//                            navController = navController,
-//                            gameState = gameState,
-//                            serverState = serverState,
-//                            serverScreen = serverScreen,
-//                            onGameEvent = serverViewModel::onGameEvent,
-//                            onServerEvent = serverViewModel.serverBridge::onServerEvent
-//                        )
-//                    }
-//                }
+                        PlayerViewServer(
+                            navController = navController,
+                            gameState = gameState,
+                            playerState = playerState,
+                            playerActionsState = playerActionsState,
+                            onPlayerEvent = serverPlayerVM::onPlayerEvent,
+                            onGameEvent = serverViewModel::onGameEvent,
+                        )
+                    }
+                    ServerType.IS_TABLE -> {
+                        ServerGameView(
+                            navController = navController,
+                            gameState = gameState,
+                            serverState = serverState,
+                            serverScreen = serverScreen,
+                            onGameEvent = serverViewModel::onGameEvent,
+                            onServerEvent = serverViewModel.serverBridge::onServerEvent
+                        )
+                    }
+                }
             }
         }
     }

@@ -74,92 +74,88 @@ fun PlayerGameView(
         )
     }
 
-    Column {
-        Text(text = playerState.toString())
-        Text(text = clientState.toString())
-    }
     var showPopUpMenu by rememberSaveable { mutableStateOf(false) }
 
-//    Crossfade(targetState = clientState.connectionStatus) { connectionStatus ->
-//        when (connectionStatus) {
-//            ConnectionStatusEnum.NONE, ConnectionStatusEnum.CONNECTING -> {
-//                Box(
-//                    modifier = Modifier.fillMaxSize(),
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    LoadingAnimation(
-//                        modifier = Modifier
-//                            .fillMaxSize(0.4f),
-//                        text = stringResource(R.string.client_connecting),
-//                        onCancelRequest = {
-//                            playerViewModel.onPlayerEvent(PlayerEvents.Disconnect)
-//                        }
-//                    )
-//                }
-//            }
-//
-//            ConnectionStatusEnum.FAILED_TO_CONNECT -> {
-//                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-//                    Column(
-//                        verticalArrangement = Arrangement.spacedBy(16.dp),
-//                        horizontalAlignment = Alignment.CenterHorizontally
-//                    ) {
-//                        Text(text = "Failed to connect to the server, please try again.")
-//                        Button(onClick = {
-//                            playerViewModel.clientBridge.onClientEvent(
-//                                ClientEvents.Connect(context, nickname)
-//                            )
-//                        }) {
-//                            Text(text = "Try again")
-//                        }
-//                    }
-//                }
-//            }
-//
-//            ConnectionStatusEnum.CONNECTED -> {
-//                when(clientState.serverType){
-//                    ServerType.IS_TABLE -> {
-//                        PlayerViewPrivate(
-//                            navController,
-//                            playerState,
-//                            playerActionsState,
-//                            onPlayerEvent = playerViewModel::onPlayerEvent
-//                        )
-//                    }
-//                    ServerType.IS_PLAYER -> {
-//                        val gameState by playerViewModel.gameState.collectAsStateWithLifecycle()
-//                        PlayerViewServer(
-//                            navController,
-//                            gameState,
-//                            playerState,
-//                            playerActionsState,
-//                            onPlayerEvent = playerViewModel::onPlayerEvent,
-//                            onGameEvent = {}
-//                        )
-//                    }
-//                }
-//            }
-//
-//            ConnectionStatusEnum.DISCONNECTED -> {
-//                LaunchedEffect(key1 = connectionStatus) {
-//                    navController.navigate(MenuScreen) {
-//                        popUpTo(PlayerScreen(nickname)) {
-//                            inclusive = true
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        if (showPopUpMenu) {
-//            GamePopUpMenu(
-//                navController,
-//                true,
-//                onDismissRequest = { showPopUpMenu = false },
-//                onLeaveRequest = { playerViewModel.onPlayerEvent(PlayerEvents.Disconnect) }
-//            )
-//        }
-//    }
+    Crossfade(targetState = clientState.connectionStatus) { connectionStatus ->
+        when (connectionStatus) {
+            ConnectionStatusEnum.NONE, ConnectionStatusEnum.CONNECTING -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LoadingAnimation(
+                        modifier = Modifier
+                            .fillMaxSize(0.4f),
+                        text = stringResource(R.string.client_connecting),
+                        onCancelRequest = {
+                            playerViewModel.onPlayerEvent(PlayerEvents.Disconnect)
+                        }
+                    )
+                }
+            }
+
+            ConnectionStatusEnum.FAILED_TO_CONNECT -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = "Failed to connect to the server, please try again.")
+                        Button(onClick = {
+                            playerViewModel.clientBridge.onClientEvent(
+                                ClientEvents.Connect(context, nickname)
+                            )
+                        }) {
+                            Text(text = "Try again")
+                        }
+                    }
+                }
+            }
+
+            ConnectionStatusEnum.CONNECTED -> {
+                when(clientState.serverType){
+                    ServerType.IS_TABLE -> {
+                        PlayerViewPrivate(
+                            navController,
+                            playerState,
+                            playerActionsState,
+                            onPlayerEvent = playerViewModel::onPlayerEvent
+                        )
+                    }
+                    ServerType.IS_PLAYER -> {
+                        val gameState by playerViewModel.gameState.collectAsStateWithLifecycle()
+                        PlayerViewServer(
+                            navController,
+                            gameState,
+                            playerState,
+                            playerActionsState,
+                            onPlayerEvent = playerViewModel::onPlayerEvent,
+                            onGameEvent = {}
+                        )
+                    }
+                }
+            }
+
+            ConnectionStatusEnum.DISCONNECTED -> {
+                LaunchedEffect(key1 = connectionStatus) {
+                    navController.navigate(MenuScreen) {
+                        popUpTo(PlayerScreen(nickname)) {
+                            inclusive = true
+                        }
+                    }
+                }
+            }
+        }
+
+        if (showPopUpMenu) {
+            GamePopUpMenu(
+                navController,
+                true,
+                onDismissRequest = { showPopUpMenu = false },
+                onLeaveRequest = { playerViewModel.onPlayerEvent(PlayerEvents.Disconnect) }
+            )
+        }
+    }
 }
 
 

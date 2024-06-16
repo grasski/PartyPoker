@@ -135,18 +135,6 @@ fun MenuView(
                                 ){
                                     Text(text = "START SERVER")
                                 }
-
-
-                                val serverViewModel: ServerOwnerViewModel = hiltViewModel()
-                                val serverState by serverViewModel.serverBridge.serverState.collectAsStateWithLifecycle()
-
-
-                                LaunchedEffect(true) {
-                                    Log.e("", "HALOO???")
-                                    serverViewModel.serverBridge.onServerEvent(
-                                        ServerEvents.StartServer(context, ServerType.IS_TABLE, "Server")
-                                    )
-                                }
                             }
                         } else{
                             Text("Not possible to Host a game without accepting permissions")
@@ -184,20 +172,6 @@ fun MenuView(
                             ){
                                 Text("Login")
                             }
-
-
-                            val playerViewModel: PlayerViewModel = hiltViewModel()
-                            val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
-                            val playerActionsState by playerViewModel.playerActionsState.collectAsStateWithLifecycle()
-                            val clientState by playerViewModel.clientBridge.clientState.collectAsStateWithLifecycle()
-
-                            LaunchedEffect(Unit) {
-                                playerViewModel.clientBridge.onClientEvent(
-                                    ClientEvents.Connect(context, nickname)
-                                )
-                            }
-
-
                         } else{
                             Text("Not possible to Join a game without accepting permissions")
                         }

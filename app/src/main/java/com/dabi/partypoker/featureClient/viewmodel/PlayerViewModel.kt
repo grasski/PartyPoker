@@ -99,11 +99,11 @@ class PlayerViewModel @Inject constructor(
                 _playerState.update { it.copy(
                     nickname = event.nickname
                 ) }
-                connectionsClient.stopDiscovery()
             }
             ClientBridgeEvents.ClientConnected -> {
                 val clientPayload = toClientPayload(ClientPayloadType.CONNECTED, _playerState.value.nickname)
                 clientBridge.sendPayload(clientPayload)
+                connectionsClient.stopDiscovery()
             }
 
             is ClientBridgeEvents.UpdateClient -> {

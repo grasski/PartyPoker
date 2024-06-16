@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DIALOG" />
-        <DropdownSelection timestamp="2024-06-14T18:28:37.275404500Z">
+        <DropdownSelection timestamp="2024-06-11T08:24:13.240510800Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\jirka\.android\avd\Small_Phone_API_VanillaIceCream.avd" />
+              <DeviceId pluginId="Default" identifier="serial=192.168.1.227:38725;connection=82458ec3" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -15,7 +15,7 @@
           <targets>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="Default" identifier="serial=192.168.1.227:40843;connection=cbee8004" />
+                <DeviceId pluginId="PhysicalDevice" identifier="serial=312319b5" />
               </handle>
             </Target>
             <Target type="DEFAULT_BOOT">
