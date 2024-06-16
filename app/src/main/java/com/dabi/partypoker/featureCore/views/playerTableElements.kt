@@ -100,14 +100,7 @@ fun PlayerDrawItself(
             PlayerBox(
                 size = playerBoxSize + sizeConstant,
                 fontSize = (fontSize.value + (fontSize/4).value).sp,
-                playerState = player.copy(
-                    holeCards = listOf(
-                        Card(CardType.CLUB, 10)
-                    ),
-                    isDealer = true,
-                    isPlayingNow = false,
-                    called = 52
-                ),
+                playerState = player,
                 layoutDirection = PlayerLayoutDirection.BOTTOM,
                 showCards = true
             )

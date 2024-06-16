@@ -42,7 +42,10 @@ class GameManager {
             val bigBlind = getPlayingNow(games + 2, gameState)
             if (dealerId == null || smallBlind == null || bigBlind == null){
                 return GameState(
-                    players = gameState.players
+                    players = gameState.players,
+                    seatPositions = gameState.seatPositions,
+                    messages = gameState.messages,
+                    bank = gameState.bank
                 )
             }
 
@@ -226,7 +229,7 @@ class GameManager {
                 return null
             }
 
-            val sortedSeatsWithPlayers = gameState.seatPositions.toList().sortedBy { (_, value) -> value.position }.toMap()
+            val sortedSeatsWithPlayers = gameState.gameReadyPlayers.toList().sortedBy { (_, value) -> value.position }.toMap()
 //            val sortedPlayers = gameState.gameReadyPlayers.sorted()
 
             val currentIndex = sortedSeatsWithPlayers.toList().indexOfFirst { it.first == gameState.playingNow } // Získáme index aktuálního hráče

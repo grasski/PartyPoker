@@ -133,16 +133,8 @@ open class ServerOwnerViewModel@Inject constructor(
                             // TODO: Remove player from game
                             return
                         }
-
-                        val position: Int? = if (serverBridge.serverState.value.serverType == ServerType.IS_TABLE){
-                            _gameState.value.getAvailableRandomPosition()
-                        } else{
-                            if (_gameState.value.seatPositions.values.isEmpty()){
-                                0
-                            } else{
-                                _gameState.value.seatPositions.values.last().position + 1
-                            }
-                        }
+                        
+                        val position: Int? = _gameState.value.getAvailableRandomPosition()
 
                         position?.let {
                             _gameState.update { gameState ->

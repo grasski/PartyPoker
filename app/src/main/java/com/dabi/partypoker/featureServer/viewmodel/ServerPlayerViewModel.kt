@@ -7,6 +7,7 @@ import com.dabi.partypoker.featureCore.data.PlayerActionsState
 import com.dabi.partypoker.featureCore.interfaces.PlayerCoreInterface
 import com.dabi.partypoker.featureServer.model.ServerBridgeEvents
 import com.dabi.partypoker.featureServer.model.data.GameState
+import com.dabi.partypoker.featureServer.model.data.SeatPosition
 import com.dabi.partypoker.utils.ClientPayloadType
 import com.google.android.gms.nearby.connection.ConnectionsClient
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,6 +42,7 @@ class ServerPlayerViewModel @Inject constructor(
         )
         _gameState.update { it.copy(
             players = it.players + ("ServerPlayer" to player),
+            seatPositions = it.seatPositions + (player.id to SeatPosition(0))
         ) }
         _playerState.update { player }
 

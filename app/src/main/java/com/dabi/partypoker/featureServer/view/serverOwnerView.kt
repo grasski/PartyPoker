@@ -39,6 +39,7 @@ import com.dabi.partypoker.R
 import com.dabi.partypoker.ServerScreen
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.view.PlayerViewServer
+import com.dabi.partypoker.featureCore.views.DrawPlayersByPosition
 import com.dabi.partypoker.featureCore.views.GamePopUpMenu
 import com.dabi.partypoker.featureCore.views.GameTable
 import com.dabi.partypoker.featureCore.views.LoadingAnimation
@@ -68,7 +69,6 @@ fun ServerOwnerView(
 
     val context = LocalContext.current
     LaunchedEffect(true) {
-        Log.e("", "HALOO???")
         serverViewModel.serverBridge.onServerEvent(
             ServerEvents.StartServer(context, ServerType.valueOf(serverScreen.serverType), serverScreen.serverName)
         )
@@ -188,22 +188,31 @@ fun ServerGameView(
                 tableSize = s
             }
         )
-        ServerDrawPlayers(
-            gameState = gameState
-//                .copy(players = mapOf(
-//                "0" to PlayerState("0", "0"),
-//                "1" to PlayerState("1", "1", isReadyToPlay = true),
-//                "2" to PlayerState("2", "2", isReadyToPlay = true, isPlayingNow = true),
-//                "3" to PlayerState("3", "3", isReadyToPlay = true),
-//                "4" to PlayerState("4", "4", isReadyToPlay = true),
-//                "5" to PlayerState("5", "5", isReadyToPlay = true),
-//                "6" to PlayerState("6", "6", isReadyToPlay = true),
-//                "7" to PlayerState("7", "7", isReadyToPlay = true),
-//                "8" to PlayerState("8", "8", isReadyToPlay = true),
-//            ))
-            ,
+
+        val players = gameState.seatPositions.entries.associate { it.value.position to gameState.players[it.key] }
+        Log.e("", "HRACI: " + players)
+        DrawPlayersByPosition(
+            players = players,
+            serverType = serverState.serverType,
             tablePosition = tablePosition,
             tableSize = tableSize
         )
+//        ServerDrawPlayers(
+//            gameState = gameState
+////                .copy(players = mapOf(
+////                "0" to PlayerState("0", "0"),
+////                "1" to PlayerState("1", "1", isReadyToPlay = true),
+////                "2" to PlayerState("2", "2", isReadyToPlay = true, isPlayingNow = true),
+////                "3" to PlayerState("3", "3", isReadyToPlay = true),
+////                "4" to PlayerState("4", "4", isReadyToPlay = true),
+////                "5" to PlayerState("5", "5", isReadyToPlay = true),
+////                "6" to PlayerState("6", "6", isReadyToPlay = true),
+////                "7" to PlayerState("7", "7", isReadyToPlay = true),
+////                "8" to PlayerState("8", "8", isReadyToPlay = true),
+////            ))
+//            ,
+//            tablePosition = tablePosition,
+//            tableSize = tableSize
+//        )
     }
 }

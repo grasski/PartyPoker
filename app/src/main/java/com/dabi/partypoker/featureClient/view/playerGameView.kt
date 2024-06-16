@@ -17,6 +17,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +42,7 @@ import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureClient.viewmodel.PlayerViewModel
 import com.dabi.partypoker.featureCore.data.PlayerActionsState
+import com.dabi.partypoker.featureCore.views.DrawPlayersByPosition
 import com.dabi.partypoker.featureCore.views.GamePopUpMenu
 import com.dabi.partypoker.featureCore.views.GameTable
 import com.dabi.partypoker.featureCore.views.LoadingAnimation
@@ -299,25 +301,24 @@ fun PlayerViewServer(
             tableSize = tableSize
         )
 
-        var sortedPlayers by remember(gameState){
-            mutableStateOf(gameState.gameReadyPlayers.toList().sortedBy { it.second.position }.toMap() )
-        }
-
+        val sortedPlayers = gameState.seatPositions.toList().sortedBy { it.second.position }.toMap()
         val meIndex = sortedPlayers.keys.indexOf(playerState.id)
-        if (meIndex <= -1){
-            Log.e("PlayerViewServer", "I was not found.. problem")
+        val myPosition = sortedPlayers[playerState.id]?.position
+        if (meIndex <= -1 || myPosition == null){
             return
         }
         val playersBeforeMe = sortedPlayers.toList().take(meIndex).toMap()
-        sortedPlayers = sortedPlayers.minus(playersBeforeMe.keys)
-        sortedPlayers = sortedPlayers.plus(playersBeforeMe)
-        sortedPlayers = sortedPlayers.minus(playerState.id)
+        val players = sortedPlayers
+            .minus(playersBeforeMe.keys)
+            .plus(playersBeforeMe)
+            .minus(playerState.id)
+            .entries.associate { it.value.position to gameState.players[it.key] }
 
 
-
-        PlayerDrawPlayers(
-            player = playerState,
-            players = gameState.players.values.toList(),
+        DrawPlayersByPosition(
+            players = players,
+            myPosition = myPosition,
+            serverType = ServerType.IS_PLAYER,
             tablePosition = tablePosition,
             tableSize = tableSize
         )
