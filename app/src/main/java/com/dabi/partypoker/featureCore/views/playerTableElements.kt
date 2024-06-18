@@ -1,5 +1,7 @@
 package com.dabi.partypoker.featureCore.views
 
+import android.util.Log
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -58,6 +61,7 @@ import com.dabi.partypoker.featureCore.data.colors
 import com.dabi.partypoker.utils.Card
 import com.dabi.partypoker.utils.CardType
 import com.dabi.partypoker.utils.UiTexts
+import com.dabi.partypoker.utils.formatNumberToString
 
 
 @Composable
@@ -106,232 +110,249 @@ fun PlayerDrawItself(
             )
         }
 
-        Column(
-            modifier = Modifier
-                .size(
-                    width = this@BoxWithConstraints.maxWidth - (this@BoxWithConstraints.maxWidth / 2 + (playerBoxSize.width + sizeConstant.width) / 2),
-                    height = playerBoxSize.height + sizeConstant.height
-                )
-                .offset {
-                    IntOffset(
-                        x = (this@BoxWithConstraints.maxWidth / 2 + (playerBoxSize.width + sizeConstant.width) / 2)
-                            .toPx()
-                            .toInt(),
-                        y = (tablePosition.y + tableSize.height - sizeConstant.height.toPx()).toInt()
-                    )
-                }
-                .padding(end = 8.dp)
-                .clip(RoundedCornerShape(10.dp)),
-            horizontalAlignment = Alignment.Start
-        ){
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(colors.playerButtonsColor)
-                    .padding(5.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ){
-                Text(
-                    text = "Full house".uppercase(),
-                    fontSize = fontSize,
-                    color = Color.White,
-                    fontWeight = FontWeight.ExtraBold,
-                    style = TextStyle(
-                        platformStyle = PlatformTextStyle(
-                            includeFontPadding = false
-                        )
-                    )
-                )
-                Icon(
-                    Icons.AutoMirrored.Default.Help,
-                    contentDescription = "Help",
-                    tint = Color.White,
-                    modifier = Modifier
-                        .clickable(
-                            interactionSource = null,
-                            indication = null,
-                            onClick = {
-                                // TODO()
-                            }
-                        )
-                        .padding(start = 10.dp, end = 5.dp)
-                        .size(fontSize.value.dp * 1.2f)
-                )
+        Log.e("","PLAYER READY: " + player.isReadyToPlay)
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ){
-                    val strength = 30f
-                    val animatedColor by remember {
-                        derivedStateOf { lerp(Color.Red, Color.Green, strength / 100) }
+        Crossfade(
+            targetState = player.isReadyToPlay
+        ) { ready ->
+            Column(
+                modifier = Modifier
+                    .size(
+                        width = this@BoxWithConstraints.maxWidth - (this@BoxWithConstraints.maxWidth / 2 + (playerBoxSize.width + sizeConstant.width) / 2),
+                        height = playerBoxSize.height + sizeConstant.height
+                    )
+                    .offset {
+                        IntOffset(
+                            x = (this@BoxWithConstraints.maxWidth / 2 + (playerBoxSize.width + sizeConstant.width) / 2)
+                                .toPx()
+                                .toInt(),
+                            y = (tablePosition.y + tableSize.height - sizeConstant.height.toPx()).toInt()
+                        )
                     }
-                    LinearProgressIndicator(
-                        progress = { strength / 100 },
-                        color = animatedColor,
-                        trackColor = colors.playerButtonsColor,
-                        modifier = Modifier
-                            .height(with(density) { fontSize.toDp() * 1f })
-                            .fillMaxWidth()
-                            .drawWithCache {
-                                onDrawWithContent {
-                                    drawContent()
-
-                                    val spaceBetween = size.width / 5
-                                    for (i in 1..4) {
-                                        drawLine(
-                                            color = colors.calledMoneyColor,
-                                            start = Offset(spaceBetween * i, 0f),
-                                            end = Offset(spaceBetween * i, size.height),
-                                            strokeWidth = 1.dp.toPx()
-                                        )
-                                    }
-                                }
-                            }
-                            .border(1.dp, colors.calledMoneyColor, RoundedCornerShape(5.dp))
-                            .clip(RoundedCornerShape(5.dp))
-                    )
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxSize()
-                    .background(colors.playerButtonsColor)
+                    .padding(end = 8.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(colors.playerButtonsColor2)
                     .padding(5.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
+                horizontalAlignment = Alignment.Start
             ){
-                Button(
-                    onClick = { /*TODO*/ },
-                    enabled = player.isPlayingNow,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    shape = RoundedCornerShape(5.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.buttonColor,
-                        contentColor = colors.calledMoneyColor
-                    ),
-                    border = BorderStroke(
-                        1.dp,
-                        colors.calledMoneyColor.copy(alpha = 0.5f)
-                    ),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Text(
-                        text =
-                            if (playerActionsState.canCheck)
-                                UiTexts.StringResource(R.string.action_check).asString().uppercase()
-                            else
-                                UiTexts.StringResource(R.string.action_call).asString().uppercase() + "\n" + playerActionsState.callAmount,
-                        fontSize = fontSize,
-                        textAlign = TextAlign.Center,
-                        style = TextStyle(
-                            platformStyle = PlatformTextStyle(
-                                includeFontPadding = false
+                if (ready) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ){
+                        Text(
+                            text = "Full house".uppercase(),
+                            fontSize = fontSize,
+                            color = Color.White,
+                            fontWeight = FontWeight.ExtraBold,
+                            style = TextStyle(
+                                platformStyle = PlatformTextStyle(
+                                    includeFontPadding = false
+                                )
                             )
-                        ),
-                    )
-                }
+                        )
+                        Icon(
+                            Icons.AutoMirrored.Default.Help,
+                            contentDescription = "Help",
+                            tint = Color.White,
+                            modifier = Modifier
+                                .clickable(
+                                    interactionSource = null,
+                                    indication = null,
+                                    onClick = {
+                                        // TODO()
+                                    }
+                                )
+                                .padding(start = 10.dp, end = 5.dp)
+                                .size(fontSize.value.dp * 1.2f)
+                        )
 
-                Button(
-                    onClick = { /*TODO*/ },
-                    enabled = player.isPlayingNow,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    shape = RoundedCornerShape(5.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.buttonColor,
-                        contentColor = colors.calledMoneyColor
-                    ),
-                    border = BorderStroke(
-                        1.dp,
-                        colors.calledMoneyColor.copy(alpha = 0.5f)
-                    ),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Text(
-                        text = UiTexts.StringResource(R.string.action_raise).asString().uppercase(),
-                        fontSize = fontSize,
-                        style = TextStyle(
-                            platformStyle = PlatformTextStyle(
-                                includeFontPadding = false
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ){
+                            val strength = 30f
+                            val animatedColor by remember {
+                                derivedStateOf { lerp(Color.Red, Color.Green, strength / 100) }
+                            }
+                            LinearProgressIndicator(
+                                progress = { strength / 100 },
+                                color = animatedColor,
+                                trackColor = colors.playerButtonsColor,
+                                modifier = Modifier
+                                    .height(with(density) { fontSize.toDp() * 1f })
+                                    .fillMaxWidth()
+                                    .drawWithCache {
+                                        onDrawWithContent {
+                                            drawContent()
+
+                                            val spaceBetween = size.width / 5
+                                            for (i in 1..4) {
+                                                drawLine(
+                                                    color = colors.calledMoneyColor,
+                                                    start = Offset(spaceBetween * i, 0f),
+                                                    end = Offset(spaceBetween * i, size.height),
+                                                    strokeWidth = 1.dp.toPx()
+                                                )
+                                            }
+                                        }
+                                    }
+                                    .border(1.dp, colors.calledMoneyColor, RoundedCornerShape(5.dp))
+                                    .clip(RoundedCornerShape(5.dp))
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.weight(0.1f))
+                    
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
+                    ){
+                        Button(
+                            onClick = {
+                                if (playerActionsState.canCheck){
+                                    onPlayerEvent(PlayerEvents.Check)
+                                } else{
+                                    onPlayerEvent(PlayerEvents.Call(playerActionsState.callAmount))
+                                }
+                            },
+                            enabled = player.isPlayingNow,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                            shape = RoundedCornerShape(5.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = colors.buttonColor,
+                                contentColor = colors.calledMoneyColor
+                            ),
+                            border = BorderStroke(
+                                1.dp,
+                                colors.calledMoneyColor.copy(alpha = 0.5f)
+                            ),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Text(
+                                text =
+                                if (playerActionsState.canCheck)
+                                    UiTexts.StringResource(R.string.action_check).asString().uppercase()
+                                else
+                                    UiTexts.StringResource(R.string.action_call).asString().uppercase() + "\n" + playerActionsState.callAmount.formatNumberToString(),
+                                fontSize = fontSize * 1.2f,
+                                fontWeight = FontWeight.ExtraBold,
+                                textAlign = TextAlign.Center,
+                                color = colors.calledMoneyColor,
+                                style = TextStyle(
+                                    platformStyle = PlatformTextStyle(
+                                        includeFontPadding = false
+                                    )
+                                ),
+                            )
+                        }
+
+                        Button(
+                            onClick = {
+                                // TODO
+                            },
+                            enabled = player.isPlayingNow,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                            shape = RoundedCornerShape(5.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = colors.buttonColor,
+                                contentColor = colors.calledMoneyColor
+                            ),
+                            border = BorderStroke(
+                                1.dp,
+                                colors.calledMoneyColor.copy(alpha = 0.5f)
+                            ),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Text(
+                                text = UiTexts.StringResource(R.string.action_raise).asString().uppercase(),
+                                fontSize = fontSize * 1.2f,
+                                fontWeight = FontWeight.ExtraBold,
+                                textAlign = TextAlign.Center,
+                                color = colors.calledMoneyColor,
+                                style = TextStyle(
+                                    platformStyle = PlatformTextStyle(
+                                        includeFontPadding = false
+                                    )
+                                )
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                onPlayerEvent(PlayerEvents.Fold)
+                            },
+                            enabled = player.isPlayingNow,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                            shape = RoundedCornerShape(5.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = colors.buttonColor,
+                                contentColor = colors.calledMoneyColor
+                            ),
+                            border = BorderStroke(
+                                1.dp,
+                                colors.calledMoneyColor.copy(alpha = 0.5f)
+                            ),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Text(
+                                text = UiTexts.StringResource(R.string.action_fold).asString().uppercase(),
+                                fontSize = fontSize * 1.2f,
+                                fontWeight = FontWeight.ExtraBold,
+                                textAlign = TextAlign.Center,
+                                color = colors.calledMoneyColor,
+                                style = TextStyle(
+                                    platformStyle = PlatformTextStyle(
+                                        includeFontPadding = false
+                                    )
+                                )
+                            )
+                        }
+                    }
+                } else{
+                    Button(
+                        onClick = {
+                            onPlayerEvent(PlayerEvents.Ready)
+                        },
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        shape = RoundedCornerShape(5.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colors.buttonColor,
+                            contentColor = colors.calledMoneyColor
+                        ),
+                        border = BorderStroke(
+                            1.dp,
+                            colors.calledMoneyColor.copy(alpha = 0.5f)
+                        ),
+                        contentPadding = PaddingValues(5.dp)
+                    ) {
+                        Text(
+                            text = UiTexts.StringResource(R.string.action_ready).asString().uppercase(),
+                            fontSize = fontSize * 1.5f,
+                            fontWeight = FontWeight.ExtraBold,
+                            textAlign = TextAlign.Center,
+                            color = colors.calledMoneyColor,
+                            style = TextStyle(
+                                platformStyle = PlatformTextStyle(
+                                    includeFontPadding = false
+                                )
                             )
                         )
-                    )
-                }
-                Button(
-                    onClick = {
-                        onPlayerEvent(PlayerEvents.Fold)
-                    },
-                    enabled = player.isPlayingNow,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    shape = RoundedCornerShape(5.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.buttonColor,
-                        contentColor = colors.calledMoneyColor
-                    ),
-                    border = BorderStroke(
-                        1.dp,
-                        colors.calledMoneyColor.copy(alpha = 0.5f)
-                    ),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Text(
-                        text = UiTexts.StringResource(R.string.action_fold).asString().uppercase(),
-                        fontSize = fontSize,
-                        style = TextStyle(
-                            platformStyle = PlatformTextStyle(
-                                includeFontPadding = false
-                            )
-                        )
-                    )
+                    }
                 }
             }
         }
     }
-}
-
-
-@Composable
-fun PlayerDrawPlayers(
-    player: PlayerState,
-    players: List<PlayerState>,
-
-    tablePosition: Offset,
-    tableSize: IntSize,
-) {
-    var playerBoxSize by remember { mutableStateOf(DpSize.Zero) }
-    var fontSize by remember { mutableStateOf(20.sp) }
-    CalculatePlayerBoxSize(
-        playerBoxSize = { playerBoxSize = it },
-        fontSize = { fontSize = it }
-    )
-
-
-    val density = LocalDensity.current
-    val topLeftHorizontal = with(density) { DpOffset(
-        x = tablePosition.x.toDp() - playerBoxSize.width / 2,
-        y = tablePosition.y.toDp() - playerBoxSize.height / 2 - playerBoxSize.height / 3
-    ) }
-    val bottomLeftHorizontal = with(density) { DpOffset(
-        x = tablePosition.x.toDp() - playerBoxSize.width / 2,
-        y = tablePosition.y.toDp() + tableSize.height.toDp() - playerBoxSize.height / 2 + playerBoxSize.height / 3
-    ) }
-
-    val topLeftVertical = with(density) { DpOffset(
-        x = tablePosition.x.toDp() - playerBoxSize.width / 2 - playerBoxSize.width / 5,
-        y = tablePosition.y.toDp() + playerBoxSize.height / 2
-    ) }
-    val topRightVertical = with(density) { DpOffset(
-        x = tablePosition.x.toDp() + tableSize.width.toDp() - playerBoxSize.width / 2 + playerBoxSize.width / 5,
-        y = tablePosition.y.toDp() + playerBoxSize.height / 2
-    ) }
-
 }

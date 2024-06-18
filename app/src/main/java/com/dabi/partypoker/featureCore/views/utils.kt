@@ -1,15 +1,34 @@
 package com.dabi.partypoker.featureCore.views
 
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
 import androidx.window.core.layout.WindowHeightSizeClass
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.dabi.partypoker.R
 
 
 @Composable
@@ -35,6 +54,93 @@ fun CalculatePlayerBoxSize(
             else -> {
                 playerBoxSize(DpSize(220.dp, 110.dp))
                 fontSize(23.sp)
+            }
+        }
+    }
+}
+
+
+@Composable
+fun LoadingAnimation(
+    modifier: Modifier,
+    text: String,
+    onCancelRequest: () -> Unit
+) {
+    val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.loading_animation))
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        iterations = LottieConstants.IterateForever
+    )
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
+    ) {
+        LottieAnimation(
+            composition = composition,
+            progress = { progress },
+            modifier = Modifier.weight(1f)
+        )
+        Text(text = text)
+        Button(onClick = { onCancelRequest() }) {
+            Text(text = "Cancel")
+        }
+    }
+}
+
+
+@Composable
+fun GamePopUpMenu(
+    navController: NavController,
+    isPlayer: Boolean,
+    onDismissRequest: () -> Unit,
+    onLeaveRequest: () -> Unit,
+) {
+    Dialog(onDismissRequest = { onDismissRequest() }) {
+        Card(
+            modifier = Modifier
+        ){
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                when(isPlayer){
+                    true -> {
+                        //TODO: in future some settings, etc.
+                        Button(onClick = {
+                            onDismissRequest()
+                            onLeaveRequest()
+                        }) {
+                            Text(text = "Leave")
+                        }
+                    }
+                    false -> {
+                        //TODO: in future some settings, kicking people, etc.
+                        Button(onClick = { /*TODO*/ }) {
+                            Text(text = "Stop advertising")
+                        }
+                        Button(onClick = {
+                            onDismissRequest()
+                            onLeaveRequest()
+                        }) {
+                            Text(text = "Leave")
+                        }
+                    }
+                }
+
+                Row (
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.End
+                ){
+                    Button(onClick = { onDismissRequest() }) {
+                        Text(text = "Pokračovat")
+                    }
+                }
             }
         }
     }

@@ -13,7 +13,6 @@ import com.google.android.gms.nearby.connection.ConnectionsClient
 import com.google.android.gms.nearby.connection.Payload
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 
@@ -33,16 +32,20 @@ class ServerBridge(
     val serverState: StateFlow<ServerState> = _serverState
 
     fun killServer(){
-        _serverState.update { ServerState() }
-        connectionsClient.stopDiscovery()
         connectionsClient.stopAdvertising()
         connectionsClient.stopAllEndpoints()
+    }
+
+    fun leave(){
+        _serverState.update { it.copy(
+            serverStatus = ServerStatusEnum.OFF
+        ) }
     }
 
     fun onServerEvent(event: ServerEvents){
         when(event) {
             is ServerEvents.StartServer -> {
-                if (_serverState.value.serverStatus == ServerStatusEnum.OFF){
+                if (_serverState.value.serverStatus == ServerStatusEnum.NONE){
                     ServerManager(connectionsClient, this::onServerEvent).startAdvertising(
                         context = event.context,
                         name = event.serverName
@@ -75,8 +78,6 @@ class ServerBridge(
                 _serverState.update { it.copy(
                     connectedClients = it.connectedClients.plus(clientEndpointId)
                 )}
-
-                Log.e("", "CLIENT CONNECTED: " + _serverState.value.connectedClients)
 
                 val serverPayload = toServerPayload(ServerPayloadType.CLIENT_CONNECTED, _serverState.value.serverType)
                 connectionsClient.sendPayload(clientEndpointId, serverPayload)

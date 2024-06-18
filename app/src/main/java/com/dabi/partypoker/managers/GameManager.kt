@@ -152,13 +152,13 @@ class GameManager {
                     val tableCards = getCards(gameState.cardsDeck.toMutableList(), 3)
 
                     gameState.cardsDeck = gameState.cardsDeck.toMutableList().apply { removeAll(tableCards) }
-                    gameState.cardsTable = tableCards
+                    gameState.cardsTable += tableCards
                 }
                 if (gameState.round in 3..4){
                     val tableCards = getCards(gameState.cardsDeck.toMutableList(), 1)
 
                     gameState.cardsDeck = gameState.cardsDeck.toMutableList().apply { removeAll(tableCards) }
-                    gameState.cardsTable = tableCards
+                    gameState.cardsTable += tableCards
                 }
                 if (gameState.round == 5){
                     Log.e("", "HOTOVO, HRA SKONCILA V 5. KOLE")

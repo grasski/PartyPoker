@@ -15,12 +15,6 @@ fun Int.formatNumberToString(): String {
         this >= 1000000 -> String.format("%.1fM", this / 1000000.0).replace(".0", "")
         this >= 1000 -> String.format("%.1fK", this / 1000.0).replace(".0", "")
         else -> this.toString()
-
-//        this >= 1000000 -> String.format("%.1fM", this / 1000000.0).replace(".0", "")
-//        this >= 100000 -> String.format("%.1fK", this / 100000).replace(".0", "")
-//        this >= 10000 -> String.format("%,dK", this / 1000)
-//        this >= 1000 -> String.format("%,d", this)
-//        else -> this.toString()
     }
 }
 

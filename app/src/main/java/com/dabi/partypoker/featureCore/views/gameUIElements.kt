@@ -1,5 +1,6 @@
 package com.dabi.partypoker.featureCore.views
 
+import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,15 +24,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -64,117 +61,23 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.navigation.NavController
-import androidx.window.core.layout.WindowHeightSizeClass
 import coil.compose.rememberAsyncImagePainter
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
 import com.dabi.partypoker.featureCore.data.colors
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.managers.GameEvents
+import com.dabi.partypoker.managers.ServerType
 import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.formatNumberToString
-
-
-@Composable
-fun LoadingAnimation(
-    modifier: Modifier,
-    text: String,
-    onCancelRequest: () -> Unit
-) {
-    val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.loading_animation))
-    val progress by animateLottieCompositionAsState(
-        composition = composition,
-        iterations = LottieConstants.IterateForever
-    )
-
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly
-    ) {
-        LottieAnimation(
-            composition = composition,
-            progress = { progress },
-            modifier = Modifier.weight(1f)
-        )
-        Text(text = text)
-        Button(onClick = { onCancelRequest() }) {
-            Text(text = "Cancel")
-        }
-    }
-}
-
-
-@Composable
-fun GamePopUpMenu(
-    navController: NavController,
-    isPlayer: Boolean,
-    onDismissRequest: () -> Unit,
-    onLeaveRequest: () -> Unit,
-) {
-    Dialog(onDismissRequest = { onDismissRequest() }) {
-        Card(
-            modifier = Modifier
-        ){
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                when(isPlayer){
-                    true -> {
-                        //TODO: in future some settings, etc.
-                        Button(onClick = {
-                            onDismissRequest()
-                            onLeaveRequest()
-                        }) {
-                            Text(text = "Leave")
-                        }
-                    }
-                    false -> {
-                        //TODO: in future some settings, kicking people, etc.
-                        Button(onClick = { /*TODO*/ }) {
-                            Text(text = "Stop advertising")
-                        }
-                        Button(onClick = {
-                            onDismissRequest()
-                            onLeaveRequest()
-                        }) {
-                            Text(text = "Leave")
-                        }
-                    }
-                }
-
-                Row (
-                    modifier = Modifier.fillMaxSize(),
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.End
-                ){
-                    Button(onClick = { onDismissRequest() }) {
-                        Text(text = "Pokračovat")
-                    }
-                }
-            }
-        }
-    }
-}
 
 
 @Composable
@@ -357,13 +260,11 @@ fun PlayerBox(
         Box(
             modifier = Modifier
                 .size(size)
-                .background(Color.Red)
         )
         return
     }
 
     val density = LocalDensity.current
-
     val circleSize by remember(size) {
         mutableStateOf(
             with(density) { (65 * with(density){size.height.toPx()} / 100).toDp() })    // 65% of total height
@@ -481,7 +382,6 @@ fun PlayerBox(
                                 .clip(RoundedCornerShape(3.dp))
                         )
                     }
-
                 }
             }
 
@@ -773,6 +673,149 @@ private fun HorizontalPlayerItems(
                         )
                     )
                 )
+            }
+        }
+    }
+}
+
+
+@Composable
+fun DrawPlayersByPosition(
+    players: Map<Int, PlayerState?>,
+    myPosition: Int = 0,
+    serverType: ServerType,
+    tablePosition: Offset,
+    tableSize: IntSize,
+) {
+    var playerBoxSize by remember { mutableStateOf(DpSize.Zero) }
+    var fontSize by remember { mutableStateOf(20.sp) }
+    CalculatePlayerBoxSize(
+        playerBoxSize = { playerBoxSize = it },
+        fontSize = { fontSize = it }
+    )
+
+    val density = LocalDensity.current
+    val topLeftHorizontal = with(density) { DpOffset(
+        x = tablePosition.x.toDp() - playerBoxSize.width / 2,
+        y = tablePosition.y.toDp() - playerBoxSize.height / 2 - playerBoxSize.height / 3
+    ) }
+    val bottomLeftHorizontal = with(density) { DpOffset(
+        x = tablePosition.x.toDp() - playerBoxSize.width / 2,
+        y = tablePosition.y.toDp() + tableSize.height.toDp() - playerBoxSize.height / 2 + playerBoxSize.height / 3
+    ) }
+
+
+    val topLeftVertical = with(density) { DpOffset(
+        x = tablePosition.x.toDp() - playerBoxSize.width / 2 - playerBoxSize.width / 5,
+        y = tablePosition.y.toDp() + playerBoxSize.height / 2
+    ) }
+    val topRightVertical = with(density) { DpOffset(
+        x = tablePosition.x.toDp() + tableSize.width.toDp() - playerBoxSize.width / 2 + playerBoxSize.width / 5,
+        y = tablePosition.y.toDp() + playerBoxSize.height / 2
+    ) }
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        val totalPlayersHorizontal = 4
+        val totalPlayersVertical = if (serverType == ServerType.IS_TABLE) 1 else 2
+
+        val originalIndex = if (serverType == ServerType.IS_TABLE) 0 else (myPosition + 2)
+        var seatIndex = originalIndex
+
+        // Left side
+        Column(
+            modifier = Modifier
+                .offset(topLeftVertical.x, topLeftVertical.y)
+                .size(
+                    width = playerBoxSize.width,
+                    height = with(density) { tableSize.height.toDp() - playerBoxSize.height }
+                ),
+            verticalArrangement = Arrangement.SpaceEvenly
+        ){
+            for (i in (totalPlayersVertical - 1 + seatIndex) downTo (0 + originalIndex)){
+                PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i % 10], layoutDirection = PlayerLayoutDirection.LEFT)
+
+                seatIndex ++
+                if (seatIndex >= 10){
+                    seatIndex = 0
+                }
+            }
+        }
+
+        // Top side
+        Row(
+            modifier = Modifier
+                .offset(topLeftHorizontal.x, topLeftHorizontal.y)
+                .size(
+                    width = with(density) { tableSize.width.toDp() + playerBoxSize.width },
+                    height = playerBoxSize.height
+                ),
+            horizontalArrangement = Arrangement.spacedBy(playerBoxSize.width/4, Alignment.CenterHorizontally)
+        ){
+            for (i in seatIndex..<(totalPlayersHorizontal + totalPlayersVertical + originalIndex)){
+                PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i % 10], layoutDirection = PlayerLayoutDirection.TOP)
+
+                seatIndex ++
+                if (seatIndex >= 10){
+                    seatIndex = 0
+                }
+            }
+        }
+
+        // Right side
+        Column(
+            modifier = Modifier
+                .offset(topRightVertical.x, topRightVertical.y)
+                .size(
+                    width = playerBoxSize.width,
+                    height = with(density) { tableSize.height.toDp() - playerBoxSize.height }
+                ),
+            verticalArrangement = Arrangement.SpaceEvenly
+        ){
+            if (serverType == ServerType.IS_TABLE){
+                for (i in seatIndex..<(2*totalPlayersVertical + totalPlayersHorizontal)){
+                    PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i], layoutDirection = PlayerLayoutDirection.RIGHT)
+                    seatIndex ++
+                }
+            } else{
+                for (i in (seatIndex)..<(seatIndex + totalPlayersVertical)){
+                    PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i % 10], layoutDirection = PlayerLayoutDirection.RIGHT)
+
+                    seatIndex ++
+                    if (seatIndex >= 10){
+                        seatIndex = 0
+                    }
+                }
+            }
+        }
+
+        // Bottom side
+        Row(
+            modifier = Modifier
+                .offset{
+                    IntOffset(
+                        (bottomLeftHorizontal.x + if (serverType == ServerType.IS_TABLE) 0.dp else playerBoxSize.width/1.5f).toPx().toInt(),
+                        bottomLeftHorizontal.y.toPx().toInt()
+                    )
+                }
+                .size(
+                    width = with(density) { tableSize.width.toDp() + playerBoxSize.width },
+                    height = playerBoxSize.height
+                ),
+            horizontalArrangement =
+            if (serverType == ServerType.IS_TABLE)
+                Arrangement.spacedBy(playerBoxSize.width/4, Alignment.CenterHorizontally)
+            else
+                Arrangement.Start
+        ){
+            if (serverType == ServerType.IS_TABLE){
+                for (i in (2*totalPlayersHorizontal + 2*totalPlayersVertical -1) downTo seatIndex ){
+                    PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i], layoutDirection = PlayerLayoutDirection.BOTTOM)
+                    seatIndex ++
+                }
+            } else{
+                PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[(seatIndex+1) % 10], layoutDirection = PlayerLayoutDirection.BOTTOM)
             }
         }
     }

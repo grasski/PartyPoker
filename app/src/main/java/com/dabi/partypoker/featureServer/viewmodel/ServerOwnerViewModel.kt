@@ -46,7 +46,6 @@ open class ServerOwnerViewModel@Inject constructor(
     override fun onCleared() {
         super.onCleared()
 
-        _gameState.update { GameState() }
         serverBridge.killServer()
     }
     init {
@@ -76,7 +75,7 @@ open class ServerOwnerViewModel@Inject constructor(
             }
 
             GameEvents.CloseGame -> {
-                serverBridge.killServer()
+                serverBridge.leave()
             }
         }
     }

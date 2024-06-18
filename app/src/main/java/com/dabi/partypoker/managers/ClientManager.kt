@@ -29,7 +29,8 @@ enum class ConnectionStatusEnum{
     CONNECTING,
     FAILED_TO_CONNECT,
     CONNECTED,
-    DISCONNECTED
+    KICKED,
+    LEFT
 }
 
 
@@ -70,13 +71,13 @@ class ClientManager(
             }
 
             override fun onEndpointLost(endpointId: String) {
-                events(ClientEvents.ConnectionStatus(ConnectionStatusEnum.DISCONNECTED))
+//                events(ClientEvents.ConnectionStatus(ConnectionStatusEnum.KICKED))
                 Log.e("", "CLIENT onEndpointLost " + endpointId)
             }
         }
     }
 
-    val connectionLifecycleCallback: ConnectionLifecycleCallback = object : ConnectionLifecycleCallback() {
+    var connectionLifecycleCallback: ConnectionLifecycleCallback = object : ConnectionLifecycleCallback() {
         override fun onConnectionInitiated(endpointId: String, info: ConnectionInfo) {
             connectionsClient.acceptConnection(endpointId, payloadCallback)
         }
@@ -100,7 +101,7 @@ class ClientManager(
         }
 
         override fun onDisconnected(endpointId: String) {
-            events(ClientEvents.ConnectionStatus(ConnectionStatusEnum.DISCONNECTED))
+            events(ClientEvents.ConnectionStatus(ConnectionStatusEnum.KICKED))
             Log.e("", "CLIENT $endpointId disconnected")
         }
     }

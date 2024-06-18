@@ -9,40 +9,45 @@ import com.google.android.gms.nearby.connection.ConnectionsClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.scopes.ViewModelScoped
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+
 @Module
 @InstallIn(SingletonComponent::class)
-class AppModule {
+class AppModule2 {
 
     @Provides
     @Singleton
     fun provideConnectionsClient(
         @ApplicationContext context: Context
     ): ConnectionsClient = Nearby.getConnectionsClient(context)
+}
 
 
+@Module
+@InstallIn(ViewModelComponent::class)
+class AppModule {
     @Provides
-    @Singleton
+    @ViewModelScoped
     fun providePlayerViewModel(
         connectionsClient: ConnectionsClient
     ): PlayerViewModel {
         return PlayerViewModel(connectionsClient)
     }
 
-
     @Provides
-    @Singleton
+    @ViewModelScoped
     fun provideServerOwnerViewModel(
         connectionsClient: ConnectionsClient
     ): ServerOwnerViewModel {
         return ServerOwnerViewModel(connectionsClient)
     }
-
     @Provides
-    @Singleton
+    @ViewModelScoped
     fun provideServerPlayerViewModel(
         connectionsClient: ConnectionsClient
     ): ServerPlayerViewModel {

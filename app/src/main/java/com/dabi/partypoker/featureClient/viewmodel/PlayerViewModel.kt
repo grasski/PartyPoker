@@ -1,6 +1,5 @@
 package com.dabi.partypoker.featureClient.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.dabi.partypoker.featureClient.model.ClientBridge
 import com.dabi.partypoker.featureClient.model.ClientBridgeEvents
@@ -21,7 +20,7 @@ import javax.inject.Inject
 
 sealed class PlayerEvents{
     data object Ready: PlayerEvents()
-    data object Disconnect: PlayerEvents()
+    data object Leave: PlayerEvents()
 
     data object Check: PlayerEvents()
     data class Call(val amount: Int): PlayerEvents()
@@ -47,17 +46,14 @@ class PlayerViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        Log.e("", "PLAYER CLEARED")
 
         clientBridge.killClient()
-        _gameState.update { GameState() }
-        _playerState.update { PlayerState() }
     }
 
     override fun onPlayerEvent(event: PlayerEvents){
         when(event){
-            PlayerEvents.Disconnect -> {
-                clientBridge.disconnect()
+            PlayerEvents.Leave -> {
+                clientBridge.leave()
             }
 
             PlayerEvents.Ready -> {

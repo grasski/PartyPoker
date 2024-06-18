@@ -29,10 +29,11 @@ sealed class ServerEvents{
 }
 
 enum class ServerStatusEnum{
-    OFF,
+    NONE,
     ADVERTISING,
     ADVERTISING_FAILED,
-    ACTIVE // After connection is established with all players, we can turn off the advertising
+    ACTIVE, // After connection is established with all players, we can turn off the advertising
+    OFF
 }
 
 enum class ServerType{
@@ -45,12 +46,6 @@ class ServerManager(
     private val connectionsClient: ConnectionsClient,
     private val events: (ServerEvents) -> (Unit)
 ) {
-    fun closeServer(){
-        connectionsClient.stopAdvertising()
-        connectionsClient.stopDiscovery()
-        connectionsClient.stopAllEndpoints()
-    }
-
     fun startAdvertising(context: Context, strategy: Strategy = Strategy.P2P_STAR, name: String) {
         val advertisingOptions: AdvertisingOptions = AdvertisingOptions.Builder()
             .setStrategy(strategy).build()

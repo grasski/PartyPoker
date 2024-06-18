@@ -34,15 +34,14 @@ class ClientBridge (
     val clientState = _clientState.asStateFlow()
 
     fun killClient(){
-        _clientState.update { ClientState() }
+        connectionsClient.disconnectFromEndpoint(clientState.value.serverID)
         connectionsClient.stopDiscovery()
-        connectionsClient.stopAdvertising()
         connectionsClient.stopAllEndpoints()
     }
 
-    fun disconnect(){
+    fun leave(){
         _clientState.update { it.copy(
-            connectionStatus = ConnectionStatusEnum.DISCONNECTED
+            connectionStatus = ConnectionStatusEnum.LEFT
         ) }
     }
 
@@ -64,11 +63,6 @@ class ClientBridge (
                 bridgeEvent(ClientBridgeEvents.ClientConnected)
             }
             is ClientEvents.ConnectionStatus -> {
-                if (event.status == ConnectionStatusEnum.DISCONNECTED && _clientState.value.connectionStatus == ConnectionStatusEnum.NONE){
-                    Log.e("", "Client disconnected MANUALY")
-                    // Manual disconnection
-                    return
-                }
                 _clientState.update { it.copy(
                     connectionStatus = event.status
                 ) }
@@ -90,7 +84,6 @@ class ClientBridge (
                     }
 
                     ServerPayloadType.UPDATE_CLIENT -> {
-                        Log.e("", "DATA: " + data)
                         val playerState = Gson().fromJson(data.toString(), PlayerState::class.java)
                         bridgeEvent(ClientBridgeEvents.UpdateClient(playerState))
                     }

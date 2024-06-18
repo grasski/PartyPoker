@@ -1,5 +1,6 @@
 package com.dabi.partypoker.featureServer.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
@@ -32,6 +33,7 @@ class ServerPlayerViewModel @Inject constructor(
     )
     val playerActionsState = _playerActionsState.asStateFlow()
 
+
     init {
         val player = PlayerState(
             nickname = "ServerPlayer",
@@ -63,7 +65,9 @@ class ServerPlayerViewModel @Inject constructor(
 
     override fun onPlayerEvent(event: PlayerEvents){
         when(event){
-            PlayerEvents.Disconnect -> TODO()
+            PlayerEvents.Leave -> {
+                serverBridge.leave()
+            }
 
             PlayerEvents.Ready -> {
                 onServerBridgeEvent(ServerBridgeEvents.ClientAction(_playerState.value.id, ClientPayloadType.ACTION_READY, null))
