@@ -41,6 +41,10 @@ import com.dabi.partypoker.ui.theme.PartyPokerTheme
 import com.dabi.partypoker.utils.Card
 import com.dabi.partypoker.utils.CardType
 import com.dabi.partypoker.utils.evaluateGame
+import com.dabi.partypoker.utils.evaluatePlayerCards
+import com.dabi.partypoker.utils.generateDeck
+import com.dabi.partypoker.utils.getCards
+import com.dabi.partypoker.utils.handStrength
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 
@@ -57,34 +61,73 @@ class MainActivity : ComponentActivity() {
                 Scaffold (){
                     Box(modifier = Modifier.padding(it).fillMaxSize()){
                         Navigation()
-
-//                        val players = mapOf(
-//                            "1" to PlayerState(
+//
+//                        val players = listOf(
+//                            PlayerState(
 //                                nickname = "1",
 //                                holeCards = listOf(
-//                                    Card(CardType.CLUB, 6),
-//                                    Card(CardType.CLUB, 7),
+//                                    Card(CardType.SPADE, 12),
+//                                    Card(CardType.HEART, 13),
 //                                )
 //                            ),
-//                            "2" to PlayerState(
+//                            PlayerState(
 //                                nickname = "2",
 //                                holeCards = listOf(
-//                                    Card(CardType.DIAMOND, 2),
-//                                    Card(CardType.HEART, 6),
+//                                    Card(CardType.SPADE, 3),
+//                                    Card(CardType.DIAMOND, 5),
+//                                )
+//                            ),
+//                            PlayerState(
+//                                nickname = "3",
+//                                holeCards = listOf(
+//                                    Card(CardType.CLUB, 13),
+//                                    Card(CardType.HEART, 12),
 //                                )
 //                            )
+//                        )
+//                        val tableCards = listOf(
+//                            Card(CardType.DIAMOND, 14),
+//                            Card(CardType.DIAMOND, 2),
+//                            Card(CardType.DIAMOND, 10),
+//                            Card(CardType.DIAMOND, 4),
+//                            Card(CardType.DIAMOND, 11),
 //                        )
 //                        val e = evaluateGame(
 //                            players = players,
-//                            tableCards = listOf(
-//                                Card(CardType.HEART, 3),
-//                                Card(CardType.HEART, 8),
-//                                Card(CardType.DIAMOND, 8),
-//                                Card(CardType.DIAMOND, 14),
-//                                Card(CardType.DIAMOND, 3),
-//                            )
+//                            tableCards = tableCards
 //                        )
 //                        Log.e("", "EVALUATE: " + e)
+//
+//                        players.forEach {
+//                            val playerEval = evaluatePlayerCards(tableCards, it.holeCards)
+//                            val evalStrength = handStrength(playerEval)
+//
+//                            Log.e("", it.nickname + " has : " + playerEval + " with strength: " + evalStrength)
+//                        }
+
+
+
+//                        val deck = generateDeck()
+//                        val tableCards = getCards(deck, 5)
+//                        deck.removeAll(tableCards)
+//                        Log.e("", "Table cards: " + tableCards)
+//
+//                        val players: MutableList<PlayerState> = mutableListOf()
+//                        for (i in 0..5){
+//                            val handCards = getCards(deck, 2)
+//                            deck.removeAll(tableCards)
+//
+//                            players.add(
+//                                PlayerState(
+//                                    nickname = "Player $i",
+//                                    holeCards = handCards
+//                                )
+//                            )
+//                            Log.e("", "Player $i: " + handCards + " " + handStrength(evaluatePlayerCards(tableCards, handCards)) + " " + evaluatePlayerCards(tableCards, handCards))
+//                        }
+//
+//                        val evaluation = evaluateGame(players, tableCards)
+//                        Log.e("", "EVALUATION: " + evaluation.first.map { it.nickname } + " " + evaluation.second.first)
                     }
                 }
             }

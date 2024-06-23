@@ -1,7 +1,9 @@
 package com.dabi.partypoker.utils
 
+import android.util.Log
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.model.data.endpointID
+import kotlin.math.pow
 
 
 fun checkEpicFlush(cards: List<Card>): Pair<Boolean, List<Card>> {
@@ -233,9 +235,6 @@ fun evaluatePlayerCards(tableCards: List<Card>, holeCards: List<Card>): Pair<Car
 
 
 fun evaluateGame(players: List<PlayerState>, tableCards: List<Card>): Pair<List<PlayerState>, Pair<CardsCombination, List<List<Card>>>> {
-//    val players = gameData.players.filter { !it.value.isFolded && it.value.isReadyToPlay  && it.value.holeCards != null }
-//    val tableCards = gameData.cards
-
     val combinations: MutableMap<PlayerState, Pair<CardsCombination, List<Card>>> = mutableMapOf()
     for (player in players){
         combinations[player] = evaluatePlayerCards(tableCards, player.holeCards)

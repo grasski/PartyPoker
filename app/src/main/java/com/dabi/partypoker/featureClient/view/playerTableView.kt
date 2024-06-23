@@ -100,9 +100,7 @@ fun PlayerGameView(
             .minus(playerState.id)
             .entries.associate { it.value.position to gameState.players[it.key] }
 
-        LaunchedEffect(playerState) {
-            Log.e("", "ZMENAAA")
-        }
+
         DrawPlayersByPosition(
             players = players,
             gameState = gameState,

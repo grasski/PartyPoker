@@ -73,6 +73,7 @@ import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.evaluatePlayerCards
 import com.dabi.partypoker.utils.formatNumberToString
+import com.dabi.partypoker.utils.handStrength
 
 @Composable
 fun PlayerDrawItself(
@@ -244,12 +245,12 @@ fun PlayerDrawItself(
                                 modifier = Modifier
                                     .fillMaxWidth()
                             ){
-                                val strength = 30f
+                                val strength = handStrength(cardsCombination)
                                 val animatedColor by remember {
-                                    derivedStateOf { lerp(Color.Red, Color.Green, strength / 100) }
+                                    derivedStateOf { lerp(Color.Red, Color.Green, strength) }
                                 }
                                 LinearProgressIndicator(
-                                    progress = { strength / 100 },
+                                    progress = { strength },
                                     color = animatedColor,
                                     trackColor = colors.playerButtonsColor,
                                     modifier = Modifier

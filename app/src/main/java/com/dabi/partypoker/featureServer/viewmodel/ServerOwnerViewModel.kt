@@ -145,7 +145,6 @@ open class ServerOwnerViewModel@Inject constructor(
                 _gameState.update { gameState ->
                     gameState.copy(
                         players = gameState.players.filter { it.key != clientID },
-//                        gameReadyPlayers = gameState.gameReadyPlayers.filter { it.key != clientID },
                         seatPositions = gameState.seatPositions.filter { it.key != clientID },
 
                         messages = gameState.messages.plus(UiTexts.StringResource(R.string.client_disconnected))

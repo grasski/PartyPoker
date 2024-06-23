@@ -1,6 +1,7 @@
 package com.dabi.partypoker.utils
 
 import com.dabi.partypoker.R
+import kotlin.math.pow
 
 
 enum class CardType{
@@ -14,19 +15,19 @@ data class Card(
     val value: Int
 )
 
-enum class CardsCombination {
-    ROYAL_FLUSH,
-    STRAIGHT_FLUSH,
-    POKER,
-    FULL_HOUSE,
-    FLUSH,
-    STRAIGHT,
-    TRIPS,
-    TWO_PAIRS,
-    PAIR,
-    CARD,
+enum class CardsCombination(val powerIndex: Int) {
+    ROYAL_FLUSH(10),
+    STRAIGHT_FLUSH(9),
+    POKER(8),
+    FULL_HOUSE(7),
+    FLUSH(6),
+    STRAIGHT(5),
+    TRIPS(4),
+    TWO_PAIRS(3),
+    PAIR(2),
+    CARD(1),
 
-    NONE
+    NONE(0)
 }
 
 fun generateDeck(): MutableList<Card> {
@@ -52,6 +53,14 @@ fun getCards(cards: MutableList<Card>, number: Int): List<Card> {
     }
 
     return playerCards.toList()
+}
+
+fun handStrength(handEvaluation: Pair<CardsCombination, List<Card>>): Float{
+    val topStrength = CardsCombination.ROYAL_FLUSH.powerIndex
+
+    val powerIndex = handEvaluation.first.powerIndex.toFloat()
+
+    return powerIndex / topStrength
 }
 
 object CardsUtils{
