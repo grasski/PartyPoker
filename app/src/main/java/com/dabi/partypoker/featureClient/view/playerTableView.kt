@@ -1,5 +1,6 @@
 package com.dabi.partypoker.featureClient.view
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +10,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,7 +59,6 @@ fun PlayerGameView(
             onLeaveRequest = {
                 onGameEvent(GameEvents.CloseGame)
                 onPlayerEvent(PlayerEvents.Leave)
-//                navController.navigate(MenuScreen) { popUpTo(navController.currentDestination?.route ?: "") { inclusive = true } }
             }
         )
     }
@@ -86,14 +87,6 @@ fun PlayerGameView(
             }
         )
 
-        PlayerDrawItself(
-            player = playerState,
-            playerActionsState = playerActionsState,
-            onPlayerEvent = onPlayerEvent,
-            tablePosition = tablePosition,
-            tableSize = tableSize
-        )
-
         val sortedPlayers = gameState.seatPositions.toList().sortedBy { it.second.position }.toMap()
         val meIndex = sortedPlayers.keys.indexOf(playerState.id)
         val myPosition = sortedPlayers[playerState.id]?.position
@@ -107,10 +100,23 @@ fun PlayerGameView(
             .minus(playerState.id)
             .entries.associate { it.value.position to gameState.players[it.key] }
 
+        LaunchedEffect(playerState) {
+            Log.e("", "ZMENAAA")
+        }
         DrawPlayersByPosition(
             players = players,
+            gameState = gameState,
             myPosition = myPosition,
             serverType = ServerType.IS_PLAYER,
+            tablePosition = tablePosition,
+            tableSize = tableSize
+        )
+
+        PlayerDrawItself(
+            player = playerState,
+            playerActionsState = playerActionsState,
+            onPlayerEvent = onPlayerEvent,
+            gameState = gameState,
             tablePosition = tablePosition,
             tableSize = tableSize
         )

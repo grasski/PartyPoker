@@ -44,12 +44,9 @@ data class GameState(
     var round: Int = 0,
     var games: Int = 0,
 
-    var messages: List<UiTexts.StringResource> = emptyList(),
+    var messages: List<UiTexts> = emptyList(),
     var playerTimerDuration: Int = 12,
 
-    var winners: List<PlayerState> = emptyList(),
-    var winningCombination: CardsCombination = CardsCombination.NONE,
-    var winnersCards: String? = null,
     var nextGameIn: Int = 15
 ){
     fun getAvailableRandomPosition(): Int? {

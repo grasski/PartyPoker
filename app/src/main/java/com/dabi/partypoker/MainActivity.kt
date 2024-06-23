@@ -2,6 +2,7 @@ package com.dabi.partypoker
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -39,6 +40,7 @@ import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.ui.theme.PartyPokerTheme
 import com.dabi.partypoker.utils.Card
 import com.dabi.partypoker.utils.CardType
+import com.dabi.partypoker.utils.evaluateGame
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 
@@ -56,100 +58,33 @@ class MainActivity : ComponentActivity() {
                     Box(modifier = Modifier.padding(it).fillMaxSize()){
                         Navigation()
 
-
-//                        this@MainActivity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-
-//                        Box(
-//                            modifier = Modifier
-//                                .displayCutoutPadding()
-//                                .fillMaxSize()
-//                                .paint(
-//                                    rememberAsyncImagePainter(model = R.drawable.game_background),
-//                                    contentScale = ContentScale.FillWidth
-//                                ),
-//                            contentAlignment = Alignment.Center
-//                        ){
-//                            val players = listOf(
-//                                PlayerState(
-//                                    nickname = "Player1",
-//                                    isDealer = true,
-//                                    isBigBlind = true,
-//                                    called = 8880000,
-//                                    holeCards = listOf(
-//                                        Card(CardType.CLUB,3),
-//                                        Card(CardType.SPADE,5)
-//                                    )),
-//                                PlayerState(
-//                                    nickname = "Player2",
-//                                    isDealer = true,
-//                                    called = 530000,
-//                                    holeCards = listOf(
-//                                        Card(CardType.CLUB,3),
-//                                        Card(CardType.SPADE,5)
-//                                    )),
-//                                PlayerState(
-//                                    nickname = "Player3",
-//                                    isDealer = true,
-//                                    isBigBlind = true,
-//                                    called = 15230,
-//                                    holeCards = listOf(
-//                                        Card(CardType.CLUB,3),
-//                                        Card(CardType.SPADE,5)
-//                                    )),
-//                                PlayerState(
-//                                    nickname = "Player4",
-//                                    isDealer = true,
-//                                    isBigBlind = true,
-//                                    money = 500,
-//                                    called = 152800,
-//                                    holeCards = listOf(
-//                                        Card(CardType.CLUB,3),
-//                                        Card(CardType.SPADE,5)
-//                                    )),
-//                                PlayerState(
-//                                    nickname = "Player5",
-//                                    isDealer = true,
-//                                    money = 500,
-//                                    called = 100
-//                                ),
-//                                PlayerState(
-//                                    nickname = "Player6",
-//                                    isDealer = true,
-//                                    money = 50000,
-//                                    called = 105200,
-//                                    isFolded = true
-//                                ),
-//                                PlayerState(
-//                                    nickname = "Player7",
-//                                    isDealer = true,
-//                                    isBigBlind = true,
-//                                    money = 500,
-//                                    called = 100
-//                                ),
-//                                PlayerState(
-//                                    nickname = "Player8",
-//                                    isDealer = true,
-//                                    isBigBlind = true,
-//                                    money = 500,
-//                                    called = 100,
-//                                    isFolded = true
-//                                ),
-//                                PlayerState(
-//                                    nickname = "Player9",
-//                                    isDealer = true,
-//                                    isBigBlind = true,
-//                                    money = 500,
-//                                    called = 100
-//                                ),
-//                                PlayerState(
-//                                    nickname = "Player10",
-//                                    isDealer = true,
-//                                    isBigBlind = true,
-//                                    money = 500,
-//                                    called = 8880000
+//                        val players = mapOf(
+//                            "1" to PlayerState(
+//                                nickname = "1",
+//                                holeCards = listOf(
+//                                    Card(CardType.CLUB, 6),
+//                                    Card(CardType.CLUB, 7),
+//                                )
+//                            ),
+//                            "2" to PlayerState(
+//                                nickname = "2",
+//                                holeCards = listOf(
+//                                    Card(CardType.DIAMOND, 2),
+//                                    Card(CardType.HEART, 6),
 //                                )
 //                            )
-
+//                        )
+//                        val e = evaluateGame(
+//                            players = players,
+//                            tableCards = listOf(
+//                                Card(CardType.HEART, 3),
+//                                Card(CardType.HEART, 8),
+//                                Card(CardType.DIAMOND, 8),
+//                                Card(CardType.DIAMOND, 14),
+//                                Card(CardType.DIAMOND, 3),
+//                            )
+//                        )
+//                        Log.e("", "EVALUATE: " + e)
                     }
                 }
             }

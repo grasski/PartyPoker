@@ -86,6 +86,7 @@ fun ServerGameView(
         val players = gameState.seatPositions.entries.associate { it.value.position to gameState.players[it.key] }
         DrawPlayersByPosition(
             players = players,
+            gameState = gameState,
             serverType = serverState.serverType,
             tablePosition = tablePosition,
             tableSize = tableSize

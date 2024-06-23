@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="card">High Card</string>
-    <string name="pair">Pair</string>
+    <string name="pair">One Pair</string>
     <string name="two_pairs">Two Pair</string>
     <string name="trips">Three of a Kind</string>
     <string name="straight">Straight</string>

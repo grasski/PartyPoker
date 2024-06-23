@@ -9,13 +9,17 @@ import com.dabi.partypoker.featureClient.model.data.ClientState
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.utils.ServerPayloadType
+import com.dabi.partypoker.utils.UiTexts
+import com.dabi.partypoker.utils.UiTextsAdapter
 import com.dabi.partypoker.utils.fromServerPayload
 import com.google.android.gms.nearby.connection.ConnectionsClient
 import com.google.android.gms.nearby.connection.Payload
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
 
 
 sealed class ClientBridgeEvents{
@@ -84,11 +88,19 @@ class ClientBridge (
                     }
 
                     ServerPayloadType.UPDATE_CLIENT -> {
-                        val playerState = Gson().fromJson(data.toString(), PlayerState::class.java)
+                        val gson = GsonBuilder()
+                            .registerTypeAdapter(UiTexts::class.java, UiTextsAdapter())
+                            .create()
+
+                        val playerState = gson.fromJson(data.toString(), PlayerState::class.java)
                         bridgeEvent(ClientBridgeEvents.UpdateClient(playerState))
                     }
                     ServerPayloadType.UPDATE_GAME_STATE -> {
-                        val gameState = Gson().fromJson(data.toString(), GameState::class.java)
+                        val gson = GsonBuilder()
+                            .registerTypeAdapter(UiTexts::class.java, UiTextsAdapter())
+                            .create()
+
+                        val gameState = gson.fromJson(data.toString(), GameState::class.java)
                         bridgeEvent(ClientBridgeEvents.UpdateGameState(gameState))
                     }
                 }

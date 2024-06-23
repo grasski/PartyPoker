@@ -1,6 +1,8 @@
 [versions]
 agp = "8.4.2"
-kotlin = "1.9.0"
+kotlin = "2.0.0"
+
+ksp = "2.0.0-1.0.22"
 
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -20,7 +22,7 @@ permissions = "0.24.10-beta"
 hilt = "2.48"
 androidxHilt = "1.2.0"
 
-serialization = "1.6.3"
+serialization = "1.7.0"
 
 coil = "2.4.0"
 material3AdaptiveAndroid = "1.0.0-beta03"
@@ -68,7 +70,10 @@ lottie = { group = "com.airbnb.android", name = "lottie-compose", version.ref = 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+google-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }

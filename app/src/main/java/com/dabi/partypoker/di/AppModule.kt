@@ -1,11 +1,17 @@
 package com.dabi.partypoker.di
 
 import android.content.Context
+import com.dabi.partypoker.featureClient.model.ClientBridge
 import com.dabi.partypoker.featureClient.viewmodel.PlayerViewModel
 import com.dabi.partypoker.featureServer.viewmodel.ServerOwnerViewModel
 import com.dabi.partypoker.featureServer.viewmodel.ServerPlayerViewModel
+import com.dabi.partypoker.utils.UiTexts
+import com.dabi.partypoker.utils.UiTextsAdapter
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.ConnectionsClient
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import dagger.Component
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,7 +32,6 @@ class AppModule2 {
         @ApplicationContext context: Context
     ): ConnectionsClient = Nearby.getConnectionsClient(context)
 }
-
 
 @Module
 @InstallIn(ViewModelComponent::class)

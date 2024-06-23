@@ -1,8 +1,8 @@
 package com.dabi.partypoker.featureCore.views
 
 import android.util.Log
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,7 +25,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -141,35 +145,43 @@ fun GameTable(
             Row (
                 modifier = Modifier
                     .fillMaxWidth(0.6f)
-                    .height(playerBoxSize.height / 2)
+                    .height(playerBoxSize.height/2)
                     .padding(horizontal = 5.dp),
-
+                horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
                 ){
                 Row(
                     modifier = Modifier
-                        .width(playerBoxSize.width),
+                        .width(playerBoxSize.width - playerBoxSize.width / 3)
+                        .fillMaxHeight(),
                     horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(
                         painter = painterResource(R.drawable.bank),
                         contentDescription = "bank",
-                    )
-                    Text(
-                        text = gameState.bank.formatNumberToString(),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = fontSize,
-                        maxLines = 1,
-                        color = Color.White,
                         modifier = Modifier
-                            .background(Color.Black, RoundedCornerShape(8.dp))
-                            .padding(5.dp),
-                        style = TextStyle(
-                            platformStyle = PlatformTextStyle(
-                                includeFontPadding = false
+                            .size(playerBoxSize.height / 2)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black, RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center
+                    ){
+                        Text(
+                            text = gameState.bank.formatNumberToString(),
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            fontSize = fontSize,
+                            maxLines = 1,
+                            color = Color.White,
+                            style = TextStyle(
+                                platformStyle = PlatformTextStyle(
+                                    includeFontPadding = false
+                                )
                             )
                         )
-                    )
+                    }
                 }
 
                 Row(
@@ -251,7 +263,7 @@ fun PlayerBox(
     size: DpSize,
     fontSize: TextUnit,
     playerState: PlayerState?,
-    timerDuration: Int = 10,
+    gameState: GameState,
 
     showCards: Boolean = false,
     layoutDirection: PlayerLayoutDirection,
@@ -279,18 +291,25 @@ fun PlayerBox(
     }
 
     var triggerTimer by remember { mutableStateOf(false) }
-    LaunchedEffect(playerState.isPlayingNow) {
-        triggerTimer = playerState.isPlayingNow
-    }
-    val animateTimer by animateFloatAsState(
-        targetValue = if (triggerTimer) 0f else 360f,
-        animationSpec = tween(
-            durationMillis = timerDuration * 1000,
-            easing = LinearEasing
+    val animationTimer = remember {
+        Animatable(
+            initialValue = if (triggerTimer) 360f else 0f
         )
-    )
+    }
+    LaunchedEffect(playerState.isPlayingNow, gameState.round, gameState.games) {
+        animationTimer.snapTo(360f)
+        triggerTimer = playerState.isPlayingNow
+
+        animationTimer.animateTo(
+            targetValue = if (!triggerTimer) 360f else 0f,
+            animationSpec = tween(
+                durationMillis = gameState.playerTimerDuration * 1000,
+                easing = LinearEasing
+            )
+        )
+    }
     val animatedColor by remember {
-        derivedStateOf { lerp(Color.Red, Color.Green, animateTimer/360) }
+        derivedStateOf { lerp(Color.Red, Color.Green, animationTimer.value/360) }
     }
 
     Box{
@@ -454,7 +473,7 @@ fun PlayerBox(
                                     drawArc(
                                         color = animatedColor,
                                         startAngle = -90f,
-                                        sweepAngle = -animateTimer,
+                                        sweepAngle = -animationTimer.value,
                                         useCenter = false,
                                         style = Stroke(
                                             10.dp.toPx(),
@@ -682,6 +701,7 @@ private fun HorizontalPlayerItems(
 @Composable
 fun DrawPlayersByPosition(
     players: Map<Int, PlayerState?>,
+    gameState: GameState,
     myPosition: Int = 0,
     serverType: ServerType,
     tablePosition: Offset,
@@ -733,13 +753,10 @@ fun DrawPlayersByPosition(
                 ),
             verticalArrangement = Arrangement.SpaceEvenly
         ){
-            for (i in (totalPlayersVertical - 1 + seatIndex) downTo (0 + originalIndex)){
-                PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i % 10], layoutDirection = PlayerLayoutDirection.LEFT)
+            for (i in (seatIndex + totalPlayersVertical-1) downTo (seatIndex)){
+                PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i % 10], gameState = gameState, layoutDirection = PlayerLayoutDirection.LEFT)
 
                 seatIndex ++
-                if (seatIndex >= 10){
-                    seatIndex = 0
-                }
             }
         }
 
@@ -753,13 +770,10 @@ fun DrawPlayersByPosition(
                 ),
             horizontalArrangement = Arrangement.spacedBy(playerBoxSize.width/4, Alignment.CenterHorizontally)
         ){
-            for (i in seatIndex..<(totalPlayersHorizontal + totalPlayersVertical + originalIndex)){
-                PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i % 10], layoutDirection = PlayerLayoutDirection.TOP)
+            for (i in seatIndex..<(seatIndex + totalPlayersHorizontal)){
+                PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i % 10], gameState = gameState, layoutDirection = PlayerLayoutDirection.TOP)
 
                 seatIndex ++
-                if (seatIndex >= 10){
-                    seatIndex = 0
-                }
             }
         }
 
@@ -773,30 +787,24 @@ fun DrawPlayersByPosition(
                 ),
             verticalArrangement = Arrangement.SpaceEvenly
         ){
-            if (serverType == ServerType.IS_TABLE){
-                for (i in seatIndex..<(2*totalPlayersVertical + totalPlayersHorizontal)){
-                    PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i], layoutDirection = PlayerLayoutDirection.RIGHT)
-                    seatIndex ++
-                }
-            } else{
-                for (i in (seatIndex)..<(seatIndex + totalPlayersVertical)){
-                    PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i % 10], layoutDirection = PlayerLayoutDirection.RIGHT)
+            for (i in (seatIndex)..<(seatIndex + totalPlayersVertical)){
+                PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i % 10], gameState = gameState, layoutDirection = PlayerLayoutDirection.RIGHT)
 
-                    seatIndex ++
-                    if (seatIndex >= 10){
-                        seatIndex = 0
-                    }
-                }
+                seatIndex ++
             }
         }
 
         // Bottom side
         Row(
             modifier = Modifier
-                .offset{
+                .offset {
                     IntOffset(
-                        (bottomLeftHorizontal.x + if (serverType == ServerType.IS_TABLE) 0.dp else playerBoxSize.width/1.5f).toPx().toInt(),
-                        bottomLeftHorizontal.y.toPx().toInt()
+                        (bottomLeftHorizontal.x + if (serverType == ServerType.IS_TABLE) 0.dp else playerBoxSize.width / 1.5f)
+                            .toPx()
+                            .toInt(),
+                        bottomLeftHorizontal.y
+                            .toPx()
+                            .toInt()
                     )
                 }
                 .size(
@@ -810,13 +818,61 @@ fun DrawPlayersByPosition(
                 Arrangement.Start
         ){
             if (serverType == ServerType.IS_TABLE){
-                for (i in (2*totalPlayersHorizontal + 2*totalPlayersVertical -1) downTo seatIndex ){
-                    PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i], layoutDirection = PlayerLayoutDirection.BOTTOM)
+                for (i in (seatIndex + totalPlayersHorizontal-1) downTo (seatIndex)){
+                    PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i % 10], gameState = gameState, layoutDirection = PlayerLayoutDirection.BOTTOM)
                     seatIndex ++
                 }
             } else{
-                PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[(seatIndex+1) % 10], layoutDirection = PlayerLayoutDirection.BOTTOM)
+                PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[(seatIndex+1) % 10], gameState = gameState, layoutDirection = PlayerLayoutDirection.BOTTOM)
             }
         }
     }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RaiseSlider(
+    modifier: Modifier = Modifier,
+    valueRange: ClosedFloatingPointRange<Float>,
+    valueF: (Int) -> Unit
+) {
+    val sliderState by remember { mutableStateOf(
+        SliderState(
+            valueRange = valueRange,
+            value = valueRange.start
+        )
+    ) }
+    valueF(sliderState.value.toInt())
+
+    Slider(
+        state = sliderState,
+        modifier = modifier,
+//        thumb = {
+//            Column(
+//                modifier = Modifier
+//            ) {
+//                Box(
+//                    Modifier
+//                        .size(16.dp)
+//                        .clip(CircleShape)
+//                        .background(Color.Green)
+//                )
+//                Text(text = sliderState.value.toInt().formatNumberToString())
+//            }
+//        },
+//        track = {
+//            Box(
+//                modifier = Modifier,
+//            ){
+//                Box(
+//                    Modifier
+//                        .fillMaxWidth()
+//                        .height(16.dp)
+//                        .clip(RoundedCornerShape(16.dp))
+//                        .background(Color.Red)
+//                )
+//            }
+//        }
+    )
 }

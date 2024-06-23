@@ -3,7 +3,9 @@ package com.dabi.partypoker.utils
 import android.util.Log
 import com.google.android.gms.nearby.connection.Payload
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import javax.inject.Inject
 
 
 enum class ServerPayloadType{
@@ -26,19 +28,35 @@ enum class ClientPayloadType{
 
 
 fun <T> toServerPayload(payloadType: ServerPayloadType, data: T): Payload {
-    val json = Gson().toJson(Pair(payloadType, data))
+    val gson = GsonBuilder()
+        .registerTypeAdapter(UiTexts::class.java, UiTextsAdapter())
+        .create()
+
+    val json = gson.toJson(Pair(payloadType, data))
     return Payload.fromBytes(json.toByteArray(Charsets.UTF_8))
 }
 fun <T> fromServerPayload(payload: Payload): Pair<ServerPayloadType, T>{
+    val gson = GsonBuilder()
+        .registerTypeAdapter(UiTexts::class.java, UiTextsAdapter())
+        .create()
+
     val rawData = String(payload.asBytes()!!, Charsets.UTF_8)
-    return Gson().fromJson(rawData, object : TypeToken<Pair<ServerPayloadType, T>>(){}.type)
+    return gson.fromJson(rawData, object : TypeToken<Pair<ServerPayloadType, T>>(){}.type)
 }
 
 fun <T> toClientPayload(payloadType: ClientPayloadType, data: T?): Payload {
-    val json = Gson().toJson(Pair(payloadType, data))
+    val gson = GsonBuilder()
+        .registerTypeAdapter(UiTexts::class.java, UiTextsAdapter())
+        .create()
+
+    val json = gson.toJson(Pair(payloadType, data))
     return Payload.fromBytes(json.toByteArray(Charsets.UTF_8))
 }
 fun <T> fromClientPayload(payload: Payload): Pair<ClientPayloadType, T?>{
+    val gson = GsonBuilder()
+        .registerTypeAdapter(UiTexts::class.java, UiTextsAdapter())
+        .create()
+
     val rawData = String(payload.asBytes()!!, Charsets.UTF_8)
-    return Gson().fromJson(rawData, object : TypeToken<Pair<ClientPayloadType, T?>>(){}.type)
+    return gson.fromJson(rawData, object : TypeToken<Pair<ClientPayloadType, T?>>(){}.type)
 }

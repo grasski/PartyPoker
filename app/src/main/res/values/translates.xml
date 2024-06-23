@@ -8,9 +8,15 @@
     <string name="server_starting">Server is starting, please wait.</string>
     <string name="client_connecting">Connecting to the server, please wait.</string>
 
-    <string name="action_ready">Get ready\nfor the game!</string>
+    <string name="action_ready">Get ready for the game!</string>
     <string name="action_check">CHECK</string>
     <string name="action_call">CALL</string>
     <string name="action_raise">RAISE</string>
     <string name="action_fold">FOLD</string>
+
+    <string name="winner_private">%1$s won the game and earned %2$s $!</string>
+    <plurals name="winner_public">
+        <item quantity="one">%1$s won the game and earned %2$s $!</item>
+        <item quantity="other">Winners of the game are: %1$s. They earned %2$s $!</item>
+    </plurals>
 </resources>

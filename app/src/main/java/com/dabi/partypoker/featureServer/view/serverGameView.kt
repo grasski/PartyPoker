@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -89,7 +90,7 @@ fun ServerView(
                 when(ServerType.valueOf(serverScreen.serverType)){
                     ServerType.IS_PLAYER -> {
                         val serverPlayerVM = (serverViewModel as ServerPlayerViewModel)
-                        val playerState by serverPlayerVM.playerState.collectAsStateWithLifecycle()
+                        val playerState by serverPlayerVM.playerState.collectAsState()
                         val playerActionsState by serverPlayerVM.playerActionsState.collectAsStateWithLifecycle()
 
                         PlayerGameView(

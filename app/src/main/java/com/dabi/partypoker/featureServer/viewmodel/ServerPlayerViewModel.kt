@@ -40,17 +40,19 @@ class ServerPlayerViewModel @Inject constructor(
             id = "ServerPlayer",
             isServer = true,
             money = 1000,
-            isReadyToPlay = true
+//            isReadyToPlay = true
         )
+        _playerState.update { player }
+
         _gameState.update { it.copy(
             players = it.players + ("ServerPlayer" to player),
             seatPositions = it.seatPositions + (player.id to SeatPosition(0))
         ) }
-        _playerState.update { player }
 
         viewModelScope.launch {
             _gameState.collect{ gs ->
                 val playerUpdate = gs.players[_playerState.value.id]!!
+                Log.e("", "SERVER: " + playerUpdate)
                 _playerState.update { playerUpdate }
 
                 _playerActionsState.update { it.copy(
