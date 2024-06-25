@@ -65,6 +65,7 @@ fun handStrength(handEvaluation: Pair<CardsCombination, List<Card>>): Float{
 
 object CardsUtils{
     val combinationsTranslationID = mapOf(
+        CardsCombination.NONE to R.string.noneComb,
         CardsCombination.CARD to R.string.card,
         CardsCombination.PAIR to R.string.pair,
         CardsCombination.TWO_PAIRS to R.string.two_pairs,

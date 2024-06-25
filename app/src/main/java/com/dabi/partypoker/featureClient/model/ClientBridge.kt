@@ -92,7 +92,7 @@ class ClientBridge (
                             .registerTypeAdapter(UiTexts::class.java, UiTextsAdapter())
                             .create()
 
-                        val playerState = gson.fromJson(data.toString(), PlayerState::class.java)
+                        val playerState = gson.fromJson(gson.toJson(data), PlayerState::class.java)
                         bridgeEvent(ClientBridgeEvents.UpdateClient(playerState))
                     }
                     ServerPayloadType.UPDATE_GAME_STATE -> {
@@ -100,7 +100,7 @@ class ClientBridge (
                             .registerTypeAdapter(UiTexts::class.java, UiTextsAdapter())
                             .create()
 
-                        val gameState = gson.fromJson(data.toString(), GameState::class.java)
+                        val gameState = gson.fromJson(gson.toJson(data), GameState::class.java)
                         bridgeEvent(ClientBridgeEvents.UpdateGameState(gameState))
                     }
                 }

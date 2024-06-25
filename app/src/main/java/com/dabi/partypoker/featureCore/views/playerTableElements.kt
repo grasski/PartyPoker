@@ -245,9 +245,9 @@ fun PlayerDrawItself(
                                 modifier = Modifier
                                     .fillMaxWidth()
                             ){
-                                val strength = handStrength(cardsCombination)
-                                val animatedColor by remember {
-                                    derivedStateOf { lerp(Color.Red, Color.Green, strength) }
+                                val strength by remember(cardsCombination) { mutableStateOf(handStrength(cardsCombination)) }
+                                val animatedColor by remember(strength) {
+                                    mutableStateOf(lerp(Color.Red, Color.Green, strength))
                                 }
                                 LinearProgressIndicator(
                                     progress = { strength },

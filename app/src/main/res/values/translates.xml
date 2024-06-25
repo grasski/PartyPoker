@@ -14,9 +14,10 @@
     <string name="action_raise">RAISE</string>
     <string name="action_fold">FOLD</string>
 
-    <string name="winner_private">%1$s won the game and earned %2$s $!</string>
+    <string name="game_sender">Hra %1$s</string>
+    <string name="winner_private">%1$s won the game before showdown and earned $%2$s!</string>
     <plurals name="winner_public">
-        <item quantity="one">%1$s won the game and earned %2$s $!</item>
-        <item quantity="other">Winners of the game are: %1$s. They earned %2$s $!</item>
+        <item quantity="one">%1$s won $%2$s with</item>
+        <item quantity="other">%1$s won $%2$s each with</item>
     </plurals>
 </resources>

@@ -21,4 +21,6 @@ object colors{
 
     val playerBoxColor1 = Color(0x9920382c).copy(alpha = 1f)
     val playerBoxColor2 = Color(0x997da892).copy(alpha = 1f)
+
+    val messagesCard = Color(0x994b7a80).copy(alpha = 1f)
 }

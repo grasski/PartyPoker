@@ -16,9 +16,10 @@
     <string name="action_raise">Navýšit</string>
     <string name="action_fold">Složit</string>
 
-    <string name="winner_private">%1$s vyhrál hru a získal %2$s $!</string>
+    <string name="game_sender">Game %1$s</string>
+    <string name="winner_private">%1$s vyhrál hru před koncem a získal $%2$s!</string>
     <plurals name="winner_public" tools:ignore="MissingQuantity">
-        <item quantity="one">%1$s vyhrál hru a získal %2$s $!</item>
-        <item quantity="other">Vítězové hry jsou: %1$s. Každý získal %2$s $!</item>
+        <item quantity="one">%1$s vyhrál $%2$s s</item>
+        <item quantity="other">%1$s vyhráli $%2$s s</item>
     </plurals>
 </resources>

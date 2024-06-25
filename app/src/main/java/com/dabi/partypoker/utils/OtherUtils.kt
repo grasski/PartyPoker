@@ -1,6 +1,7 @@
 package com.dabi.partypoker.utils
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.Resources
 import android.util.Log
 import androidx.annotation.ArrayRes
@@ -54,6 +55,14 @@ sealed class UiTexts{
             is ArrayResource -> stringArrayResource(resId)[index]
         }
     }
+    fun asString(context: Context): String{
+        return when(this){
+            is StringResource -> context.getString(resId, *args)
+            is PluralResource -> context.resources.getQuantityString(resId, quantity, *args)
+            is ArrayResource -> context.resources.getStringArray(resId)[index]
+        }
+    }
+
 
 
     fun asArray(): List<String> {

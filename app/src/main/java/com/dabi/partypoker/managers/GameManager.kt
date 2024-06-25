@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.ui.util.fastJoinToString
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureServer.model.data.GameState
+import com.dabi.partypoker.featureServer.model.data.MessageData
 import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.evaluateGame
@@ -276,7 +277,9 @@ class GameManager {
                     if (player.id == winnerId){
                         player.money += gameState.bank
 
-                        gameState.messages += UiTexts.StringResource(R.string.winner_private, player.nickname, gameState.bank)
+                        gameState.messages += MessageData(
+                            messages = listOf(UiTexts.StringResource(R.string.winner_private, player.nickname, gameState.bank))
+                        )
                     }
                 }
 
@@ -297,7 +300,14 @@ class GameManager {
                         player.money += playerEarning
                     }
                 }
-                gameState.messages += UiTexts.PluralResource(R.plurals.winner_public, winnerPlayers.size, winnerPlayers.joinToString { it.nickname }, playerEarning)
+
+                gameState.messages += MessageData(
+                    messages = listOf(
+                        UiTexts.PluralResource(R.plurals.winner_public, winnerPlayers.size, winnerPlayers.joinToString { it.nickname }, playerEarning),
+                        UiTexts.StringResource(CardsUtils.combinationsTranslationID[evaluation.second.first]!!)
+                    ),
+                    cards = evaluation.second.second.first()
+                )
                 gameState.bank = restBank
 
                 return startGame(gameState, restBank)

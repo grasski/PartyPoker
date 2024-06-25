@@ -20,12 +20,18 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderState
@@ -72,16 +78,22 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Popup
 import coil.compose.rememberAsyncImagePainter
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
 import com.dabi.partypoker.featureCore.data.colors
 import com.dabi.partypoker.featureServer.model.data.GameState
+import com.dabi.partypoker.featureServer.model.data.MessageData
 import com.dabi.partypoker.managers.GameEvents
 import com.dabi.partypoker.managers.ServerType
 import com.dabi.partypoker.utils.CardsUtils
+import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.formatNumberToString
+import kotlinx.serialization.descriptors.StructureKind
 
 
 @Composable
@@ -145,7 +157,7 @@ fun GameTable(
             Row (
                 modifier = Modifier
                     .fillMaxWidth(0.6f)
-                    .height(playerBoxSize.height/2)
+                    .height(playerBoxSize.height / 2)
                     .padding(horizontal = 5.dp),
                 horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
                 ){
@@ -193,17 +205,23 @@ fun GameTable(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ){
+                    var showMessages by remember { mutableStateOf(false) }
+                    if (showMessages){
+                        MessagesView(
+                            onDismissRequest = { showMessages = false },
+                            messages = gameState.messages
+                        )
+                    }
+
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .padding(horizontal = 5.dp)
                     ){
-                        Text(
-                            text = gameState.messages.lastOrNull()?.asString() ?: "",
+                        gameState.messages.lastOrNull()?.ShowMessage(
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
                             fontSize = fontSize,
-                            color = Color.White,
+                            textColor = Color.White
                         )
                     }
 
@@ -213,7 +231,7 @@ fun GameTable(
                         modifier = Modifier
                             .clip(CircleShape)
                             .clickable(onClick = {
-                                //TODO()
+                                showMessages = true
                             }),
                         tint = Color.White
                     )
@@ -875,4 +893,70 @@ fun RaiseSlider(
 //            }
 //        }
     )
+}
+
+
+@Composable
+fun MessagesView(
+    modifier: Modifier = Modifier,
+    onDismissRequest: () -> Unit,
+    messages: List<MessageData>
+) {
+    var playerBoxSize by remember { mutableStateOf(DpSize.Zero) }
+    var fontSize by remember { mutableStateOf(20.sp) }
+    CalculatePlayerBoxSize(
+        playerBoxSize = { playerBoxSize = it },
+        fontSize = { fontSize = it }
+    )
+
+    val lazyState = rememberLazyListState()
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()){
+            lazyState.animateScrollToItem(messages.size - 1)
+        }
+    }
+
+    Dialog(
+        onDismissRequest = { onDismissRequest() },
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = colors.messagesCard
+            )
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxHeight(0.8f)
+                    .fillMaxWidth(0.6f)
+                    .padding(24.dp),
+                state = lazyState
+            ) {
+                item {
+                    Text(
+                        text = "Seznam zpráv",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = fontSize * 2.5f
+                    )
+                }
+
+                messages.forEachIndexed { index, msgData ->
+                    item(index){
+                        msgData.ShowMessage(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 5.dp),
+                            maxLines = 4,
+                            fontSize = fontSize * 1.5f
+                        )
+                        HorizontalDivider()
+                    }
+                }
+            }
+        }
+    }
 }

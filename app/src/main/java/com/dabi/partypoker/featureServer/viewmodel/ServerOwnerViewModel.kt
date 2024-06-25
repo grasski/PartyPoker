@@ -11,6 +11,7 @@ import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureServer.model.ServerBridge
 import com.dabi.partypoker.featureServer.model.ServerBridgeEvents
 import com.dabi.partypoker.featureServer.model.data.GameState
+import com.dabi.partypoker.featureServer.model.data.MessageData
 import com.dabi.partypoker.featureServer.model.data.SeatPosition
 import com.dabi.partypoker.featureServer.model.data.ServerState
 import com.dabi.partypoker.managers.ServerEvents
@@ -147,7 +148,11 @@ open class ServerOwnerViewModel@Inject constructor(
                         players = gameState.players.filter { it.key != clientID },
                         seatPositions = gameState.seatPositions.filter { it.key != clientID },
 
-                        messages = gameState.messages.plus(UiTexts.StringResource(R.string.client_disconnected))
+                        messages = gameState.messages.plus(
+                            MessageData(
+                                messages = listOf(UiTexts.StringResource(R.string.client_disconnected))
+                            )
+                        )
                     )
                 }
             }
@@ -178,7 +183,11 @@ open class ServerOwnerViewModel@Inject constructor(
                                 gameState.copy(
                                     players = gameState.players + (clientID to player),
                                     seatPositions = gameState.seatPositions + (clientID to SeatPosition(position)),
-                                    messages = gameState.messages.plus(UiTexts.StringResource(R.string.client_connected, player.nickname))
+                                    messages = gameState.messages.plus(
+                                        MessageData(
+                                            messages = listOf(UiTexts.StringResource(R.string.client_connected, player.nickname))
+                                        )
+                                    )
                                 )
                             }
                         } ?: run {

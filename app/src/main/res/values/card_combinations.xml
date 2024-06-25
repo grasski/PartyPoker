@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="noneComb">None combination</string>
     <string name="card">High Card</string>
     <string name="pair">One Pair</string>
     <string name="two_pairs">Two Pair</string>

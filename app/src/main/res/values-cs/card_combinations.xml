@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="noneComb">Žádná kombinace</string>
     <string name="card">Vysoká karta</string>
     <string name="pair">Pár</string>
     <string name="two_pairs">Dvojice</string>
