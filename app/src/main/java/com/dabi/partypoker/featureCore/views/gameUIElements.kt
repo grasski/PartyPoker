@@ -308,18 +308,17 @@ fun PlayerBox(
         )
     }
 
-    var triggerTimer by remember { mutableStateOf(false) }
+
     val animationTimer = remember {
         Animatable(
-            initialValue = if (triggerTimer) 360f else 0f
+            initialValue = if (playerState.isPlayingNow) 360f else 0f
         )
     }
     LaunchedEffect(playerState.isPlayingNow, gameState.round, gameState.games) {
         animationTimer.snapTo(360f)
-        triggerTimer = playerState.isPlayingNow
 
         animationTimer.animateTo(
-            targetValue = if (!triggerTimer) 360f else 0f,
+            targetValue = if (!playerState.isPlayingNow) 360f else 0f,
             animationSpec = tween(
                 durationMillis = gameState.playerTimerDuration * 1000,
                 easing = LinearEasing
@@ -330,11 +329,12 @@ fun PlayerBox(
         derivedStateOf { lerp(Color.Red, Color.Green, animationTimer.value/360) }
     }
 
+
     Box{
         when(layoutDirection){
             PlayerLayoutDirection.LEFT -> {
                 VerticalPlayerItems(
-                    playerState = playerState,
+                    playerState = playerState.copy(),
                     modifier = Modifier
                         .width(size.width * 65 / 100)
                         .align(Alignment.CenterEnd)
@@ -346,7 +346,7 @@ fun PlayerBox(
             }
             PlayerLayoutDirection.TOP -> {
                 HorizontalPlayerItems(
-                    playerState = playerState,
+                    playerState = playerState.copy(),
                     modifier = Modifier
                         .width(size.width)
                         .height(size.height / 3)
@@ -357,7 +357,7 @@ fun PlayerBox(
             }
             PlayerLayoutDirection.RIGHT -> {
                 VerticalPlayerItems(
-                    playerState = playerState,
+                    playerState = playerState.copy(),
                     modifier = Modifier
                         .width(size.width * 65 / 100)
                         .align(Alignment.CenterStart)
@@ -369,7 +369,7 @@ fun PlayerBox(
             }
             PlayerLayoutDirection.BOTTOM -> {
                 HorizontalPlayerItems(
-                    playerState = playerState,
+                    playerState = playerState.copy(),
                     modifier = Modifier
                         .width(size.width)
                         .height(size.height / 3)
@@ -485,21 +485,17 @@ fun PlayerBox(
                         .clip(CircleShape)
                         .background(Color.White)
                         .border(1.dp, Color.Black.copy(alpha = 0.5f), CircleShape)
-                        .drawWithCache {
-                            onDrawBehind {
-                                if (playerState.isPlayingNow) {
-                                    drawArc(
-                                        color = animatedColor,
-                                        startAngle = -90f,
-                                        sweepAngle = -animationTimer.value,
-                                        useCenter = false,
-                                        style = Stroke(
-                                            10.dp.toPx(),
-                                            cap = StrokeCap.Round,
-                                        ),
-                                    )
-                                }
-                            }
+                        .drawBehind {
+                            drawArc(
+                                color = if (playerState.isPlayingNow) animatedColor else Color.Transparent,
+                                startAngle = -90f,
+                                sweepAngle = -animationTimer.value,
+                                useCenter = false,
+                                style = Stroke(
+                                    10.dp.toPx(),
+                                    cap = StrokeCap.Round,
+                                ),
+                            )
                         }
                         .padding(10.dp)
                         .paint(

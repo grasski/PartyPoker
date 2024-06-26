@@ -52,8 +52,7 @@ class ServerPlayerViewModel @Inject constructor(
         viewModelScope.launch {
             _gameState.collect{ gs ->
                 val playerUpdate = gs.players[_playerState.value.id]!!
-                Log.e("", "SERVER: " + playerUpdate)
-                _playerState.update { playerUpdate }
+                _playerState.update { playerUpdate.copy() }
 
                 _playerActionsState.update { it.copy(
                     canCheck = checkEnabled(),

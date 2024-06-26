@@ -28,6 +28,7 @@ class GameManager {
                 player.isFolded = false
                 player.holeCards = emptyList()
                 player.called = 0
+                player.isPlayingNow = false
             }
 
             val readyPlayers = gameState.players.filter { it.value.isReadyToPlay }
@@ -38,6 +39,15 @@ class GameManager {
                     gameState.gameReadyPlayers += id to position
                 }
             }
+            if (gameState.gameReadyPlayers.size < 2){
+                Log.e("", "TADY KONEC START")
+                return GameState(
+                    players = gameState.players,
+                    seatPositions = gameState.seatPositions,
+                    messages = gameState.messages,
+                    bank = gameState.bank
+                )
+            }
 //            // To count correct dealer, smallBlind and bigBlind in new game rounds
             gameState.playingNow = gameState.gameReadyPlayers.toList().sortedBy { it.second.position }.toMap().keys.firstOrNull()
 //            gameState.playingNow = gameState.gameReadyPlayers.firstOrNull()
@@ -47,6 +57,7 @@ class GameManager {
             val smallBlind = getPlayingNow(games + 1, gameState)
             val bigBlind = getPlayingNow(games + 2, gameState)
             if (dealerId == null || smallBlind == null || bigBlind == null){
+                Log.e("", "TADY KONEC START 2")
                 return GameState(
                     players = gameState.players,
                     seatPositions = gameState.seatPositions,

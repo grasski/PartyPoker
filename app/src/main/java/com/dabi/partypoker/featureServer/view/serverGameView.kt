@@ -90,7 +90,7 @@ fun ServerView(
                 when(ServerType.valueOf(serverScreen.serverType)){
                     ServerType.IS_PLAYER -> {
                         val serverPlayerVM = (serverViewModel as ServerPlayerViewModel)
-                        val playerState by serverPlayerVM.playerState.collectAsState()
+                        val playerState by serverPlayerVM.playerState.collectAsStateWithLifecycle()
                         val playerActionsState by serverPlayerVM.playerActionsState.collectAsStateWithLifecycle()
 
                         PlayerGameView(

@@ -117,6 +117,9 @@ fun PlayerView(
                     }
                     ServerType.IS_PLAYER -> {
                         val gameState by playerViewModel.gameState.collectAsStateWithLifecycle()
+                        LaunchedEffect(playerState) {
+                            Log.e("", "PLAYER ZMENA")
+                        }
                         PlayerGameView(
                             navController,
                             gameState,

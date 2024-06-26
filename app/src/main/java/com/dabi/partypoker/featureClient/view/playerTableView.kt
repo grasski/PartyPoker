@@ -30,6 +30,7 @@ import com.dabi.partypoker.featureCore.views.DrawPlayersByPosition
 import com.dabi.partypoker.featureCore.views.GamePopUpMenu
 import com.dabi.partypoker.featureCore.views.GameTable
 import com.dabi.partypoker.featureCore.views.PlayerDrawItself
+import com.dabi.partypoker.featureCore.views.calculatePlayersPosition
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.managers.GameEvents
 import com.dabi.partypoker.managers.ServerType
@@ -87,28 +88,23 @@ fun PlayerGameView(
             }
         )
 
-        val sortedPlayers = gameState.seatPositions.toList().sortedBy { it.second.position }.toMap()
-        val meIndex = sortedPlayers.keys.indexOf(playerState.id)
-        val myPosition = sortedPlayers[playerState.id]?.position
-        if (meIndex <= -1 || myPosition == null){
-            return
-        }
-        val playersBeforeMe = sortedPlayers.toList().take(meIndex).toMap()
-        val players = sortedPlayers
-            .minus(playersBeforeMe.keys)
-            .plus(playersBeforeMe)
-            .minus(playerState.id)
-            .entries.associate { it.value.position to gameState.players[it.key] }
-
-
-        DrawPlayersByPosition(
-            players = players,
-            gameState = gameState,
-            myPosition = myPosition,
-            serverType = ServerType.IS_PLAYER,
-            tablePosition = tablePosition,
-            tableSize = tableSize
+        val calculatePlayersPosition = calculatePlayersPosition(
+            gameState = gameState.copy(),
+            currentPlayerId = playerState.id
         )
+        if (calculatePlayersPosition.first != null && calculatePlayersPosition.second.isNotEmpty()){
+            val myPosition = calculatePlayersPosition.first!!
+            val players = calculatePlayersPosition.second
+
+            DrawPlayersByPosition(
+                players = players,
+                gameState = gameState,
+                myPosition = myPosition,
+                serverType = ServerType.IS_PLAYER,
+                tablePosition = tablePosition,
+                tableSize = tableSize
+            )
+        }
 
         PlayerDrawItself(
             player = playerState,

@@ -24,6 +24,7 @@ import com.google.android.gms.nearby.connection.ConnectionsClient
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,6 +50,7 @@ open class ServerOwnerViewModel@Inject constructor(
         super.onCleared()
 
         serverBridge.killServer()
+        timerJob?.cancel()
     }
     init {
         viewModelScope.launch {
@@ -74,11 +76,12 @@ open class ServerOwnerViewModel@Inject constructor(
     fun onGameEvent(event: GameEvents) {
         when (event){
             GameEvents.StartGame -> {
-                _gameState.update { GameManager.startGame(_gameState.value) }
+                _gameState.update { GameManager.startGame(_gameState.value).copy() }
                 if (!_gameState.value.started) {
                     Log.e("ServerOwnerViewModel", "Game not started, few players")
                     return
                 }
+                handlePlayingPlayer()
             }
 
             GameEvents.CloseGame -> {
@@ -93,6 +96,10 @@ open class ServerOwnerViewModel@Inject constructor(
         timerJob?.cancel()
         timerJob = this.viewModelScope.launch {
             while (_playerMoveTimer.value > 0){
+                if (!_gameState.value.started) {
+                    timerJob?.cancel()
+                    this.cancel()
+                }
                 _playerMoveTimer.value --
                 delay(1000)
 
@@ -125,16 +132,16 @@ open class ServerOwnerViewModel@Inject constructor(
             }
 
             tempGameState = GameManager.movePlayedCheckRound(tempGameState)
-            _gameState.update { tempGameState }
+            _gameState.update { tempGameState.copy() }
             handlePlayingPlayer()
         } ?: run {
-            _gameState.update { GameManager.movePlayedCheckRound(it) }
+            _gameState.update { GameManager.movePlayedCheckRound(it).copy() }
             handlePlayingPlayer()
         }
     }
     private fun autoCheck(){
         Log.e("", "AUTO CHECK: " + _gameState.value.playingNow)
-        _gameState.update { GameManager.movePlayedCheckRound(_gameState.value) }
+        _gameState.update { GameManager.movePlayedCheckRound(_gameState.value).copy() }
         handlePlayingPlayer()
     }
 
@@ -207,7 +214,12 @@ open class ServerOwnerViewModel@Inject constructor(
                             val updatedPlayers = _gameState.value.players.toMutableMap().apply {
                                 this[clientID] = updatedPlayer
                             }
-                            _gameState.value = _gameState.value.copy(players = updatedPlayers)
+                            _gameState.update { gameState ->
+                                gameState.copy(
+                                    players = updatedPlayers
+                                )
+                            }
+//                            _gameState.value = _gameState.value.copy(players = updatedPlayers)
                         }
                     }
 
@@ -217,7 +229,7 @@ open class ServerOwnerViewModel@Inject constructor(
                         if (_playerMoveTimer.value > 0){
                             timerJob?.cancel()
 
-                            _gameState.update { GameManager.movePlayedCheckRound(_gameState.value) }
+                            _gameState.update { GameManager.movePlayedCheckRound(_gameState.value).copy() }
                             handlePlayingPlayer()
                         }
                     }
@@ -244,7 +256,7 @@ open class ServerOwnerViewModel@Inject constructor(
                                     tempGameState.bank += amount
                                     tempGameState = GameManager.movePlayedCheckRound(tempGameState)
 
-                                    _gameState.update { tempGameState }
+                                    _gameState.update { tempGameState.copy() }
                                     handlePlayingPlayer()
                                 }
                             }
@@ -286,7 +298,7 @@ open class ServerOwnerViewModel@Inject constructor(
                                 }
 
                                 tempGameState = GameManager.movePlayedCheckRound(tempGameState)
-                                _gameState.update { tempGameState }
+                                _gameState.update { tempGameState.copy() }
                                 handlePlayingPlayer()
                             }
                         }
@@ -307,7 +319,7 @@ open class ServerOwnerViewModel@Inject constructor(
                                 }
 
                                 tempGameState = GameManager.movePlayedCheckRound(tempGameState)
-                                _gameState.update { tempGameState }
+                                _gameState.update { tempGameState.copy() }
                                 handlePlayingPlayer()
                             }
                         }

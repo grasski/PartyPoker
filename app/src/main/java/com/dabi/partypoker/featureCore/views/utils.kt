@@ -29,6 +29,9 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.dabi.partypoker.R
+import com.dabi.partypoker.featureClient.model.data.PlayerState
+import com.dabi.partypoker.featureClient.model.data.endpointID
+import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.MessageData
 
 
@@ -58,6 +61,26 @@ fun CalculatePlayerBoxSize(
             }
         }
     }
+}
+
+
+fun calculatePlayersPosition(
+    gameState: GameState,
+    currentPlayerId: endpointID
+): Pair<Int?, Map<Int, PlayerState?>> {
+    val sortedPlayers = gameState.seatPositions.toList().sortedBy { it.second.position }.toMap()
+    val meIndex = sortedPlayers.keys.indexOf(currentPlayerId)
+    val myPosition = sortedPlayers[currentPlayerId]?.position
+    if (meIndex <= -1 || myPosition == null){
+        return Pair(null, emptyMap())
+    }
+    val playersBeforeMe = sortedPlayers.toList().take(meIndex).toMap()
+
+    return Pair(myPosition, sortedPlayers
+        .minus(playersBeforeMe.keys)
+        .plus(playersBeforeMe)
+        .minus(currentPlayerId)
+        .entries.associate { it.value.position to gameState.players[it.key] })
 }
 
 
