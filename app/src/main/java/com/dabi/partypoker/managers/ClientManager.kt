@@ -71,7 +71,7 @@ class ClientManager(
             }
 
             override fun onEndpointLost(endpointId: String) {
-//                events(ClientEvents.ConnectionStatus(ConnectionStatusEnum.KICKED))
+                events(ClientEvents.ConnectionStatus(ConnectionStatusEnum.KICKED))
                 Log.e("", "CLIENT onEndpointLost " + endpointId)
             }
         }

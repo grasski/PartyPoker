@@ -29,6 +29,9 @@ class GameManager {
                 player.holeCards = emptyList()
                 player.called = 0
                 player.isPlayingNow = false
+                player.isDealer = false
+                player.isBigBlind = false
+                player.isSmallBlind = false
             }
 
             val readyPlayers = gameState.players.filter { it.value.isReadyToPlay }
@@ -189,26 +192,39 @@ class GameManager {
             }
 
             gameState.activeRaise?.let { (raiserId, raiseAmount) ->
-                Log.e("", "RAISER: " + raiserId + " AMOUNT: " + raiseAmount)
                 if (gameState.round == 1){
-                    Log.e("", "RAISER: " + raiserId + " AMOUNT: " + raiseAmount)
-                    if (movePlayedBy == gameState.bigBlindId && raiseAmount == gameState.bigBlindAmount){
-                        // BB checked in his move in round 1, so the round ends
-                        return newRound()
-//                    } else if (movePlayedBy == gameState.bigBlindId && raiserId != gameState.bigBlindId){
-//                        return newRound()
-                    } else if (movePlayedBy == gameState.bigBlindId && raiserId == playingNextId){
-                        return newRound()
-                    } else if (raiserId == playingNextId && gameState.bigBlindRaised){
-                        return newRound()
-                    } else {
-                        if (movePlayedBy == gameState.bigBlindId){ gameState.bigBlindRaised = true }
-                        // Someone else played, or BB called someone's raise, or BB raised -> round continues
+                    if (gameState.bigBlindRaised){
+                        if (raiserId == playingNextId){
+                            return newRound()
+                        }
                         gameState.playingNow = playingNextId
+                    } else{
+                        if (movePlayedBy == gameState.bigBlindId){
+                            // Big blind CHECKED/FOLDED in round 1
+                            if (raiseAmount == gameState.bigBlindAmount){
+                                return newRound()
+                            }
+
+                            // Big blind RAISED in round 1
+                            if (raiserId == gameState.bigBlindId){
+                                gameState.bigBlindRaised = true
+                                gameState.playingNow = playingNextId
+                            } else{
+                                // Big blind CALLED in round 1
+                                if (raiserId == playingNextId){
+                                    return newRound()
+                                }
+                                gameState.playingNow = playingNextId
+                            }
+                        } else{
+                            if (raiserId == playingNextId && movePlayedBy != gameState.smallBlindId){
+                                return newRound()
+                            }
+                            gameState.playingNow = playingNextId
+                        }
                     }
                 } else{
                     if (raiserId == playingNextId){
-                        // If the next player is the one who raised in current round, we makes new round as you can not re-raise yourself in one round
                         return newRound()
                     }
                     gameState.playingNow = playingNextId
@@ -254,25 +270,21 @@ class GameManager {
                 val nextPlayerIndex = ((if (afterDealer) dealerId else currentPlayerIndex) + i) % sortedSeatsWithPlayers.size
                 val playerId = sortedSeatsWithPlayers.keys.toList()[nextPlayerIndex]
 
-                if (playerId == gameState.roundStartedId && !afterDealer){
-                    return playerId
-                }
-
-//                if (playerId == gameState.activeRaise?.first){
-//                    return playerId
-//                }
-
-                gameState.players[playerId]?.let { player ->
-                    if (!player.isFolded){
+                // If the player exists, check if he folded=(skip him) or not=(he will play next)
+                gameState.players[playerId]?.let {
+                    if (!it.isFolded){
                         return playerId
                     }
+                } ?: run {
+                    // Otherwise, he is next on the move, but not really playing, because he left the game
+                    return playerId
                 }
                 i++
             }
         }
 
 
-        private fun gameOver(gameState: GameState): GameState{
+        fun gameOver(gameState: GameState): GameState{
             Log.e("", "GAME OVER")
 
             val notFolderPlayersID = gameState.gameReadyPlayers.filter { (playerId, _) ->

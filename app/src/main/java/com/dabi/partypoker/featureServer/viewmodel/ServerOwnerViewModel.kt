@@ -162,6 +162,17 @@ open class ServerOwnerViewModel@Inject constructor(
                         )
                     )
                 }
+
+                val foldedCount = _gameState.value.gameReadyPlayers.count { (playerId, _) ->
+                    val player = _gameState.value.players[playerId]
+                    player?.isFolded ?: true
+                }
+
+                if ((foldedCount + 1) >= _gameState.value.gameReadyPlayers.size){
+                    _gameState.update {
+                        GameManager.gameOver(it).copy()
+                    }
+                }
             }
 
             is ServerBridgeEvents.ClientAction -> {
