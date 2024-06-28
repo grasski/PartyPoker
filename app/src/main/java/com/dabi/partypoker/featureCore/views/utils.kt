@@ -1,6 +1,10 @@
 package com.dabi.partypoker.featureCore.views
 
-import android.util.Log
+
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.InfiniteRepeatableSpec
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,20 +13,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
-import androidx.window.core.layout.WindowHeightSizeClass
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -32,7 +38,6 @@ import com.dabi.partypoker.R
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.model.data.endpointID
 import com.dabi.partypoker.featureServer.model.data.GameState
-import com.dabi.partypoker.featureServer.model.data.MessageData
 
 
 @Composable
@@ -110,6 +115,33 @@ fun LoadingAnimation(
         Button(onClick = { onCancelRequest() }) {
             Text(text = "Cancel")
         }
+    }
+}
+
+
+@Composable
+fun Modifier.glowItem(
+    itemCornerRadius: Dp,
+    active: Boolean
+): Modifier{
+    if (!active) return this
+
+    val infiniteTransition = rememberInfiniteTransition(label = "")
+    val colorAnimation by infiniteTransition.animateColor(
+        initialValue = Color(0x99FFDF00),
+        targetValue = Color(0x99DAA520),
+        animationSpec = InfiniteRepeatableSpec(
+            animation = tween(1000),
+            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
+        ), label = ""
+    )
+
+    return this.drawWithContent {
+        drawContent()
+        drawRoundRect(
+            color = colorAnimation.copy(alpha = 0.5f),
+            cornerRadius = CornerRadius(itemCornerRadius.toPx(), itemCornerRadius.toPx())
+        )
     }
 }
 

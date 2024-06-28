@@ -1,91 +1,33 @@
 package com.dabi.partypoker
 
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.displayCutoutPadding
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.paint
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.PlaceholderVerticalAlign
-import androidx.compose.ui.text.PlatformTextStyle
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import coil.compose.rememberAsyncImagePainter
 import com.dabi.partypoker.featureClient.model.data.PlayerState
-import com.dabi.partypoker.featureCore.views.CalculatePlayerBoxSize
-import com.dabi.partypoker.featureCore.views.GameTable
-import com.dabi.partypoker.featureCore.views.MessagesView
+import com.dabi.partypoker.featureCore.views.CardBox
 import com.dabi.partypoker.featureServer.model.data.GameState
-import com.dabi.partypoker.featureServer.model.data.MessageData
+import com.dabi.partypoker.featureServer.model.data.SeatPosition
+import com.dabi.partypoker.managers.GameManager
 import com.dabi.partypoker.ui.theme.PartyPokerTheme
 import com.dabi.partypoker.utils.Card
 import com.dabi.partypoker.utils.CardType
-import com.dabi.partypoker.utils.CardsCombination
-import com.dabi.partypoker.utils.CardsUtils
-import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.evaluateGame
 import com.dabi.partypoker.utils.evaluatePlayerCards
-import com.dabi.partypoker.utils.formatNumberToString
-import com.dabi.partypoker.utils.generateDeck
-import com.dabi.partypoker.utils.getCards
 import com.dabi.partypoker.utils.handStrength
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 
 
 @AndroidEntryPoint
@@ -98,8 +40,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             PartyPokerTheme {
                 Scaffold (){
-                    Box(modifier = Modifier.padding(it).fillMaxSize()){
+                    Box(modifier = Modifier
+                        .padding(it)
+                        .fillMaxSize()
+                    ){
                         Navigation()
+//                        PlayerViewPrivate()
+
 
 
 //                        var playerBoxSize by remember { mutableStateOf(DpSize.Zero) }
@@ -247,24 +194,24 @@ class MainActivity : ComponentActivity() {
 //                            PlayerState(
 //                                nickname = "1",
 //                                holeCards = listOf(
-//                                    Card(CardType.HEART, 7),
-//                                    Card(CardType.DIAMOND, 13),
+//                                    Card(CardType.CLUB, 2),
+//                                    Card(CardType.SPADE, 9),
 //                                )
 //                            ),
 //                            PlayerState(
 //                                nickname = "2",
 //                                holeCards = listOf(
-//                                    Card(CardType.SPADE, 7),
-//                                    Card(CardType.HEART, 12),
+//                                    Card(CardType.CLUB, 9),
+//                                    Card(CardType.DIAMOND, 13),
 //                                )
 //                            ),
 //                        )
 //                        val tableCards = listOf(
-//                            Card(CardType.HEART, 14),
+//                            Card(CardType.HEART, 7),
+//                            Card(CardType.CLUB, 7),
+//                            Card(CardType.DIAMOND, 3),
+//                            Card(CardType.DIAMOND, 7),
 //                            Card(CardType.DIAMOND, 9),
-//                            Card(CardType.DIAMOND, 5),
-//                            Card(CardType.DIAMOND, 6),
-//                            Card(CardType.SPADE, 8),
 //                        )
 //                        val e = evaluateGame(
 //                            players = players,
@@ -278,7 +225,33 @@ class MainActivity : ComponentActivity() {
 //
 //                            Log.e("", it.nickname + " has : " + playerEval + " with strength: " + evalStrength)
 //                        }
-
+//                        val gameState = GameState(
+//                            players = mapOf(
+//                                "1" to PlayerState(
+//                                    nickname = "1",
+//                                    holeCards = listOf(
+//                                        Card(CardType.CLUB, 2),
+//                                        Card(CardType.SPADE, 9),
+//                                    )
+//                                ),
+//                                "2" to PlayerState(
+//                                    nickname = "2",
+//                                    holeCards = listOf(
+//                                        Card(CardType.CLUB, 9),
+//                                        Card(CardType.DIAMOND, 13),
+//                                    )
+//                                ),
+//                            ),
+//                            cardsTable = tableCards,
+//                            gameReadyPlayers = mapOf(
+//                                "1" to SeatPosition(1),
+//                                "2" to SeatPosition(2)
+//                            )
+//                        )
+//
+//                        val g = GameManager.gameOver(gameState = gameState)
+//                        Log.e("", "GAME OVER: " + g.winningCards)
+//                        g.messages.last().ShowMessage(maxLines = 5, fontSize = 20.sp, textColor = Color.Green)
 
 
 //                        val deck = generateDeck()

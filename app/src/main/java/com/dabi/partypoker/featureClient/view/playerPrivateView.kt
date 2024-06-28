@@ -1,102 +1,133 @@
 package com.dabi.partypoker.featureClient.view
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.dabi.partypoker.featureClient.model.data.PlayerState
-import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
-import com.dabi.partypoker.featureCore.data.PlayerActionsState
+import coil.compose.rememberAsyncImagePainter
+import com.dabi.partypoker.R
 
 
 @Composable
 fun PlayerViewPrivate(
-    navController: NavController,
-    playerState: PlayerState,
-    playerActionsState: PlayerActionsState,
-    onPlayerEvent: (PlayerEvents) -> Unit
+//    navController: NavController,
+//    playerState: PlayerState,
+//    playerActionsState: PlayerActionsState,
+//    onPlayerEvent: (PlayerEvents) -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Column {
-            IconButton(onClick = {
-//                showPopUpMenu = true
-                // TODO()
-            }) {
-                Icon(Icons.Default.Menu, contentDescription = "Menu")
-            }
+    ){
+        Column(
+            modifier = Modifier
+                .fillMaxHeight(0.7f)
+                .fillMaxWidth()
 
-            Text(text = "Connected to the server!")
+                .drawWithContent {
+                    drawContent()
 
-            Button(onClick = {
-                onPlayerEvent(PlayerEvents.Ready)
-            }) {
-                Text(text = "READY")
-            }
+                    fun addPath(
+                        heightOffset: Dp,
+                    ): Path {
+                        val path = Path()
+                        path.arcTo(
+                            rect = Rect(
+                                offset = Offset(
+                                    -10.dp.toPx(),
+                                    size.height - 80.dp.toPx() - heightOffset.toPx()
+                                ),
+                                size = Size(80.dp.toPx(), 80.dp.toPx())
+                            ),
+                            startAngleDegrees = 90f,
+                            sweepAngleDegrees = 90f,
+                            forceMoveTo = true,
+                        )
+                        path.moveTo(30.dp.toPx(), size.height - heightOffset.toPx())
+                        path.lineTo(size.width - 30.dp.toPx(), size.height - heightOffset.toPx())
+                        path.arcTo(
+                            rect = Rect(
+                                offset = Offset(
+                                    size.width - 70.dp.toPx(),
+                                    size.height - 80.dp.toPx() - heightOffset.toPx()
+                                ),
+                                size = Size(80.dp.toPx(), 80.dp.toPx())
+                            ),
+                            startAngleDegrees = 0f,
+                            sweepAngleDegrees = 90f,
+                            forceMoveTo = true,
+                        )
 
-            Button(onClick = {
-                onPlayerEvent(PlayerEvents.Leave)
-            }) {
-                Text(text = "Disconnect")
-            }
+                        return path
+                    }
+
+                    val path1 = addPath(0.dp)
+                    val path2 = addPath(6.dp)
+                    val path3 = addPath((-6).dp)
 
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(
-                    onClick = {
-                        onPlayerEvent(PlayerEvents.Check)
-                    },
-                    enabled = playerActionsState.canCheck
-                ) {
-                    Text(text = "CHECK")
+                    drawPath(
+                        path = path1,
+                        color = Color.DarkGray,
+                        style = Stroke(12.dp.toPx())
+                    )
+                    drawPath(
+                        path = path2,
+                        color = Color.White.copy(alpha = 0.5f),
+                        style = Stroke(1.dp.toPx())
+                    )
+                    drawPath(
+                        path = path3,
+                        color = Color.White,
+                        style = Stroke(1.dp.toPx())
+                    )
                 }
-                val callAmount = playerActionsState.callAmount
-                Button(
-                    onClick = {
-                        onPlayerEvent(PlayerEvents.Call(callAmount))
-                    },
-                    enabled = callAmount > 0
-                ) {
-                    Text(text = "CALL $callAmount")
-                }
-                val raisingAmount = 30
-                Button(
-                    onClick = {
-                        // So that is at least 30 + bigBlindValue
-                        onPlayerEvent(PlayerEvents.Raise(playerActionsState.raiseAmount + raisingAmount))
-                    },
-                    enabled = playerState.isPlayingNow
-                ) {
-                    Text(text = "min RAISE ${playerActionsState.raiseAmount}\nRaising: ${playerActionsState.raiseAmount + raisingAmount}")
-                }
-                Button(
-                    onClick = {
-                        onPlayerEvent(PlayerEvents.Fold)
-                    },
-                    enabled = playerActionsState.canFold
-                ) {
-                    Text(text = "FOLD")
-                }
-            }
+                .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
+                .paint(
+                    rememberAsyncImagePainter(model = R.drawable.table),
+                    contentScale = ContentScale.Crop
+                )
+                .padding(11.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ){
+            Image(
+                painterResource(id = R.drawable.player_1),
+                null,
+                modifier = Modifier
+                    .size(150.dp)
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .border(2.dp, Color.Black.copy(alpha = 0.5f), CircleShape)
+            )
         }
     }
 }

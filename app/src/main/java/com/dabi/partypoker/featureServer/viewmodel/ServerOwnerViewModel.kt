@@ -24,6 +24,7 @@ import com.google.android.gms.nearby.connection.ConnectionsClient
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,13 +43,15 @@ open class ServerOwnerViewModel@Inject constructor(
 
     private val _playerMoveTimer = MutableStateFlow(_gameState.value.playerTimerDuration)
     val playerMoveTimer = _playerMoveTimer.asStateFlow()
+    private val _gameOverTimer = MutableStateFlow(_gameState.value.nextGameIn)
+    val gameOverTimer = _gameOverTimer.asStateFlow()
     private var timerJob: Job? = null
 
     val serverBridge = ServerBridge(connectionsClient, this::onServerBridgeEvent)
 
     override fun onCleared() {
         super.onCleared()
-
+        Log.e("", "SERVER KILLED")
         serverBridge.killServer()
         timerJob?.cancel()
     }
@@ -59,7 +62,6 @@ open class ServerOwnerViewModel@Inject constructor(
                     autoFold()
                     return@collect
                 }
-
                 gameState.players.forEach { (index, player) ->
                     Log.e("ServerOwnerViewModel", "SENDING TO Player: $player")
                     val serverPayloadType = toServerPayload(ServerPayloadType.UPDATE_CLIENT, player)
@@ -69,6 +71,22 @@ open class ServerOwnerViewModel@Inject constructor(
 
                 val serverPayload = toServerPayload(ServerPayloadType.UPDATE_GAME_STATE, gameState)
                 serverBridge.sendPayload(serverPayload)
+
+
+                if (gameState.gameOver && _gameOverTimer.value >= gameState.nextGameIn){
+                    timerJob?.cancel()
+                    async {
+                        while (_gameOverTimer.value > 0){
+                            Log.e("", "GAME OVER TIMER: " + _gameOverTimer.value)
+                            _gameOverTimer.value --
+                            delay(1000)
+                        }
+                        _gameState.update { GameManager.startGame(_gameState.value).copy() }
+                        handlePlayingPlayer()
+                        _gameOverTimer.value = _gameState.value.nextGameIn
+                    }
+                    Log.e("", "LALALA: " + _gameOverTimer.value)
+                }
             }
         }
     }
@@ -96,7 +114,7 @@ open class ServerOwnerViewModel@Inject constructor(
         timerJob?.cancel()
         timerJob = this.viewModelScope.launch {
             while (_playerMoveTimer.value > 0){
-                if (!_gameState.value.started) {
+                if (!_gameState.value.started || _gameState.value.gameOver) {
                     timerJob?.cancel()
                     this.cancel()
                 }

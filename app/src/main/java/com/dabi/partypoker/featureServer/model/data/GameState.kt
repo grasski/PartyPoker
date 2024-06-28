@@ -154,7 +154,9 @@ data class GameState(
     var messages: List<MessageData> = emptyList(),
     var playerTimerDuration: Int = 12,
 
-    var nextGameIn: Int = 15
+    var gameOver: Boolean = false,
+    var nextGameIn: Int = 15,
+    var winningCards: Set<Card> = emptySet(),
 ){
     fun getAvailableRandomPosition(): Int? {
         val takenPositions = seatPositions.values.map { it.position }.toSet()

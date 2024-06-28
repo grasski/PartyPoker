@@ -307,7 +307,7 @@ fun evaluateGame(players: List<PlayerState>, tableCards: List<Card>): Pair<List<
             val allValues = best.values.flatMap { it.second.map { it.value } }
             // If all cards are same by its value, it means everyone has same combination -> split bank
             if (best.values.all { it.second.map { it.value }.containsAll(allValues) }){
-                return Pair(best.keys.toList(),  Pair(CardsCombination.FULL_HOUSE, listOf(best.values.first().second)))
+                return Pair(best.keys.toList(),  Pair(CardsCombination.FULL_HOUSE, listOf(best.values.flatMap { it.second }.toSet().toList())))
             }
 
             // Take all combinations which first's card value == highest card from all first cards of combinations

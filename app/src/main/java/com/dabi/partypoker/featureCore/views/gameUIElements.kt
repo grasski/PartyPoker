@@ -1,6 +1,5 @@
 package com.dabi.partypoker.featureCore.views
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -24,7 +23,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
@@ -48,7 +46,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -80,7 +77,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.Popup
 import coil.compose.rememberAsyncImagePainter
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureClient.model.data.PlayerState
@@ -90,10 +86,9 @@ import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.MessageData
 import com.dabi.partypoker.managers.GameEvents
 import com.dabi.partypoker.managers.ServerType
+import com.dabi.partypoker.utils.Card
 import com.dabi.partypoker.utils.CardsUtils
-import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.formatNumberToString
-import kotlinx.serialization.descriptors.StructureKind
 
 
 @Composable
@@ -130,7 +125,7 @@ fun GameTable(
             .border(11.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(40.dp))
             .paint(
                 rememberAsyncImagePainter(model = R.drawable.table),
-                contentScale = ContentScale.FillBounds
+                contentScale = ContentScale.Crop
             )
             .padding(11.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -145,12 +140,11 @@ fun GameTable(
             ) {
                 for (i in 0..4){
                     val card = gameState.cardsTable.getOrNull(i)
-                    card?.let {
-                        val cardId = CardsUtils.cardIDs[card.type.name.lowercase() + "_" + card.value]
-                        CardBox(cardId, Modifier.weight(1f))
-                    } ?: run {
-                        CardBox(null, Modifier.weight(1f))
-                    }
+                    CardBox(
+                        card = card,
+                        modifier = Modifier.weight(1f),
+                        winningCards = gameState.winningCards
+                    )
                 }
             }
 
@@ -251,18 +245,33 @@ fun GameTable(
 
 
 @Composable
-fun CardBox(cardId: Int?, modifier: Modifier) {
-    cardId?.let { id ->
-        Image(
-            painter = painterResource(id = id),
-            contentDescription = "card",
-            modifier = modifier
-                .padding(5.dp)
-                .border(1.dp, Color.White.copy(alpha = 1f), RoundedCornerShape(6.dp))
-                .padding(5.dp)
-                .clip(RoundedCornerShape(3.dp))
-        )
+fun CardBox(card: Card?, modifier: Modifier, winningCards: Set<Card>) {
+    var showEmpty by remember { mutableStateOf(true) }
+
+    card?.let {
+        showEmpty = true
+        val cardId = CardsUtils.cardIDs[card.type.name.lowercase() + "_" + card.value]
+        cardId?.let { id ->
+            showEmpty = false
+            Image(
+                painter = painterResource(id = id),
+                contentDescription = "card",
+                modifier = modifier
+                    .padding(5.dp)
+                    .border(1.dp, Color.White.copy(alpha = 1f), RoundedCornerShape(6.dp))
+                    .padding(5.dp)
+
+                    .glowItem(
+                        itemCornerRadius = 3.dp,
+                        active = card in winningCards
+                    )
+            )
+        }
     } ?: run {
+        showEmpty = true
+    }
+
+    if (showEmpty){
         Image(
             painter = painterResource(id = R.drawable.clubs_2),
             contentDescription = "card",
@@ -416,6 +425,10 @@ fun PlayerBox(
                             modifier = Modifier
                                 .padding(top = 5.dp)
                                 .weight(1f)
+                                .glowItem(
+                                    3.dp,
+                                    active = card in gameState.winningCards
+                                )
                                 .clip(RoundedCornerShape(3.dp))
                         )
                     }
@@ -768,7 +781,14 @@ fun DrawPlayersByPosition(
             verticalArrangement = Arrangement.SpaceEvenly
         ){
             for (i in (seatIndex + totalPlayersVertical-1) downTo (seatIndex)){
-                PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i % 10], gameState = gameState, layoutDirection = PlayerLayoutDirection.LEFT)
+                PlayerBox(
+                    playerBoxSize,
+                    fontSize = fontSize,
+                    playerState = players[i % 10],
+                    gameState = gameState,
+                    layoutDirection = PlayerLayoutDirection.LEFT,
+                    showCards = gameState.gameOver && players[i % 10]?.isFolded == false
+                )
 
                 seatIndex ++
             }
@@ -785,7 +805,14 @@ fun DrawPlayersByPosition(
             horizontalArrangement = Arrangement.spacedBy(playerBoxSize.width/4, Alignment.CenterHorizontally)
         ){
             for (i in seatIndex..<(seatIndex + totalPlayersHorizontal)){
-                PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i % 10], gameState = gameState, layoutDirection = PlayerLayoutDirection.TOP)
+                PlayerBox(
+                    size = playerBoxSize,
+                    fontSize = fontSize,
+                    playerState = players[i % 10],
+                    gameState = gameState,
+                    layoutDirection = PlayerLayoutDirection.TOP,
+                    showCards = gameState.gameOver && players[i % 10]?.isFolded == false
+                )
 
                 seatIndex ++
             }
@@ -802,7 +829,14 @@ fun DrawPlayersByPosition(
             verticalArrangement = Arrangement.SpaceEvenly
         ){
             for (i in (seatIndex)..<(seatIndex + totalPlayersVertical)){
-                PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i % 10], gameState = gameState, layoutDirection = PlayerLayoutDirection.RIGHT)
+                PlayerBox(
+                    size = playerBoxSize,
+                    fontSize = fontSize,
+                    playerState = players[i % 10],
+                    gameState = gameState,
+                    layoutDirection = PlayerLayoutDirection.RIGHT,
+                    showCards = gameState.gameOver && players[i % 10]?.isFolded == false
+                )
 
                 seatIndex ++
             }
@@ -833,11 +867,25 @@ fun DrawPlayersByPosition(
         ){
             if (serverType == ServerType.IS_TABLE){
                 for (i in (seatIndex + totalPlayersHorizontal-1) downTo (seatIndex)){
-                    PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[i % 10], gameState = gameState, layoutDirection = PlayerLayoutDirection.BOTTOM)
+                    PlayerBox(
+                        size = playerBoxSize,
+                        fontSize = fontSize,
+                        playerState = players[i % 10],
+                        gameState = gameState,
+                        layoutDirection = PlayerLayoutDirection.BOTTOM,
+                        showCards = gameState.gameOver && players[i % 10]?.isFolded == false
+                    )
                     seatIndex ++
                 }
             } else{
-                PlayerBox(size = playerBoxSize, fontSize = fontSize, playerState = players[(seatIndex+1) % 10], gameState = gameState, layoutDirection = PlayerLayoutDirection.BOTTOM)
+                PlayerBox(
+                    size = playerBoxSize,
+                    fontSize = fontSize,
+                    playerState = players[(seatIndex + 1) % 10],
+                    gameState = gameState,
+                    layoutDirection = PlayerLayoutDirection.BOTTOM,
+                    showCards = gameState.gameOver && players[(seatIndex + 1) % 10]?.isFolded == false
+                )
             }
         }
     }

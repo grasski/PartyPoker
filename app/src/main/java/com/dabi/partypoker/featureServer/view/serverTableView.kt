@@ -72,7 +72,7 @@ fun ServerGameView(
                 .fillMaxWidth(0.8f)
                 .padding(vertical = 50.dp)
                 .padding(horizontal = 16.dp),
-            gameState = gameState,
+            gameState = gameState.copy(),
 
             isServer = true,
             onGameEvent = onGameEvent,

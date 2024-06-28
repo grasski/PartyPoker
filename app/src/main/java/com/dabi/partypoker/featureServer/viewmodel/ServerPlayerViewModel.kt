@@ -33,6 +33,10 @@ class ServerPlayerViewModel @Inject constructor(
     )
     val playerActionsState = _playerActionsState.asStateFlow()
 
+    override fun onCleared() {
+        super.onCleared()
+        Log.e("", "SERVER PLAYER KILLED")
+    }
 
     init {
         val player = PlayerState(

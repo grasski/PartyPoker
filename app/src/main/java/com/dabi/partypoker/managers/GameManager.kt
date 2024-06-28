@@ -10,6 +10,7 @@ import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.evaluateGame
 import com.dabi.partypoker.utils.generateDeck
 import com.dabi.partypoker.utils.getCards
+import kotlinx.coroutines.Job
 
 
 sealed class GameEvents{
@@ -19,7 +20,11 @@ sealed class GameEvents{
 
 class GameManager {
     companion object{
-        fun startGame(gameStateO: GameState, bank: Int = 0): GameState{
+        fun startGame(
+            gameStateO: GameState,
+//            bank: Int = 0
+        ): GameState{
+
             Log.e("", "GAME START!!")
             var gameState = gameStateO.copy()
 
@@ -85,12 +90,15 @@ class GameManager {
                 cardsDeck = generateDeck().shuffled(),
                 cardsTable = emptyList(),
                 activeRaise = null,
-                bank = bank,
+//                bank = bank,
                 playingNow = smallBlind,
                 roundStartedId = smallBlind,
                 round = 0,
-                nextGameIn = 0,
                 bigBlindRaised = false,
+
+                nextGameIn = GameState().nextGameIn,
+                gameOver = false,
+                winningCards = emptySet(),
 
                 games = games + 1
             )
@@ -270,6 +278,10 @@ class GameManager {
                 val nextPlayerIndex = ((if (afterDealer) dealerId else currentPlayerIndex) + i) % sortedSeatsWithPlayers.size
                 val playerId = sortedSeatsWithPlayers.keys.toList()[nextPlayerIndex]
 
+                if (playerId == gameState.roundStartedId && !afterDealer){
+                    return playerId
+                }
+
                 // If the player exists, check if he folded=(skip him) or not=(he will play next)
                 gameState.players[playerId]?.let {
                     if (!it.isFolded){
@@ -285,6 +297,10 @@ class GameManager {
 
 
         fun gameOver(gameState: GameState): GameState{
+            if (gameState.gameOver){
+                return gameState
+            }
+
             Log.e("", "GAME OVER")
 
             val notFolderPlayersID = gameState.gameReadyPlayers.filter { (playerId, _) ->
@@ -292,8 +308,11 @@ class GameManager {
                 player?.isFolded == false
             }.keys
 
+            gameState.gameOver = true
+
             if (notFolderPlayersID.isEmpty()){
                 Log.e("", "no one left - should not happen")
+                return gameState
             } else if (notFolderPlayersID.size == 1){
                 val winnerId = notFolderPlayersID.first()
                 gameState.players.forEach{ (_, player) ->
@@ -307,6 +326,7 @@ class GameManager {
                 }
 
                 gameState.bank = 0
+                return startGame(gameState)
             } else{
                 val notFolderPlayers = gameState.players.filter {
                     it.key in notFolderPlayersID
@@ -332,11 +352,14 @@ class GameManager {
                     cards = evaluation.second.second.first()
                 )
                 gameState.bank = restBank
+                gameState.playingNow = null
+                gameState.winningCards = evaluation.second.second.flatten().toSet()
 
-                return startGame(gameState, restBank)
+                gameState.players.forEach { (_, player) ->
+                    player.isPlayingNow = false
+                }
+                return gameState
             }
-
-            return startGame(gameState)
         }
     }
 }

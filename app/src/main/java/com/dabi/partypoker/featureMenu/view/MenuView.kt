@@ -25,7 +25,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.hilt.navigation.compose.hiltViewModel
 
@@ -68,7 +71,14 @@ fun MenuView(
     CheckPermissions(permissionsState = { permissions = it })
     BackHandler(true) {  }
 
-    Crossfade(targetState = viewPosition) {position ->
+    Crossfade(
+        targetState = viewPosition,
+        modifier = Modifier
+            .paint(
+                painterResource(id = R.drawable.game_start_background),
+                contentScale = ContentScale.Crop
+            )
+    ) {position ->
         when (position) {
             ViewPosition.MENU -> {
                 Column(

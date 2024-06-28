@@ -5,6 +5,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -69,6 +70,7 @@ import com.dabi.partypoker.featureCore.data.PlayerActionsState
 import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
 import com.dabi.partypoker.featureCore.data.colors
 import com.dabi.partypoker.featureServer.model.data.GameState
+import com.dabi.partypoker.utils.CardsCombination
 import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.evaluatePlayerCards
@@ -191,140 +193,39 @@ fun PlayerDrawItself(
         }
 
         Crossfade(
-            targetState = player.isReadyToPlay
+            targetState = player.isReadyToPlay,
+            modifier = Modifier
+                .size(
+                    width = this.maxWidth - (this.maxWidth / 2 + (playerBoxSize.width + sizeConstant.width) / 2),
+                    height = playerBoxSize.height + sizeConstant.height
+                )
+                .offset {
+                    IntOffset(
+                        x = (this@BoxWithConstraints.maxWidth / 2 + (playerBoxSize.width + sizeConstant.width) / 2)
+                            .toPx()
+                            .toInt(),
+                        y = (tablePosition.y + tableSize.height - sizeConstant.height.toPx()).toInt()
+                    )
+                }
+                .padding(end = 8.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(colors.playerButtonsColor2)
+                .padding(6.dp),
         ) { ready ->
-            if(ready){
-                PlayerActionButtonsBackground(
-                    playerBoxSize = playerBoxSize,
-                    sizeConstant = sizeConstant,
-                    tablePosition = tablePosition,
-                    tableSize = tableSize,
-                    boxWithConstraints = this
-                ){
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ){
-                        val cardsCombination = evaluatePlayerCards(
-                            tableCards = gameState.cardsTable,
-                            holeCards = player.holeCards
-                        )
-                        val id = CardsUtils.combinationsTranslationID[cardsCombination.first]
-                        id?.let {
+            Column {
+                if(ready){
+                    if (player.holeCards.isEmpty()){
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ){
                             Text(
-                                text = UiTexts.StringResource(id).asString().uppercase(),
-                                fontSize = fontSize,
+                                text = "Wait for game to start.",
+                                fontSize = fontSize * 1.5f,
                                 color = Color.White,
                                 fontWeight = FontWeight.ExtraBold,
-                                style = TextStyle(
-                                    platformStyle = PlatformTextStyle(
-                                        includeFontPadding = false
-                                    )
-                                )
-                            )
-
-                            Icon(
-                                Icons.AutoMirrored.Default.Help,
-                                contentDescription = "Help",
-                                tint = Color.White,
-                                modifier = Modifier
-                                    .clickable(
-                                        interactionSource = null,
-                                        indication = null,
-                                        onClick = {
-                                            // TODO()
-                                        }
-                                    )
-                                    .padding(start = 10.dp, end = 5.dp)
-                                    .size(fontSize.value.dp * 1.2f)
-                            )
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            ){
-                                val strength by remember(cardsCombination) { mutableStateOf(handStrength(cardsCombination)) }
-                                val animatedColor by remember(strength) {
-                                    mutableStateOf(lerp(Color.Red, Color.Green, strength))
-                                }
-                                LinearProgressIndicator(
-                                    progress = { strength },
-                                    color = animatedColor,
-                                    trackColor = colors.playerButtonsColor,
-                                    modifier = Modifier
-                                        .height(with(density) { fontSize.toDp() * 1f })
-                                        .fillMaxWidth()
-                                        .drawWithCache {
-                                            onDrawWithContent {
-                                                drawContent()
-
-                                                val spaceBetween = size.width / 5
-                                                for (i in 1..4) {
-                                                    drawLine(
-                                                        color = colors.calledMoneyColor,
-                                                        start = Offset(spaceBetween * i, 0f),
-                                                        end = Offset(spaceBetween * i, size.height),
-                                                        strokeWidth = 1.dp.toPx()
-                                                    )
-                                                }
-                                            }
-                                        }
-                                        .border(
-                                            1.dp,
-                                            colors.calledMoneyColor,
-                                            RoundedCornerShape(5.dp)
-                                        )
-                                        .clip(RoundedCornerShape(5.dp))
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.weight(0.1f))
-
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxSize(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
-                    ){
-                        Button(
-                            onClick = {
-                                if (playerActionsState.canCheck){
-                                    onPlayerEvent(PlayerEvents.Check)
-                                } else{
-                                    onPlayerEvent(PlayerEvents.Call(playerActionsState.callAmount))
-                                }
-                                raiseEnabled = false
-                            },
-                            enabled = player.isPlayingNow,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight(),
-                            shape = RoundedCornerShape(5.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = colors.buttonColor,
-                                contentColor = colors.calledMoneyColor
-                            ),
-                            border = BorderStroke(
-                                1.dp,
-                                colors.calledMoneyColor.copy(alpha = 0.5f)
-                            ),
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            Text(
-                                text =
-                                if (playerActionsState.canCheck)
-                                    UiTexts.StringResource(R.string.action_check).asString().uppercase()
-                                else
-                                    UiTexts.StringResource(R.string.action_call).asString().uppercase() + "\n" + playerActionsState.callAmount.formatNumberToString(),
-                                fontSize = fontSize * 1.2f,
-                                fontWeight = FontWeight.ExtraBold,
                                 textAlign = TextAlign.Center,
-                                color = colors.calledMoneyColor,
                                 style = TextStyle(
                                     platformStyle = PlatformTextStyle(
                                         includeFontPadding = false
@@ -332,92 +233,221 @@ fun PlayerDrawItself(
                                 ),
                             )
                         }
+                    } else{
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
+                        ){
+                            val cardsCombination = evaluatePlayerCards(
+                                tableCards = gameState.cardsTable,
+                                holeCards = player.holeCards
+                            )
+                            val id = if (cardsCombination.first == CardsCombination.NONE) null else CardsUtils.combinationsTranslationID[cardsCombination.first]
+                            id?.let {
+                                Text(
+                                    text = UiTexts.StringResource(id).asString().uppercase(),
+                                    fontSize = fontSize,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    style = TextStyle(
+                                        platformStyle = PlatformTextStyle(
+                                            includeFontPadding = false
+                                        )
+                                    )
+                                )
 
-                        Button(
-                            onClick = {
-                                if (raiseEnabled){
-                                    onPlayerEvent(PlayerEvents.Raise(raiseAmount))
-                                    raiseEnabled = false
-                                } else{
-                                    raiseEnabled = true
+                                Icon(
+                                    Icons.AutoMirrored.Default.Help,
+                                    contentDescription = "Help",
+                                    tint = Color.White,
+                                    modifier = Modifier
+                                        .clickable(
+                                            interactionSource = null,
+                                            indication = null,
+                                            onClick = {
+                                                // TODO()
+                                            }
+                                        )
+                                        .padding(start = 10.dp, end = 5.dp)
+                                        .size(fontSize.value.dp * 1.2f)
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                ){
+                                    val strength by remember(cardsCombination) { mutableStateOf(handStrength(cardsCombination)) }
+                                    val animatedColor by remember(strength) {
+                                        mutableStateOf(lerp(Color.Red, Color.Green, strength))
+                                    }
+                                    LinearProgressIndicator(
+                                        progress = { strength },
+                                        color = animatedColor,
+                                        trackColor = colors.playerButtonsColor,
+                                        modifier = Modifier
+                                            .height(with(density) { fontSize.toDp() * 1f })
+                                            .fillMaxWidth()
+                                            .drawWithCache {
+                                                onDrawWithContent {
+                                                    drawContent()
+
+                                                    val spaceBetween = size.width / 5
+                                                    for (i in 1..4) {
+                                                        drawLine(
+                                                            color = colors.calledMoneyColor,
+                                                            start = Offset(spaceBetween * i, 0f),
+                                                            end = Offset(
+                                                                spaceBetween * i,
+                                                                size.height
+                                                            ),
+                                                            strokeWidth = 1.dp.toPx()
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                            .border(
+                                                1.dp,
+                                                colors.calledMoneyColor,
+                                                RoundedCornerShape(5.dp)
+                                            )
+                                            .clip(RoundedCornerShape(5.dp))
+                                    )
                                 }
-                            },
-                            enabled = player.isPlayingNow,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                                .onGloballyPositioned {
-                                    raiseButtonPos = it.positionInRoot()
-                                    raiseButtonSize = it.size
-                                },
-                            shape = RoundedCornerShape(5.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = colors.buttonColor,
-                                contentColor = colors.calledMoneyColor
-                            ),
-                            border = BorderStroke(
-                                1.dp,
-                                colors.calledMoneyColor.copy(alpha = 0.5f)
-                            ),
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            Text(
-                                text = UiTexts.StringResource(R.string.action_raise).asString().uppercase() + if(raiseEnabled) "\n" + raiseAmount.formatNumberToString() else "",
-                                fontSize = fontSize * 1.2f,
-                                fontWeight = FontWeight.ExtraBold,
-                                textAlign = TextAlign.Center,
-                                color = colors.calledMoneyColor,
-                                style = TextStyle(
-                                    platformStyle = PlatformTextStyle(
-                                        includeFontPadding = false
-                                    )
-                                )
-                            )
+                            } ?: run {
+                                Spacer(modifier = Modifier.height(with(density) { fontSize.toDp() * 1f }))
+                            }
                         }
-                        Button(
-                            onClick = {
-                                onPlayerEvent(PlayerEvents.Fold)
-                                raiseEnabled = false
-                            },
-                            enabled = player.isPlayingNow,
+                        Spacer(modifier = Modifier.weight(0.1f))
+
+                        Row(
                             modifier = Modifier
                                 .weight(1f)
-                                .fillMaxHeight(),
-                            shape = RoundedCornerShape(5.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = colors.buttonColor,
-                                contentColor = colors.calledMoneyColor
-                            ),
-                            border = BorderStroke(
-                                1.dp,
-                                colors.calledMoneyColor.copy(alpha = 0.5f)
-                            ),
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            Text(
-                                text = UiTexts.StringResource(R.string.action_fold).asString().uppercase(),
-                                fontSize = fontSize * 1.2f,
-                                fontWeight = FontWeight.ExtraBold,
-                                textAlign = TextAlign.Center,
-                                color = colors.calledMoneyColor,
-                                style = TextStyle(
-                                    platformStyle = PlatformTextStyle(
-                                        includeFontPadding = false
+                                .fillMaxSize(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
+                        ){
+                            Button(
+                                onClick = {
+                                    if (playerActionsState.canCheck){
+                                        onPlayerEvent(PlayerEvents.Check)
+                                    } else{
+                                        onPlayerEvent(PlayerEvents.Call(playerActionsState.callAmount))
+                                    }
+                                    raiseEnabled = false
+                                },
+                                enabled = player.isPlayingNow,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                                shape = RoundedCornerShape(5.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = colors.buttonColor,
+                                    contentColor = colors.calledMoneyColor
+                                ),
+                                border = BorderStroke(
+                                    1.dp,
+                                    colors.calledMoneyColor.copy(alpha = 0.5f)
+                                ),
+                                contentPadding = PaddingValues(0.dp)
+                            ) {
+                                Text(
+                                    text =
+                                    if (playerActionsState.canCheck)
+                                        UiTexts.StringResource(R.string.action_check).asString().uppercase()
+                                    else
+                                        UiTexts.StringResource(R.string.action_call).asString().uppercase() + "\n" + playerActionsState.callAmount.formatNumberToString(),
+                                    fontSize = fontSize * 1.2f,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    textAlign = TextAlign.Center,
+                                    color = colors.calledMoneyColor,
+                                    style = TextStyle(
+                                        platformStyle = PlatformTextStyle(
+                                            includeFontPadding = false
+                                        )
+                                    ),
+                                )
+                            }
+
+                            Button(
+                                onClick = {
+                                    if (raiseEnabled){
+                                        onPlayerEvent(PlayerEvents.Raise(raiseAmount))
+                                        raiseEnabled = false
+                                    } else{
+                                        raiseEnabled = true
+                                    }
+                                },
+                                enabled = player.isPlayingNow,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                                    .onGloballyPositioned {
+                                        raiseButtonPos = it.positionInRoot()
+                                        raiseButtonSize = it.size
+                                    },
+                                shape = RoundedCornerShape(5.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = colors.buttonColor,
+                                    contentColor = colors.calledMoneyColor
+                                ),
+                                border = BorderStroke(
+                                    1.dp,
+                                    colors.calledMoneyColor.copy(alpha = 0.5f)
+                                ),
+                                contentPadding = PaddingValues(0.dp)
+                            ) {
+                                Text(
+                                    text = UiTexts.StringResource(R.string.action_raise).asString().uppercase() + if(raiseEnabled) "\n" + raiseAmount.formatNumberToString() else "",
+                                    fontSize = fontSize * 1.2f,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    textAlign = TextAlign.Center,
+                                    color = colors.calledMoneyColor,
+                                    style = TextStyle(
+                                        platformStyle = PlatformTextStyle(
+                                            includeFontPadding = false
+                                        )
                                     )
                                 )
-                            )
+                            }
+                            Button(
+                                onClick = {
+                                    onPlayerEvent(PlayerEvents.Fold)
+                                    raiseEnabled = false
+                                },
+                                enabled = player.isPlayingNow,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                                shape = RoundedCornerShape(5.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = colors.buttonColor,
+                                    contentColor = colors.calledMoneyColor
+                                ),
+                                border = BorderStroke(
+                                    1.dp,
+                                    colors.calledMoneyColor.copy(alpha = 0.5f)
+                                ),
+                                contentPadding = PaddingValues(0.dp)
+                            ) {
+                                Text(
+                                    text = UiTexts.StringResource(R.string.action_fold).asString().uppercase(),
+                                    fontSize = fontSize * 1.2f,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    textAlign = TextAlign.Center,
+                                    color = colors.calledMoneyColor,
+                                    style = TextStyle(
+                                        platformStyle = PlatformTextStyle(
+                                            includeFontPadding = false
+                                        )
+                                    )
+                                )
+                            }
                         }
                     }
-                }
-            }
-            else{
-                PlayerActionButtonsBackground(
-                    playerBoxSize = playerBoxSize,
-                    sizeConstant = sizeConstant,
-                    tablePosition = tablePosition,
-                    tableSize = tableSize,
-                    boxWithConstraints = this
-                ){
+
+                } else{
                     Button(
                         onClick = {
                             onPlayerEvent(PlayerEvents.Ready)
@@ -452,40 +482,5 @@ fun PlayerDrawItself(
                 }
             }
         }
-    }
-}
-
-
-@Composable
-fun PlayerActionButtonsBackground(
-    playerBoxSize: DpSize,
-    sizeConstant: DpSize,
-    tablePosition: Offset,
-    tableSize: IntSize,
-    boxWithConstraints: BoxWithConstraintsScope,
-
-    content: @Composable (ColumnScope.() -> Unit)
-)  {
-    Column(
-        modifier = Modifier
-            .size(
-                width = boxWithConstraints.maxWidth - (boxWithConstraints.maxWidth / 2 + (playerBoxSize.width + sizeConstant.width) / 2),
-                height = playerBoxSize.height + sizeConstant.height
-            )
-            .offset {
-                IntOffset(
-                    x = (boxWithConstraints.maxWidth / 2 + (playerBoxSize.width + sizeConstant.width) / 2)
-                        .toPx()
-                        .toInt(),
-                    y = (tablePosition.y + tableSize.height - sizeConstant.height.toPx()).toInt()
-                )
-            }
-            .padding(end = 8.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(colors.playerButtonsColor2)
-            .padding(6.dp),
-        horizontalAlignment = Alignment.Start
-    ){
-        content()
     }
 }

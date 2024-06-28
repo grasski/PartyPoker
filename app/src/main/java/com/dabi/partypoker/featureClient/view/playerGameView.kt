@@ -24,7 +24,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
@@ -32,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.dabi.partypoker.MenuScreen
 import com.dabi.partypoker.PlayerScreen
 import com.dabi.partypoker.R
@@ -69,7 +72,13 @@ fun PlayerView(
     }
 
 
-    Crossfade(targetState = clientState.connectionStatus) { connectionStatus ->
+    Crossfade(
+        targetState = clientState.connectionStatus,
+        modifier = Modifier.paint(
+            rememberAsyncImagePainter(model = R.drawable.game_background),
+            contentScale = ContentScale.FillWidth
+        )
+    ) { connectionStatus ->
         when (connectionStatus) {
             ConnectionStatusEnum.NONE, ConnectionStatusEnum.CONNECTING -> {
                 Box(
@@ -108,12 +117,12 @@ fun PlayerView(
             ConnectionStatusEnum.CONNECTED -> {
                 when(clientState.serverType){
                     ServerType.IS_TABLE -> {
-                        PlayerViewPrivate(
-                            navController,
-                            playerState,
-                            playerActionsState,
-                            onPlayerEvent = playerViewModel::onPlayerEvent
-                        )
+//                        PlayerViewPrivate(
+//                            navController,
+//                            playerState,
+//                            playerActionsState,
+//                            onPlayerEvent = playerViewModel::onPlayerEvent
+//                        )
                     }
                     ServerType.IS_PLAYER -> {
                         val gameState by playerViewModel.gameState.collectAsStateWithLifecycle()
