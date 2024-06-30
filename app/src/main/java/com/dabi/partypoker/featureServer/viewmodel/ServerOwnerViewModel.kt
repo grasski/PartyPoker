@@ -1,7 +1,6 @@
 package com.dabi.partypoker.featureServer.viewmodel
 
 import android.util.Log
-import androidx.annotation.IntRange
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dabi.partypoker.R
@@ -13,9 +12,7 @@ import com.dabi.partypoker.featureServer.model.ServerBridgeEvents
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.MessageData
 import com.dabi.partypoker.featureServer.model.data.SeatPosition
-import com.dabi.partypoker.featureServer.model.data.ServerState
 import com.dabi.partypoker.managers.ServerEvents
-import com.dabi.partypoker.managers.ServerType
 import com.dabi.partypoker.utils.ClientPayloadType
 import com.dabi.partypoker.utils.ServerPayloadType
 import com.dabi.partypoker.utils.UiTexts
@@ -41,8 +38,8 @@ open class ServerOwnerViewModel@Inject constructor(
     protected val _gameState = MutableStateFlow(GameState())
     val gameState = _gameState.asStateFlow()
 
-    private val _playerMoveTimer = MutableStateFlow(_gameState.value.playerTimerDuration)
-    val playerMoveTimer = _playerMoveTimer.asStateFlow()
+    private val _playerMoveTimerMillis = MutableStateFlow(_gameState.value.playerTimerDurationMillis)
+    val playerMoveTimerMillis = _playerMoveTimerMillis.asStateFlow()
     private val _gameOverTimer = MutableStateFlow(_gameState.value.nextGameIn)
     val gameOverTimer = _gameOverTimer.asStateFlow()
     private var timerJob: Job? = null
@@ -78,14 +75,13 @@ open class ServerOwnerViewModel@Inject constructor(
                     async {
                         while (_gameOverTimer.value > 0){
                             Log.e("", "GAME OVER TIMER: " + _gameOverTimer.value)
-                            _gameOverTimer.value --
                             delay(1000)
+                            _gameOverTimer.value --
                         }
                         _gameState.update { GameManager.startGame(_gameState.value).copy() }
                         handlePlayingPlayer()
                         _gameOverTimer.value = _gameState.value.nextGameIn
                     }
-                    Log.e("", "LALALA: " + _gameOverTimer.value)
                 }
             }
         }
@@ -109,19 +105,18 @@ open class ServerOwnerViewModel@Inject constructor(
     }
 
     private fun handlePlayingPlayer(){
-        _playerMoveTimer.update { _gameState.value.playerTimerDuration }
+        _playerMoveTimerMillis.update { _gameState.value.playerTimerDurationMillis }
 
         timerJob?.cancel()
         timerJob = this.viewModelScope.launch {
-            while (_playerMoveTimer.value > 0){
+            while (_playerMoveTimerMillis.value > 0){
                 if (!_gameState.value.started || _gameState.value.gameOver) {
                     timerJob?.cancel()
                     this.cancel()
                 }
-                _playerMoveTimer.value --
                 delay(1000)
-
-                Log.e("ServerOwnerViewModel", "Timer: " + _playerMoveTimer.value)
+                _playerMoveTimerMillis.value -= 1000
+                Log.e("", "TIMER: " + _playerMoveTimerMillis.value)
             }
             Log.e("ServerOwnerViewModel", "KONEC TIMER")
             timeOutAutoMove()
@@ -170,6 +165,7 @@ open class ServerOwnerViewModel@Inject constructor(
 
                 _gameState.update { gameState ->
                     gameState.copy(
+                        bank = gameState.bank + (gameState.players[clientID]?.called ?: 0),
                         players = gameState.players.filter { it.key != clientID },
                         seatPositions = gameState.seatPositions.filter { it.key != clientID },
 
@@ -190,6 +186,7 @@ open class ServerOwnerViewModel@Inject constructor(
                     _gameState.update {
                         GameManager.gameOver(it).copy()
                     }
+                    handlePlayingPlayer()
                 }
             }
 
@@ -254,103 +251,91 @@ open class ServerOwnerViewModel@Inject constructor(
 
                     ClientPayloadType.ACTION_CHECK -> {
                         if (_gameState.value.playingNow != clientID){ return }
+                        timerJob?.cancel()
 
-                        if (_playerMoveTimer.value > 0){
-                            timerJob?.cancel()
-
-                            _gameState.update { GameManager.movePlayedCheckRound(_gameState.value).copy() }
-                            handlePlayingPlayer()
-                        }
+                        _gameState.update { GameManager.movePlayedCheckRound(_gameState.value).copy() }
+                        handlePlayingPlayer()
                     }
                     ClientPayloadType.ACTION_CALL -> {
                         if (_gameState.value.playingNow != clientID){ return }
+                        timerJob?.cancel()
 
-                        if (_playerMoveTimer.value > 0){
-                            timerJob?.cancel()
+                        val player = _gameState.value.players[clientID]
+                        player?.let { p ->
+                            _gameState.value.activeRaise?.let {
+                                val amount = it.second.minus(p.called)
+                                if (p.called > it.second || amount > p.money){ return } // Should never happen
 
-                            val player = _gameState.value.players[clientID]
-                            player?.let { p ->
-                                _gameState.value.activeRaise?.let {
-                                    val amount = it.second.minus(p.called)
-                                    if (p.called > it.second || amount > p.money){ return } // Should never happen
+                                var tempGameState = _gameState.value.copy()
 
-                                    var tempGameState = _gameState.value.copy()
-
-                                    tempGameState.players.forEach { (_, player) ->
-                                        if (player.id == _gameState.value.playingNow){
-                                            player.money -= amount
-                                            player.called += amount
-                                        }
+                                tempGameState.players.forEach { (_, player) ->
+                                    if (player.id == _gameState.value.playingNow){
+                                        player.money -= amount
+                                        player.called += amount
                                     }
-                                    tempGameState.bank += amount
-                                    tempGameState = GameManager.movePlayedCheckRound(tempGameState)
-
-                                    _gameState.update { tempGameState.copy() }
-                                    handlePlayingPlayer()
                                 }
+//                                tempGameState.bank += amount
+                                tempGameState = GameManager.movePlayedCheckRound(tempGameState)
+
+                                _gameState.update { tempGameState.copy() }
+                                handlePlayingPlayer()
                             }
                         }
                     }
                     ClientPayloadType.ACTION_RAISE -> {
                         if (_gameState.value.playingNow != clientID){ return }
+                        timerJob?.cancel()
 
-                        if (_playerMoveTimer.value > 0){
-                            timerJob?.cancel()
+                        val amount = Gson().fromJson(data.toString(), Int::class.java)
+                        val player = _gameState.value.players[clientID]
+                        player?.let { p ->
+                            var tempGameState = _gameState.value.copy()
 
-                            val amount = Gson().fromJson(data.toString(), Int::class.java)
-                            val player = _gameState.value.players[clientID]
-                            player?.let { p ->
-                                var tempGameState = _gameState.value.copy()
+                            tempGameState.activeRaise?.let { (raiserId, activeRaisedAmount) ->
+                                val callAmount = activeRaisedAmount.minus(p.called) // Amount which player had to call if chose CALL option
+                                val raisedAmount = amount - callAmount
+                                if (amount < callAmount || amount > p.money){ return }
 
-                                tempGameState.activeRaise?.let { (raiserId, activeRaisedAmount) ->
-                                    val callAmount = activeRaisedAmount.minus(p.called) // Amount which player had to call if chose CALL option
-                                    val raisedAmount = amount - callAmount
-                                    if (amount < callAmount || amount > p.money){ return }
-
-                                    tempGameState.players.forEach { (_, player) ->
-                                        if (player.id == _gameState.value.playingNow){
-                                            player.money -= (callAmount + raisedAmount)
-                                            player.called += (callAmount + raisedAmount)
-                                        }
+                                tempGameState.players.forEach { (_, player) ->
+                                    if (player.id == _gameState.value.playingNow){
+                                        player.money -= (callAmount + raisedAmount)
+                                        player.called += (callAmount + raisedAmount)
                                     }
-                                    tempGameState.bank += (callAmount + raisedAmount)
-                                    tempGameState.activeRaise = Pair(clientID, (activeRaisedAmount + raisedAmount))
-                                }?: run {
-                                    tempGameState.players.forEach { (_, player) ->
-                                        if (player.id == _gameState.value.playingNow){
-                                            player.money -= amount
-                                            player.called += amount
-                                        }
-                                    }
-                                    tempGameState.bank += amount
-                                    tempGameState.activeRaise = Pair(clientID, amount)
                                 }
-
-                                tempGameState = GameManager.movePlayedCheckRound(tempGameState)
-                                _gameState.update { tempGameState.copy() }
-                                handlePlayingPlayer()
+//                                tempGameState.bank += (callAmount + raisedAmount)
+                                tempGameState.activeRaise = Pair(clientID, (activeRaisedAmount + raisedAmount))
+                            }?: run {
+                                tempGameState.players.forEach { (_, player) ->
+                                    if (player.id == _gameState.value.playingNow){
+                                        player.money -= amount
+                                        player.called += amount
+                                    }
+                                }
+//                                tempGameState.bank += amount
+                                tempGameState.activeRaise = Pair(clientID, amount)
                             }
+
+                            tempGameState = GameManager.movePlayedCheckRound(tempGameState)
+                            _gameState.update { tempGameState.copy() }
+                            handlePlayingPlayer()
                         }
                     }
                     ClientPayloadType.ACTION_FOLD -> {
                         if (_gameState.value.playingNow != clientID){ return }
+                        timerJob?.cancel()
 
-                        if (_playerMoveTimer.value > 0) {
-                            timerJob?.cancel()
-
-                            val player = _gameState.value.players[clientID]
-                            player?.let { p ->
-                                var tempGameState = _gameState.value.copy()
-                                tempGameState.players.forEach { (_, player) ->
-                                    if (player.id == _gameState.value.playingNow) {
-                                        player.isFolded = true
-                                    }
+                        val player = _gameState.value.players[clientID]
+                        player?.let { p ->
+                            var tempGameState = _gameState.value.copy()
+                            tempGameState.players.forEach { (_, player) ->
+                                if (player.id == _gameState.value.playingNow) {
+                                    player.isFolded = true
                                 }
-
-                                tempGameState = GameManager.movePlayedCheckRound(tempGameState)
-                                _gameState.update { tempGameState.copy() }
-                                handlePlayingPlayer()
                             }
+
+                            tempGameState = GameManager.movePlayedCheckRound(tempGameState)
+                            _gameState.update { tempGameState.copy() }
+                            handlePlayingPlayer()
                         }
                     }
                 }

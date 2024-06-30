@@ -1,8 +1,16 @@
 package com.dabi.partypoker.featureCore.views
 
+import android.util.Log
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.with
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,6 +44,7 @@ import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -131,7 +140,7 @@ fun GameTable(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ){
-        if (gameState.started){
+        if (gameState.started || !isServer){
             Row(
                 modifier = Modifier
                     .fillMaxWidth(.60f),
@@ -140,11 +149,20 @@ fun GameTable(
             ) {
                 for (i in 0..4){
                     val card = gameState.cardsTable.getOrNull(i)
-                    CardBox(
-                        card = card,
-                        modifier = Modifier.weight(1f),
-                        winningCards = gameState.winningCards
-                    )
+                    card?.let {
+                        val cardId = CardsUtils.cardIDs[card.type.name.lowercase() + "_" + card.value]
+                        CardBox(
+                            cardId,
+                            Modifier
+                                .padding(5.dp)
+                                .border(1.dp, Color.White.copy(alpha = 1f), RoundedCornerShape(6.dp))
+                                .padding(5.dp)
+                                .weight(1f)
+                                .glowItem(3.dp, card in gameState.winningCards)
+                        )
+                    } ?: run {
+                        CardBox(null, Modifier.weight(1f))
+                    }
                 }
             }
 
@@ -174,14 +192,15 @@ fun GameTable(
                             .background(Color.Black, RoundedCornerShape(8.dp)),
                         contentAlignment = Alignment.Center
                     ){
-                        Text(
-                            text = gameState.bank.formatNumberToString(),
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            fontSize = fontSize,
-                            maxLines = 1,
-                            color = Color.White,
-                            style = TextStyle(
+                        ShowMoneyAnimated(
+                            amount = gameState.bank,
+                            isGameOver = gameState.gameOver,
+                            spinningDuration = gameState.nextGameIn / 2 *1000,
+                            textStyle = TextStyle(
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                fontSize = fontSize,
+                                color = Color.White,
                                 platformStyle = PlatformTextStyle(
                                     includeFontPadding = false
                                 )
@@ -232,12 +251,10 @@ fun GameTable(
                 }
             }
         } else{
-            if (isServer){
-                Button(onClick = {
-                    onGameEvent(GameEvents.StartGame)
-                }) {
-                    Text(text = "Start the game")
-                }
+            Button(onClick = {
+                onGameEvent(GameEvents.StartGame)
+            }) {
+                Text(text = "Start the game")
             }
         }
     }
@@ -245,33 +262,14 @@ fun GameTable(
 
 
 @Composable
-fun CardBox(card: Card?, modifier: Modifier, winningCards: Set<Card>) {
-    var showEmpty by remember { mutableStateOf(true) }
-
-    card?.let {
-        showEmpty = true
-        val cardId = CardsUtils.cardIDs[card.type.name.lowercase() + "_" + card.value]
-        cardId?.let { id ->
-            showEmpty = false
-            Image(
-                painter = painterResource(id = id),
-                contentDescription = "card",
-                modifier = modifier
-                    .padding(5.dp)
-                    .border(1.dp, Color.White.copy(alpha = 1f), RoundedCornerShape(6.dp))
-                    .padding(5.dp)
-
-                    .glowItem(
-                        itemCornerRadius = 3.dp,
-                        active = card in winningCards
-                    )
-            )
-        }
+fun CardBox(cardId: Int?, modifier: Modifier) {
+    cardId?.let { id ->
+        Image(
+            painter = painterResource(id = id),
+            contentDescription = "card",
+            modifier = modifier
+        )
     } ?: run {
-        showEmpty = true
-    }
-
-    if (showEmpty){
         Image(
             painter = painterResource(id = R.drawable.clubs_2),
             contentDescription = "card",
@@ -285,6 +283,7 @@ fun CardBox(card: Card?, modifier: Modifier, winningCards: Set<Card>) {
 }
 
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun PlayerBox(
     size: DpSize,
@@ -329,7 +328,7 @@ fun PlayerBox(
         animationTimer.animateTo(
             targetValue = if (!playerState.isPlayingNow) 360f else 0f,
             animationSpec = tween(
-                durationMillis = gameState.playerTimerDuration * 1000,
+                durationMillis = gameState.playerTimerDurationMillis - 150,
                 easing = LinearEasing
             )
         )
@@ -550,23 +549,27 @@ fun PlayerBox(
                             ),
                             modifier = Modifier.weight(0.8f)
                         )
-                        Text(
-                            text = playerState.money.formatNumberToString(),
-                            color = Color.Green,
-                            maxLines = 1,
-                            textAlign = TextAlign.Center,
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f),
-                            overflow = TextOverflow.Clip,
-                            style = TextStyle(
-                                platformStyle = PlatformTextStyle(
-                                    includeFontPadding = false
-                                ),
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = fontSize*1.4
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ){
+                            ShowMoneyAnimated(
+                                amount = playerState.money,
+                                isGameOver = gameState.gameOver,
+                                spinningDuration = gameState.nextGameIn / 2 *1000,
+                                textStyle = TextStyle(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    textAlign = TextAlign.Center,
+                                    fontSize = fontSize * 1.4f,
+                                    color = Color.Green,
+
+                                    platformStyle = PlatformTextStyle(
+                                        includeFontPadding = false
+                                    )
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }

@@ -24,7 +24,6 @@ class GameManager {
             gameStateO: GameState,
 //            bank: Int = 0
         ): GameState{
-
             Log.e("", "GAME START!!")
             var gameState = gameStateO.copy()
 
@@ -123,7 +122,7 @@ class GameManager {
                     }
                 }
             }
-            gameState.bank += gameState.smallBlindAmount + gameState.bigBlindAmount
+//            gameState.bank += gameState.smallBlindAmount + gameState.bigBlindAmount
 
             val playingNow = getPlayingNow(2, gameState)
             if (playingNow == null){
@@ -167,7 +166,8 @@ class GameManager {
                     round = gameState.round + 1,
                     activeRaise = null,
                     playingNow = playingFirstAfterDealerId,
-                    roundStartedId = playingFirstAfterDealerId
+                    roundStartedId = playingFirstAfterDealerId,
+                    bank = gameState.bank + gameState.players.values.sumOf { it.called }
                 )
                 gameState.players.forEach { (_, player) ->
                     player.called = 0
@@ -297,10 +297,9 @@ class GameManager {
 
 
         fun gameOver(gameState: GameState): GameState{
-            if (gameState.gameOver){
+            if (gameState.gameOver || !gameState.started){
                 return gameState
             }
-
             Log.e("", "GAME OVER")
 
             val notFolderPlayersID = gameState.gameReadyPlayers.filter { (playerId, _) ->
@@ -309,6 +308,7 @@ class GameManager {
             }.keys
 
             gameState.gameOver = true
+            gameState.bank += gameState.players.values.sumOf { it.called }
 
             if (notFolderPlayersID.isEmpty()){
                 Log.e("", "no one left - should not happen")

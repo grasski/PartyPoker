@@ -129,7 +129,9 @@ fun PlayerDrawItself(
         var raiseButtonSize by remember { mutableStateOf(IntSize.Zero) }
         var raiseAmount by remember { mutableStateOf(playerActionsState.raiseAmount) }
         var raiseEnabled by remember { mutableStateOf(false) }
-
+        LaunchedEffect(player.isPlayingNow){
+            raiseEnabled = false
+        }
         if (raiseEnabled){
             Column(
                 modifier = Modifier
@@ -164,30 +166,35 @@ fun PlayerDrawItself(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ){
-                    RaiseSlider(
-                        modifier = Modifier
-                            .weight(2f),
-                        valueRange = playerActionsState.raiseAmount.toFloat() .. player.money.toFloat()
-                    ){
-                        raiseAmount = it
+                    if (playerActionsState.raiseAmount.toFloat() > player.money.toFloat()){
+                        Text(text = "Not enought money to raise")
+                    } else{
+                        RaiseSlider(
+                            modifier = Modifier
+                                .weight(2f),
+                            valueRange = playerActionsState.raiseAmount.toFloat() .. player.money.toFloat()
+                        ){
+                            raiseAmount = it
+                        }
+                        
+                        Button(
+                            onClick = {
+                                raiseEnabled = false
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth(0.2f),
+                            shape = RoundedCornerShape(10.dp),
+                            contentPadding = PaddingValues(0.dp)
+                        ){
+                            Text(
+                                text = "CANCEL",
+                                fontSize = fontSize,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
 
-                    Button(
-                        onClick = {
-                            raiseEnabled = false
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth(0.2f),
-                        shape = RoundedCornerShape(10.dp),
-                        contentPadding = PaddingValues(0.dp)
-                    ){
-                        Text(
-                            text = "CANCEL",
-                            fontSize = fontSize,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
-                    }
                 }
             }
         }
