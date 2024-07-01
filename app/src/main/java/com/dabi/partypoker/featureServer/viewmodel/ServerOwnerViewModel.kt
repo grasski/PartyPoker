@@ -55,20 +55,18 @@ open class ServerOwnerViewModel@Inject constructor(
     init {
         viewModelScope.launch {
             _gameState.collect { gameState ->
-                if (gameState.playingNow != null && gameState.playingNow !in gameState.players.keys){
+                if ((gameState.playingNow != null && gameState.playingNow !in gameState.players.keys) || gameState.players[gameState.playingNow]?.isFolded == true){
                     autoFold()
                     return@collect
                 }
+
                 gameState.players.forEach { (index, player) ->
                     Log.e("ServerOwnerViewModel", "SENDING TO Player: $player")
                     val serverPayloadType = toServerPayload(ServerPayloadType.UPDATE_CLIENT, player)
                     serverBridge.sendPayload(index, serverPayloadType)
                 }
-
-
                 val serverPayload = toServerPayload(ServerPayloadType.UPDATE_GAME_STATE, gameState)
                 serverBridge.sendPayload(serverPayload)
-
 
                 if (gameState.gameOver && _gameOverTimer.value >= gameState.nextGameIn){
                     timerJob?.cancel()
@@ -114,7 +112,7 @@ open class ServerOwnerViewModel@Inject constructor(
                     timerJob?.cancel()
                     this.cancel()
                 }
-                delay(1000)
+                delay(1030)
                 _playerMoveTimerMillis.value -= 1000
                 Log.e("", "TIMER: " + _playerMoveTimerMillis.value)
             }
@@ -258,13 +256,13 @@ open class ServerOwnerViewModel@Inject constructor(
                     }
                     ClientPayloadType.ACTION_CALL -> {
                         if (_gameState.value.playingNow != clientID){ return }
-                        timerJob?.cancel()
 
                         val player = _gameState.value.players[clientID]
                         player?.let { p ->
                             _gameState.value.activeRaise?.let {
                                 val amount = it.second.minus(p.called)
-                                if (p.called > it.second || amount > p.money){ return } // Should never happen
+                                if (p.called > it.second || amount > p.money){ return }
+                                timerJob?.cancel()
 
                                 var tempGameState = _gameState.value.copy()
 
@@ -280,11 +278,10 @@ open class ServerOwnerViewModel@Inject constructor(
                                 _gameState.update { tempGameState.copy() }
                                 handlePlayingPlayer()
                             }
-                        }
+                        } ?: run { timerJob?.cancel() }
                     }
                     ClientPayloadType.ACTION_RAISE -> {
                         if (_gameState.value.playingNow != clientID){ return }
-                        timerJob?.cancel()
 
                         val amount = Gson().fromJson(data.toString(), Int::class.java)
                         val player = _gameState.value.players[clientID]
@@ -294,7 +291,9 @@ open class ServerOwnerViewModel@Inject constructor(
                             tempGameState.activeRaise?.let { (raiserId, activeRaisedAmount) ->
                                 val callAmount = activeRaisedAmount.minus(p.called) // Amount which player had to call if chose CALL option
                                 val raisedAmount = amount - callAmount
+                                Log.e("", "AMOUNT: " + amount + " RAISED: " + raisedAmount + " CALL: " + callAmount)
                                 if (amount < callAmount || amount > p.money){ return }
+                                timerJob?.cancel()
 
                                 tempGameState.players.forEach { (_, player) ->
                                     if (player.id == _gameState.value.playingNow){
@@ -305,6 +304,9 @@ open class ServerOwnerViewModel@Inject constructor(
 //                                tempGameState.bank += (callAmount + raisedAmount)
                                 tempGameState.activeRaise = Pair(clientID, (activeRaisedAmount + raisedAmount))
                             }?: run {
+                                if (amount > p.money){ return }
+                                timerJob?.cancel()
+
                                 tempGameState.players.forEach { (_, player) ->
                                     if (player.id == _gameState.value.playingNow){
                                         player.money -= amount
@@ -318,7 +320,7 @@ open class ServerOwnerViewModel@Inject constructor(
                             tempGameState = GameManager.movePlayedCheckRound(tempGameState)
                             _gameState.update { tempGameState.copy() }
                             handlePlayingPlayer()
-                        }
+                        } ?: run { timerJob?.cancel() }
                     }
                     ClientPayloadType.ACTION_FOLD -> {
                         if (_gameState.value.playingNow != clientID){ return }

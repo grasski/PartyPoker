@@ -3,38 +3,56 @@ package com.dabi.partypoker.featureCore.views
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.InfiniteRepeatableSpec
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Matrix
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathMeasure
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
@@ -262,4 +280,62 @@ fun ShowMoneyAnimated(
             }
         }
     }
+}
+
+
+@Composable
+fun Modifier.animatedBorder(
+    animate: Boolean,
+    durationMillis: Int,
+    colorStart: Color,
+    colorStop: Color,
+    borderPath: Path,
+    vararg changeStateKeys: Any?
+): Modifier {
+    val animationTimer = remember {
+        Animatable(
+            initialValue = if (animate) 360f else 0f
+        )
+    }
+    LaunchedEffect(*changeStateKeys) {
+        animationTimer.snapTo(360f)
+
+        animationTimer.animateTo(
+            targetValue = if (!animate) 360f else 0f,
+            animationSpec = tween(
+                durationMillis = durationMillis,
+                easing = LinearEasing
+            )
+        )
+    }
+
+    val animatedColor by remember {
+        derivedStateOf { lerp(colorStart, colorStop, animationTimer.value/360) }
+    }
+
+    // help of: https://github.com/SmartToolFactory/Jetpack-Compose-Tutorials/blob/master/Tutorial1-1Basics/src/main/java/com/smarttoolfactory/tutorial1_1basics/chapter6_graphics/Tutorial6_13BorderProgressTimer.kt
+    val pathWithProgress by remember { mutableStateOf(Path()) }
+    val pathMeasure by remember { mutableStateOf(PathMeasure()) }
+    val path = borderPath
+    return this
+        .drawBehind {
+            pathWithProgress.reset()
+
+            pathMeasure.setPath(path, forceClosed = false)
+            pathMeasure.getSegment(
+                startDistance = 0f,
+                stopDistance = pathMeasure.length * animationTimer.value/360,
+                pathWithProgress,
+                startWithMoveTo = true
+            )
+
+            drawPath(
+                path = pathWithProgress,
+                style = Stroke(
+                    7.dp.toPx(),
+                    cap = StrokeCap.Round,
+                ),
+                color = if (animate) animatedColor else Color.Transparent
+            )
+        }
 }

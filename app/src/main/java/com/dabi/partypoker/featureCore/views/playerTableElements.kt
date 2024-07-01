@@ -30,12 +30,26 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.PlusOne
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -46,7 +60,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
@@ -163,15 +180,14 @@ fun PlayerDrawItself(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(5.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically
                 ){
                     if (playerActionsState.raiseAmount.toFloat() > player.money.toFloat()){
                         Text(text = "Not enought money to raise")
                     } else{
                         RaiseSlider(
-                            modifier = Modifier
-                                .weight(2f),
+                            modifier = Modifier.weight(1f),
                             valueRange = playerActionsState.raiseAmount.toFloat() .. player.money.toFloat()
                         ){
                             raiseAmount = it
@@ -379,14 +395,16 @@ fun PlayerDrawItself(
 
                             Button(
                                 onClick = {
-                                    if (raiseEnabled){
-                                        onPlayerEvent(PlayerEvents.Raise(raiseAmount))
-                                        raiseEnabled = false
-                                    } else{
-                                        raiseEnabled = true
-                                    }
+                                    if (playerActionsState.raiseAmount <= player.money){
+                                        if (raiseEnabled){
+                                            onPlayerEvent(PlayerEvents.Raise(raiseAmount))
+                                            raiseEnabled = false
+                                        } else{
+                                            raiseEnabled = true
+                                        }
+                                    } else{ raiseEnabled = false }
                                 },
-                                enabled = player.isPlayingNow,
+                                enabled = player.isPlayingNow && playerActionsState.raiseAmount <= player.money,
                                 modifier = Modifier
                                     .weight(1f)
                                     .fillMaxHeight()
@@ -405,19 +423,33 @@ fun PlayerDrawItself(
                                 ),
                                 contentPadding = PaddingValues(0.dp)
                             ) {
-                                Text(
-                                    text = UiTexts.StringResource(R.string.action_raise).asString().uppercase() + if(raiseEnabled) "\n" + raiseAmount.formatNumberToString() else "",
-                                    fontSize = fontSize * 1.2f,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    textAlign = TextAlign.Center,
-                                    color = colors.calledMoneyColor,
-                                    style = TextStyle(
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ){
+                                    val textStyle = TextStyle(
+                                        fontSize = fontSize * 1.2f,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        textAlign = TextAlign.Center,
+                                        color = colors.calledMoneyColor,
                                         platformStyle = PlatformTextStyle(
                                             includeFontPadding = false
                                         )
                                     )
-                                )
+                                    Text(
+                                        text = UiTexts.StringResource(R.string.action_raise).asString().uppercase(),
+                                        style = textStyle
+                                    )
+                                    if (raiseEnabled){
+                                        ShowMoneyAnimated(
+                                            raiseAmount,
+                                            false,
+                                            0,
+                                            textStyle = textStyle
+                                        )
+                                    }
+                                }
                             }
+
                             Button(
                                 onClick = {
                                     onPlayerEvent(PlayerEvents.Fold)
@@ -489,5 +521,93 @@ fun PlayerDrawItself(
                 }
             }
         }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RaiseSlider(
+    modifier: Modifier = Modifier,
+    valueRange: ClosedFloatingPointRange<Float>,
+    valueF: (Int) -> Unit
+) {
+    val sliderState by remember { mutableStateOf(
+        SliderState(
+            valueRange = valueRange,
+            value = valueRange.start
+        )
+    ) }
+    valueF(sliderState.value.toInt())
+
+    var sliderSize by remember { mutableStateOf(IntSize.Zero) }
+    Row(
+        modifier = modifier
+            .onGloballyPositioned { sliderSize = it.size },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
+    ){
+        Icon(
+            Icons.Filled.Remove,
+            "",
+            modifier = Modifier
+                .border(1.dp, Color.White, RoundedCornerShape(8.dp))
+                .clickable(
+                    indication = null,
+                    interactionSource = null,
+                    onClick = {
+                        sliderState.value = (Math.round((sliderState.value - GameState().bigBlindAmount) / 10) * 10).toFloat()
+                    }
+                ),
+            tint = colors.calledMoneyColor
+        )
+
+        Slider(
+            state = sliderState,
+            modifier = Modifier.weight(1f),
+            thumb = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxHeight(0.8f)
+                        .border(2.dp, Color.White, RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(colors.calledMoneyColor),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ){
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        "",
+                        tint = Color.White
+                    )
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        "",
+                        tint = Color.White
+                    )
+                }
+            },
+            track = {
+                HorizontalDivider(
+                    modifier = Modifier
+                        .background(Color.Yellow)
+                )
+            }
+        )
+
+        Icon(
+            Icons.Filled.Add,
+            "",
+            modifier = Modifier
+                .border(1.dp, Color.White, RoundedCornerShape(8.dp))
+                .clickable(
+                    indication = null,
+                    interactionSource = null,
+                    onClick = {
+                        sliderState.value = (Math.round((sliderState.value + GameState().bigBlindAmount) / 10) * 10).toFloat()
+                    }
+                ),
+            tint = colors.calledMoneyColor
+        )
     }
 }

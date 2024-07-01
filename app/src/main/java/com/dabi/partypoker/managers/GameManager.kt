@@ -215,6 +215,10 @@ class GameManager {
 
                             // Big blind RAISED in round 1
                             if (raiserId == gameState.bigBlindId){
+                                // INFO: this can make "playingNow" player who folded and been "roundStartedId" (so basically first player after BigBlind)
+                                // quick fixed in _gameState.collect (ServerOwnerViewModel) first condition '|| gameState.players[gameState.playingNow]?.isFolded == true'
+                                // this will apply autoFold on the player to get new 'playingNow'
+
                                 gameState.bigBlindRaised = true
                                 gameState.playingNow = playingNextId
                             } else{

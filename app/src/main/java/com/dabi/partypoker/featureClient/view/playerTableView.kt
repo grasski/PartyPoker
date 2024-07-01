@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,7 +21,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.dabi.partypoker.MenuScreen
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureCore.data.PlayerActionsState

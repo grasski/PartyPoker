@@ -1,16 +1,9 @@
 package com.dabi.partypoker.featureCore.views
 
-import android.util.Log
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
-import androidx.compose.animation.with
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -44,7 +37,6 @@ import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,7 +68,6 @@ import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
@@ -95,7 +86,6 @@ import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.MessageData
 import com.dabi.partypoker.managers.GameEvents
 import com.dabi.partypoker.managers.ServerType
-import com.dabi.partypoker.utils.Card
 import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.formatNumberToString
 
@@ -119,6 +109,7 @@ fun GameTable(
         playerBoxSize = { playerBoxSize = it },
         fontSize = { fontSize = it }
     )
+    val density = LocalDensity.current
 
     Column(
         modifier = modifier
@@ -141,9 +132,25 @@ fun GameTable(
         verticalArrangement = Arrangement.Center
     ){
         if (gameState.started || !isServer){
+            var sizeOfCardsSpace by remember { mutableStateOf(IntSize.Zero) }
             Row(
                 modifier = Modifier
-                    .fillMaxWidth(.60f),
+                    .onGloballyPositioned { sizeOfCardsSpace = it.size }
+                    .fillMaxWidth(.60f)
+                    .animatedBorder(
+                        animate = gameState.gameOver,
+                        durationMillis = gameState.nextGameIn*1000 - 250,
+                        colorStart = Color.Red,
+                        colorStop = Color.Green,
+                        borderPath = Path().apply {
+                            reset()
+                            lineTo(
+                                x = with(density) { sizeOfCardsSpace.width.toDp().toPx() },
+                                y = 0f
+                            )
+                        },
+                        changeStateKeys = arrayOf(gameState.gameOver)
+                    ),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
@@ -283,7 +290,6 @@ fun CardBox(cardId: Int?, modifier: Modifier) {
 }
 
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun PlayerBox(
     size: DpSize,
@@ -315,28 +321,6 @@ fun PlayerBox(
             )
         )
     }
-
-
-    val animationTimer = remember {
-        Animatable(
-            initialValue = if (playerState.isPlayingNow) 360f else 0f
-        )
-    }
-    LaunchedEffect(playerState.isPlayingNow, gameState.round, gameState.games) {
-        animationTimer.snapTo(360f)
-
-        animationTimer.animateTo(
-            targetValue = if (!playerState.isPlayingNow) 360f else 0f,
-            animationSpec = tween(
-                durationMillis = gameState.playerTimerDurationMillis - 150,
-                easing = LinearEasing
-            )
-        )
-    }
-    val animatedColor by remember {
-        derivedStateOf { lerp(Color.Red, Color.Green, animationTimer.value/360) }
-    }
-
 
     Box{
         when(layoutDirection){
@@ -494,21 +478,23 @@ fun PlayerBox(
                 Box(
                     modifier = Modifier
                         .size(circleSize)
+                        .animatedBorder(
+                            animate = playerState.isPlayingNow,
+                            durationMillis = gameState.playerTimerDurationMillis - 250,
+                            colorStart = Color.Red,
+                            colorStop = Color.Green,
+                            borderPath = Path().apply {
+                                addArc(
+                                    oval = Rect(offset = Offset.Zero, size = with (density) { Size(circleSize.toPx(), circleSize.toPx()) }),
+                                    startAngleDegrees = -90f,
+                                    sweepAngleDegrees = -360f,
+                                )
+                            },
+                            changeStateKeys = arrayOf(playerState.isPlayingNow, gameState.round, gameState.games)
+                        )
                         .clip(CircleShape)
                         .background(Color.White)
                         .border(1.dp, Color.Black.copy(alpha = 0.5f), CircleShape)
-                        .drawBehind {
-                            drawArc(
-                                color = if (playerState.isPlayingNow) animatedColor else Color.Transparent,
-                                startAngle = -90f,
-                                sweepAngle = -animationTimer.value,
-                                useCenter = false,
-                                style = Stroke(
-                                    10.dp.toPx(),
-                                    cap = StrokeCap.Round,
-                                ),
-                            )
-                        }
                         .padding(10.dp)
                         .paint(
                             painter = painterResource(id = R.drawable.player_1),
@@ -892,54 +878,6 @@ fun DrawPlayersByPosition(
             }
         }
     }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun RaiseSlider(
-    modifier: Modifier = Modifier,
-    valueRange: ClosedFloatingPointRange<Float>,
-    valueF: (Int) -> Unit
-) {
-    val sliderState by remember { mutableStateOf(
-        SliderState(
-            valueRange = valueRange,
-            value = valueRange.start
-        )
-    ) }
-    valueF(sliderState.value.toInt())
-
-    Slider(
-        state = sliderState,
-        modifier = modifier,
-//        thumb = {
-//            Column(
-//                modifier = Modifier
-//            ) {
-//                Box(
-//                    Modifier
-//                        .size(16.dp)
-//                        .clip(CircleShape)
-//                        .background(Color.Green)
-//                )
-//                Text(text = sliderState.value.toInt().formatNumberToString())
-//            }
-//        },
-//        track = {
-//            Box(
-//                modifier = Modifier,
-//            ){
-//                Box(
-//                    Modifier
-//                        .fillMaxWidth()
-//                        .height(16.dp)
-//                        .clip(RoundedCornerShape(16.dp))
-//                        .background(Color.Red)
-//                )
-//            }
-//        }
-    )
 }
 
 
