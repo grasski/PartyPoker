@@ -8,6 +8,29 @@
     <string name="server_starting">Server is starting, please wait.</string>
     <string name="client_connecting">Connecting to the server, please wait.</string>
 
+
+    <string name="server_status">Server status:</string>
+    <string name="server_status_advertising">Advertising - open for new connections.</string>
+    <string name="server_status_active">Active - closed for new connections.</string>
+    <string name="stop_advertising">Stop advertising</string>
+    <string name="leave_game">Leave</string>
+    <string name="continue_game">Continue</string>
+
+    <string name="game_wait">Wait for start of the game.</string>
+    <string-array name="cards_tooltip">
+        <item>Strength is represented by the best combination of 5 cards.</item>
+        <item>ROYAL FLUSH: 5 cards in sequence from Ace to Ten all in same suit.</item>
+        <item>STRAIGHT FLUSH: 5 cards in sequence all in same suit.</item>
+        <item>4 OF A KIND: 4 cards of the same rank.</item>
+        <item>FULL HOUSE: 3 cards of the same rank + 2 cards of another same rank.</item>
+        <item>FLUSH: 5 cards of the same suit.</item>
+        <item>STRAIGHT: 5 cards in sequence.</item>
+        <item>3 OF A KIND: 3 cards of the same rank.</item>
+        <item>2 PAIR: 2 cards of the same rank + 2 cards of another same rank.</item>
+        <item>1 PAIR: 2 cards of the same rank.</item>
+        <item>HIGH CARD: Made of any five cards not in any of the above combination.</item>
+    </string-array>
+
     <string name="action_ready">Get ready for the game!</string>
     <string name="action_check">CHECK</string>
     <string name="action_call">CALL</string>

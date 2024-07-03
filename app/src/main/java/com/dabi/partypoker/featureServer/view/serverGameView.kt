@@ -46,7 +46,12 @@ fun ServerView(
         hiltViewModel<ServerPlayerViewModel>()
     }
     val serverState by serverViewModel.serverBridge.serverState.collectAsStateWithLifecycle()
-
+    val mappedState = when (serverState.serverStatus) {
+        ServerStatusEnum.ADVERTISING, ServerStatusEnum.ACTIVE -> ServerStatusEnum.ACTIVE    // So the change between Advertising to Active doesn't recompose whole screen
+        ServerStatusEnum.NONE -> ServerStatusEnum.NONE
+        ServerStatusEnum.ADVERTISING_FAILED -> ServerStatusEnum.ADVERTISING_FAILED
+        ServerStatusEnum.OFF -> ServerStatusEnum.OFF
+    }
 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
@@ -58,7 +63,7 @@ fun ServerView(
     }
 
     Crossfade(
-        targetState = serverState.serverStatus,
+        targetState = mappedState,
         modifier = Modifier
             .fillMaxSize()
             .paint(
@@ -94,22 +99,19 @@ fun ServerView(
                         val playerActionsState by serverPlayerVM.playerActionsState.collectAsStateWithLifecycle()
 
                         PlayerGameView(
-                            navController = navController,
                             gameState = gameState,
                             playerState = playerState,
                             playerActionsState = playerActionsState,
                             onPlayerEvent = serverPlayerVM::onPlayerEvent,
                             onGameEvent = serverViewModel::onGameEvent,
+                            serverState = serverState
                         )
                     }
                     ServerType.IS_TABLE -> {
                         ServerGameView(
-                            navController = navController,
                             gameState = gameState,
                             serverState = serverState,
-                            serverScreen = serverScreen,
                             onGameEvent = serverViewModel::onGameEvent,
-                            onServerEvent = serverViewModel.serverBridge::onServerEvent
                         )
                     }
                 }

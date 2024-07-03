@@ -7,6 +7,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +29,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
@@ -38,6 +42,9 @@ import androidx.compose.material.icons.filled.PlusOne
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -49,6 +56,8 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.TooltipDefaults.rememberPlainTooltipPositionProvider
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -70,6 +79,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -79,6 +89,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
 import coil.transform.Transformation
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureClient.model.data.PlayerState
@@ -94,6 +107,7 @@ import com.dabi.partypoker.utils.evaluatePlayerCards
 import com.dabi.partypoker.utils.formatNumberToString
 import com.dabi.partypoker.utils.handStrength
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PlayerDrawItself(
     player: PlayerState,
@@ -243,17 +257,17 @@ fun PlayerDrawItself(
                                 .fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ){
-                            Text(
-                                text = "Wait for game to start.",
-                                fontSize = fontSize * 1.5f,
-                                color = Color.White,
-                                fontWeight = FontWeight.ExtraBold,
-                                textAlign = TextAlign.Center,
+                            AutoSizeText(
+                                text = UiTexts.StringResource(R.string.game_wait).asString(),
                                 style = TextStyle(
+                                    fontSize = fontSize * 1.5f,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    textAlign = TextAlign.Center,
                                     platformStyle = PlatformTextStyle(
                                         includeFontPadding = false
                                     )
-                                ),
+                                )
                             )
                         }
                     } else{
@@ -281,6 +295,7 @@ fun PlayerDrawItself(
                                     )
                                 )
 
+                                var showPopup by remember { mutableStateOf(false) }
                                 Icon(
                                     Icons.AutoMirrored.Default.Help,
                                     contentDescription = "Help",
@@ -290,12 +305,78 @@ fun PlayerDrawItself(
                                             interactionSource = null,
                                             indication = null,
                                             onClick = {
-                                                // TODO()
+                                                showPopup = true
                                             }
                                         )
                                         .padding(start = 10.dp, end = 5.dp)
                                         .size(fontSize.value.dp * 1.2f)
                                 )
+                                if (showPopup){
+                                    Popup(
+                                        onDismissRequest = { showPopup = false },
+                                        popupPositionProvider = rememberPlainTooltipPositionProvider()
+                                    ) {
+                                        Card(
+                                            modifier = Modifier
+                                                .fillMaxWidth(0.4f)
+                                                .fillMaxHeight(0.5f),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = colors.playerButtonsColor2,
+                                                contentColor = colors.calledMoneyColor
+                                            )
+                                        ){
+                                            val texts = UiTexts.ArrayResource(R.array.cards_tooltip).asArray()
+                                            LazyColumn(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .padding(8.dp)
+                                            ) {
+                                                stickyHeader {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .background(colors.playerButtonsColor2)
+                                                            .padding(bottom = 10.dp),
+                                                        contentAlignment = Alignment.Center
+                                                    ){
+                                                        Text(
+                                                            text = texts[0].uppercase(),
+                                                            style = TextStyle(
+                                                                fontSize = fontSize,
+                                                                fontWeight = FontWeight.ExtraBold,
+                                                                textAlign = TextAlign.Center
+                                                            )
+                                                        )
+                                                    }
+                                                }
+                                                itemsIndexed(texts){index, text ->
+                                                    if (index > 0){
+                                                        val textRow = text.split(": ")
+                                                        Row(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .padding(vertical = 5.dp),
+                                                        ){
+                                                            Text(
+                                                                text = textRow[0] + ": ",
+                                                                style = TextStyle(
+                                                                    fontSize = fontSize,
+                                                                    fontWeight = FontWeight.ExtraBold
+                                                                )
+                                                            )
+                                                            Text(
+                                                                text = textRow[1],
+                                                                style = TextStyle(
+                                                                    fontSize = fontSize,
+                                                                )
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
 
                                 Box(
                                     modifier = Modifier
@@ -556,7 +637,8 @@ fun RaiseSlider(
                     indication = null,
                     interactionSource = null,
                     onClick = {
-                        sliderState.value = (Math.round((sliderState.value - GameState().bigBlindAmount) / 10) * 10).toFloat()
+                        sliderState.value =
+                            (Math.round((sliderState.value - GameState().bigBlindAmount) / 10) * 10).toFloat()
                     }
                 ),
             tint = colors.calledMoneyColor
@@ -604,7 +686,8 @@ fun RaiseSlider(
                     indication = null,
                     interactionSource = null,
                     onClick = {
-                        sliderState.value = (Math.round((sliderState.value + GameState().bigBlindAmount) / 10) * 10).toFloat()
+                        sliderState.value =
+                            (Math.round((sliderState.value + GameState().bigBlindAmount) / 10) * 10).toFloat()
                     }
                 ),
             tint = colors.calledMoneyColor

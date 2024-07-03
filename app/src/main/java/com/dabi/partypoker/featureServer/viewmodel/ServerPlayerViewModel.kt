@@ -73,6 +73,9 @@ class ServerPlayerViewModel @Inject constructor(
             PlayerEvents.Leave -> {
                 serverBridge.leave()
             }
+            PlayerEvents.ChangeView -> {
+                // Not for server
+            }
 
             PlayerEvents.Ready -> {
                 onServerBridgeEvent(ServerBridgeEvents.ClientAction(_playerState.value.id, ClientPayloadType.ACTION_READY, null))

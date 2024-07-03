@@ -34,30 +34,17 @@ import com.dabi.partypoker.managers.ServerEvents
 
 @Composable
 fun ServerGameView(
-    navController: NavController,
     gameState: GameState,
     serverState: ServerState,
-    serverScreen: ServerScreen,
     onGameEvent: (GameEvents) -> Unit,
-    onServerEvent: (ServerEvents) -> Unit
 ) {
-    var showPopUpMenu by rememberSaveable { mutableStateOf(false) }
-    IconButton(onClick = {
-        showPopUpMenu = true
-    }) {
-        Icon(Icons.Default.Menu, contentDescription = "Menu")
-    }
-    if (showPopUpMenu) {
-        GamePopUpMenu(
-            navController = navController,
-            isPlayer = false,
-            onDismissRequest = { showPopUpMenu = false },
-            onLeaveRequest = {
-                onGameEvent(GameEvents.CloseGame)
-                navController.navigate(MenuScreen) { popUpTo(ServerScreen(serverScreen.serverType, serverScreen.serverName)) { inclusive = true } }
-            }
-        )
-    }
+    GamePopUpMenu(
+        isPlayer = false,
+        onPlayerEvent = {  },
+        onGameEvent = onGameEvent,
+        serverStatus = serverState
+    )
+
 
     Box(
         modifier = Modifier

@@ -16,6 +16,7 @@ import kotlinx.coroutines.Job
 sealed class GameEvents{
     data object StartGame: GameEvents()
     data object CloseGame: GameEvents()
+    data object StopAdvertising: GameEvents()
 }
 
 class GameManager {

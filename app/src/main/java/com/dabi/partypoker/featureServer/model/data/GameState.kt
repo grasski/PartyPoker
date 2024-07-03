@@ -29,6 +29,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
+import com.dabi.partypoker.R
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.model.data.endpointID
 import com.dabi.partypoker.utils.Card

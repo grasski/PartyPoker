@@ -99,6 +99,10 @@ open class ServerOwnerViewModel@Inject constructor(
             GameEvents.CloseGame -> {
                 serverBridge.leave()
             }
+
+            GameEvents.StopAdvertising -> {
+                serverBridge.stopAdvertising()
+            }
         }
     }
 

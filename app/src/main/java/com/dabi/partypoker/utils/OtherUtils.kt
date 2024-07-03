@@ -8,6 +8,7 @@ import androidx.annotation.ArrayRes
 import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -43,7 +44,7 @@ sealed class UiTexts{
 
     class ArrayResource(
         @ArrayRes val resId: Int,
-        val index: Int
+        val index: Int = 0
     ): UiTexts()
 
 
@@ -63,11 +64,17 @@ sealed class UiTexts{
         }
     }
 
-
-
+    @Composable
     fun asArray(): List<String> {
         return when(this){
-            is ArrayResource -> Resources.getSystem().getStringArray(resId).toList()
+            is ArrayResource -> stringArrayResource(resId).toList()
+            else -> {
+                listOf<String>()}
+        }
+    }
+    fun asArray(context: Context): List<String> {
+        return when(this){
+            is ArrayResource -> context.resources.getStringArray(resId).toList()
             else -> {
                 listOf<String>()}
         }

@@ -21,6 +21,7 @@ import javax.inject.Inject
 sealed class PlayerEvents{
     data object Ready: PlayerEvents()
     data object Leave: PlayerEvents()
+    data object ChangeView: PlayerEvents()
 
     data object Check: PlayerEvents()
     data class Call(val amount: Int): PlayerEvents()
@@ -35,6 +36,9 @@ class PlayerViewModel @Inject constructor(
 ): ViewModel(), PlayerCoreInterface {
     private val _playerState: MutableStateFlow<PlayerState> = MutableStateFlow(PlayerState())
     val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
+
+    private val _viewChangeState = MutableStateFlow(false)
+    val viewChangeState = _viewChangeState.asStateFlow()
 
     private val _gameState = MutableStateFlow(GameState())
     val gameState = _gameState.asStateFlow()
@@ -54,6 +58,9 @@ class PlayerViewModel @Inject constructor(
         when(event){
             PlayerEvents.Leave -> {
                 clientBridge.leave()
+            }
+            PlayerEvents.ChangeView -> {
+                _viewChangeState.update { !it }
             }
 
             PlayerEvents.Ready -> {

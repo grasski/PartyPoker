@@ -13,16 +13,41 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -30,6 +55,8 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,7 +78,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
@@ -59,6 +88,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Popup
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -68,8 +99,16 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.model.data.endpointID
+import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
+import com.dabi.partypoker.featureCore.data.colors
 import com.dabi.partypoker.featureServer.model.data.GameState
+import com.dabi.partypoker.featureServer.model.data.ServerState
+import com.dabi.partypoker.managers.GameEvents
+import com.dabi.partypoker.managers.ServerStatusEnum
+import com.dabi.partypoker.managers.ServerType
+import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.formatNumberToString
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -180,53 +219,253 @@ fun Modifier.glowItem(
 
 @Composable
 fun GamePopUpMenu(
-    navController: NavController,
     isPlayer: Boolean,
-    onDismissRequest: () -> Unit,
-    onLeaveRequest: () -> Unit,
+    onPlayerEvent: (PlayerEvents) -> Unit,
+
+    onGameEvent: (GameEvents) -> Unit,
+    serverStatus: ServerState = ServerState()
 ) {
-    Dialog(onDismissRequest = { onDismissRequest() }) {
-        Card(
-            modifier = Modifier
-        ){
-            Column(
+    var showPopUpMenu by rememberSaveable { mutableStateOf(false) }
+    IconButton(onClick = {
+        showPopUpMenu = true
+    }) {
+        Icon(Icons.Default.Menu, contentDescription = "Menu")
+    }
+
+    if (showPopUpMenu) {
+        Dialog(
+            onDismissRequest = { showPopUpMenu = false },
+        ) {
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(vertical = 16.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(colors.messagesCard)
                     .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                when(isPlayer){
+                when (isPlayer) {
                     true -> {
-                        //TODO: in future some settings, etc.
-                        Button(onClick = {
-                            onDismissRequest()
-                            onLeaveRequest()
-                        }) {
-                            Text(text = "Leave")
+                        //TODO: in future some settings, change view, etc.
+                        Column(
+                            modifier = Modifier
+                                .align(Alignment.Center),
+                            verticalArrangement = Arrangement.SpaceBetween,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.65f)
+                                    .weight(1f),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                item{
+                                    if (serverStatus.serverType == ServerType.IS_TABLE){
+                                        Button(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            onClick = {
+                                                showPopUpMenu = false
+                                                onPlayerEvent(PlayerEvents.ChangeView)
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = colors.buttonColor,
+                                                contentColor = colors.calledMoneyColor
+                                            ),
+                                        ) {
+                                            AutoSizeText(
+                                                text = "Change view",
+                                                style = TextStyle(
+                                                    fontSize = 20.sp,
+                                                )
+                                            )
+                                        }
+                                    }
+
+                                    Button(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        onClick = {
+                                            showPopUpMenu = false
+                                            onPlayerEvent(PlayerEvents.Leave)
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = colors.buttonColor,
+                                            contentColor = colors.calledMoneyColor
+                                        ),
+                                    ) {
+                                        AutoSizeText(
+                                            text = UiTexts.StringResource(R.string.leave_game).asString(),
+                                            style = TextStyle(
+                                                fontSize = 20.sp,
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+
+                            Row (
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.Bottom,
+                                horizontalArrangement = Arrangement.End
+                            ){
+                                Button(
+                                    modifier = Modifier,
+                                    onClick = { showPopUpMenu = false },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = colors.buttonColor,
+                                        contentColor = colors.calledMoneyColor
+                                    ),
+                                ) {
+                                    AutoSizeText(
+                                        text = UiTexts.StringResource(R.string.continue_game).asString(),
+                                        style = TextStyle(
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    )
+                                }
+                            }
                         }
                     }
+
                     false -> {
                         //TODO: in future some settings, kicking people, etc.
-                        Button(onClick = { /*TODO*/ }) {
-                            Text(text = "Stop advertising")
-                        }
-                        Button(onClick = {
-                            onDismissRequest()
-                            onLeaveRequest()
-                        }) {
-                            Text(text = "Leave")
-                        }
-                    }
-                }
+                        Column(
+                            modifier = Modifier
+                                .align(Alignment.Center),
+                            verticalArrangement = Arrangement.SpaceBetween,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .align(Alignment.Start)
+                                    .fillMaxWidth(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ){
+                                    Box(modifier = Modifier
+                                        .size(15.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            if (serverStatus.serverStatus == ServerStatusEnum.ADVERTISING)
+                                                Color.Green
+                                            else Color.Yellow
+                                        )
+                                    )
+                                    AutoSizeText(
+                                        text = UiTexts.StringResource(R.string.server_status).asString(),
+                                        style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                                    )
+                                }
+                                AutoSizeText(
+                                    text =
+                                        if (serverStatus.serverStatus == ServerStatusEnum.ADVERTISING)
+                                            UiTexts.StringResource(R.string.server_status_advertising).asString()
+                                        else
+                                            UiTexts.StringResource(R.string.server_status_active).asString(),
+                                    style = TextStyle(fontSize = 20.sp),
+                                )
+                            }
 
-                Row (
-                    modifier = Modifier.fillMaxSize(),
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.End
-                ){
-                    Button(onClick = { onDismissRequest() }) {
-                        Text(text = "Pokračovat")
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.65f)
+                                    .weight(1f),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                item {
+                                    Button(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        onClick = {
+                                            onGameEvent(GameEvents.StopAdvertising)
+                                        },
+                                        enabled = serverStatus.serverStatus == ServerStatusEnum.ADVERTISING,
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = colors.buttonColor,
+                                            contentColor = colors.calledMoneyColor
+                                        ),
+                                    ) {
+                                        AutoSizeText(
+                                            text = UiTexts.StringResource(R.string.stop_advertising)
+                                                .asString(),
+                                            style = TextStyle(
+                                                fontSize = 20.sp
+                                            )
+                                        )
+                                    }
+
+                                    Button(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        onClick = {
+                                            showPopUpMenu = false
+                                            onGameEvent(GameEvents.CloseGame)
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = colors.buttonColor,
+                                            contentColor = colors.calledMoneyColor
+                                        ),
+                                    ) {
+                                        AutoSizeText(
+                                            text = UiTexts.StringResource(R.string.leave_game)
+                                                .asString(),
+                                            style = TextStyle(
+                                                fontSize = 20.sp
+                                            )
+                                        )
+                                    }
+
+                                    Button(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        onClick = {
+                                            // TODO()
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = colors.buttonColor,
+                                            contentColor = colors.calledMoneyColor
+                                        ),
+                                    ) {
+                                        AutoSizeText(
+                                            text = "PLAYERS",
+                                            style = TextStyle(
+                                                fontSize = 20.sp
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+
+                            Row (
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.Bottom,
+                                horizontalArrangement = Arrangement.End
+                            ){
+                                Button(
+                                    modifier = Modifier,
+                                    onClick = { showPopUpMenu = false },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = colors.buttonColor,
+                                        contentColor = colors.calledMoneyColor
+                                    ),
+                                ) {
+                                    AutoSizeText(
+                                        text = UiTexts.StringResource(R.string.continue_game).asString(),
+                                        style = TextStyle(
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -338,4 +577,30 @@ fun Modifier.animatedBorder(
                 color = if (animate) animatedColor else Color.Transparent
             )
         }
+}
+
+
+@Composable
+fun AutoSizeText(
+    text: String,
+    style: TextStyle,
+) {
+    var textStyle by remember { mutableStateOf(style) }
+    var readyToDraw by remember { mutableStateOf(false) }
+    Text(
+        text = text,
+        style = textStyle,
+        maxLines = 1,
+        softWrap = false,
+        modifier = Modifier.drawWithContent {
+            if (readyToDraw) drawContent()
+        },
+        onTextLayout = { textLayoutResult ->
+            if (textLayoutResult.hasVisualOverflow) {
+                textStyle = textStyle.copy(fontSize = textStyle.fontSize * 0.9)
+            } else {
+                readyToDraw = true
+            }
+        }
+    )
 }

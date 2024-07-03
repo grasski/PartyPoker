@@ -117,4 +117,11 @@ class ServerBridge(
             connectionsClient.sendPayload(_serverState.value.connectedClients, serverPayload)
         }
     }
+
+    fun stopAdvertising() {
+        connectionsClient.stopAdvertising()
+        _serverState.update { it.copy(
+            serverStatus = ServerStatusEnum.ACTIVE
+        )}
+    }
 }
