@@ -16,9 +16,12 @@ import com.dabi.partypoker.managers.ServerEvents
 import com.dabi.partypoker.utils.ClientPayloadType
 import com.dabi.partypoker.utils.ServerPayloadType
 import com.dabi.partypoker.utils.UiTexts
+import com.dabi.partypoker.utils.UiTextsAdapter
 import com.dabi.partypoker.utils.toServerPayload
 import com.google.android.gms.nearby.connection.ConnectionsClient
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -199,8 +202,15 @@ open class ServerOwnerViewModel@Inject constructor(
 
                 when(action){
                     ClientPayloadType.CONNECTED -> {
+                        val gson = GsonBuilder()
+                            .registerTypeAdapter(UiTexts::class.java, UiTextsAdapter())
+                            .create()
+                        val pairType = object : TypeToken<Pair<String, Int>>() {}.type
+                        val pair: Pair<String, Int> = gson.fromJson(gson.toJson(data), pairType)
+
                         val player = PlayerState(
-                            nickname = data.toString(),
+                            nickname = pair.first,
+                            avatarId = pair.second,
                             id = clientID,
                             money = 1000
                         )

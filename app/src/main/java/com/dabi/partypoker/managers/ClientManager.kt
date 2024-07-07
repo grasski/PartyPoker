@@ -2,6 +2,7 @@ package com.dabi.partypoker.managers
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.RawRes
 import com.google.android.gms.nearby.connection.ConnectionInfo
 import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback
 import com.google.android.gms.nearby.connection.ConnectionResolution
@@ -17,7 +18,7 @@ import com.google.android.gms.nearby.connection.Strategy
 
 
 sealed class ClientEvents{
-    data class Connect(val context: Context, val nickname: String): ClientEvents()
+    data class Connect(val context: Context, val nickname: String, @RawRes val avatarId: Int?): ClientEvents()
     data class ConnectionStatus(val status: ConnectionStatusEnum): ClientEvents()
     data class Connected(val serverId: String): ClientEvents()
 

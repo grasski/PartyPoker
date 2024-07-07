@@ -8,6 +8,21 @@
     <string name="server_starting">Server is starting, please wait.</string>
     <string name="client_connecting">Connecting to the server, please wait.</string>
 
+    <string name="enter_nickname">Enter your nickname</string>
+    <string name="choose_avatar">Choose your avatar</string>
+
+    <string name="server_playing">Are you playing too?</string>
+    <string name="server_start">Start server with game</string>
+
+    <string-array name="permissions">
+        <item>Would you like to host a local game?</item>
+        <item>Would you like to join a local game?</item>
+        <item>Please, allow necessary permissions in the game settings.</item>
+    </string-array>
+
+    <string name="fail_connect">Failed to connect to the server! This most likely happen due to missing Location service enabled. Turn on your Location and try it again.</string>
+    <string name="fail_start">Failed to start the game server! Please try it again.</string>
+
 
     <string name="server_status">Server status:</string>
     <string name="server_status_advertising">Advertising - open for new connections.</string>

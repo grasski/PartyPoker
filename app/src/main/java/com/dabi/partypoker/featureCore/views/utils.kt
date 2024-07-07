@@ -14,6 +14,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -81,6 +82,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
@@ -103,6 +105,7 @@ import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureCore.data.colors
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.ServerState
+import com.dabi.partypoker.managers.ClientEvents
 import com.dabi.partypoker.managers.GameEvents
 import com.dabi.partypoker.managers.ServerStatusEnum
 import com.dabi.partypoker.managers.ServerType
@@ -175,16 +178,53 @@ fun LoadingAnimation(
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly
+        verticalArrangement = Arrangement.Center
     ) {
         LottieAnimation(
             composition = composition,
             progress = { progress },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .fillMaxHeight(0.4f)
         )
-        Text(text = text)
-        Button(onClick = { onCancelRequest() }) {
-            Text(text = "Cancel")
+
+        Column(
+            modifier = Modifier
+                .padding(10.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .border(
+                    2.dp,
+                    colors.calledMoneyColor,
+                    RoundedCornerShape(10.dp)
+                )
+                .background(colors.playerButtonsColor2.copy(0.8f))
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ){
+            AutoSizeText(
+                text = text,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+            )
+
+            Button(
+                onClick = {
+                    onCancelRequest()
+                },
+                modifier = Modifier
+                    .padding(top = 10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colors.playerBoxColor1,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(10.dp)
+            ){
+                AutoSizeText(
+                    text = "Cancel",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
         }
     }
 }
@@ -405,6 +445,24 @@ fun GamePopUpMenu(
                                     Button(
                                         modifier = Modifier.fillMaxWidth(),
                                         onClick = {
+                                            // TODO()
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = colors.buttonColor,
+                                            contentColor = colors.calledMoneyColor
+                                        ),
+                                    ) {
+                                        AutoSizeText(
+                                            text = "PLAYERS",
+                                            style = TextStyle(
+                                                fontSize = 20.sp
+                                            )
+                                        )
+                                    }
+
+                                    Button(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        onClick = {
                                             showPopUpMenu = false
                                             onGameEvent(GameEvents.CloseGame)
                                         },
@@ -416,24 +474,6 @@ fun GamePopUpMenu(
                                         AutoSizeText(
                                             text = UiTexts.StringResource(R.string.leave_game)
                                                 .asString(),
-                                            style = TextStyle(
-                                                fontSize = 20.sp
-                                            )
-                                        )
-                                    }
-
-                                    Button(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        onClick = {
-                                            // TODO()
-                                        },
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = colors.buttonColor,
-                                            contentColor = colors.calledMoneyColor
-                                        ),
-                                    ) {
-                                        AutoSizeText(
-                                            text = "PLAYERS",
                                             style = TextStyle(
                                                 fontSize = 20.sp
                                             )
@@ -590,7 +630,7 @@ fun AutoSizeText(
     Text(
         text = text,
         style = textStyle,
-        maxLines = 1,
+        maxLines = 4,
         softWrap = false,
         modifier = Modifier.drawWithContent {
             if (readyToDraw) drawContent()

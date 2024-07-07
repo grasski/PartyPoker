@@ -1,5 +1,6 @@
 package com.dabi.partypoker.featureClient.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.dabi.partypoker.featureClient.model.ClientBridge
 import com.dabi.partypoker.featureClient.model.ClientBridgeEvents
@@ -100,11 +101,12 @@ class PlayerViewModel @Inject constructor(
         when(event){
             is ClientBridgeEvents.Connect -> {
                 _playerState.update { it.copy(
-                    nickname = event.nickname
+                    nickname = event.nickname,
+                    avatarId = event.avatarId
                 ) }
             }
             ClientBridgeEvents.ClientConnected -> {
-                val clientPayload = toClientPayload(ClientPayloadType.CONNECTED, _playerState.value.nickname)
+                val clientPayload = toClientPayload(ClientPayloadType.CONNECTED, Pair(_playerState.value.nickname, _playerState.value.avatarId))
                 clientBridge.sendPayload(clientPayload)
                 connectionsClient.stopDiscovery()
             }

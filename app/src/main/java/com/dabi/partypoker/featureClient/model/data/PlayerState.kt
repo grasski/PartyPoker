@@ -1,5 +1,6 @@
 package com.dabi.partypoker.featureClient.model.data
 
+import androidx.annotation.RawRes
 import com.dabi.partypoker.utils.Card
 
 typealias endpointID = String
@@ -7,6 +8,7 @@ typealias endpointID = String
 data class PlayerState(
     var nickname: String = "",
     var id: endpointID = "",
+    @RawRes var avatarId: Int? = null,
 
     var isServer: Boolean = false,
 

@@ -9,6 +9,21 @@
     <string name="server_starting">Server se zapíná, prosím čekejte.</string>
     <string name="client_connecting">Připojování k serveru, prosím čekejte.</string>
 
+    <string name="enter_nickname">Zadejte své herní jméno</string>
+    <string name="choose_avatar">Vyberte si svého avatara</string>
+
+    <string name="server_playing">Hraješ taky?</string>
+    <string name="server_start">Zapni server se hrou</string>
+
+    <string-array name="permissions">
+        <item>Chceš vytvořit lokální server hry?</item>
+        <item>Chceš se připojit k lokální hře?</item>
+        <item>Povol, prosím, potřebné oprávnění v nastavení hry.</item>
+    </string-array>
+
+    <string name="fail_connect">Chyba při připojování k serveru! Pravděpodobně nemáte zaplou službu určování polohy. Zapněte ji a zkuste se připojit znovu.</string>
+    <string name="fail_start">Chyba při zapínání herního serveru! Prosím, zkuste to znovu.</string>
+
 
     <string name="server_status">Stav serveru:</string>
     <string name="server_status_advertising">Naslouchání - nová spojení otevřena.</string>

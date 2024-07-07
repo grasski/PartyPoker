@@ -78,6 +78,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.rememberAsyncImagePainter
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
@@ -495,13 +500,43 @@ fun PlayerBox(
                         .clip(CircleShape)
                         .background(Color.White)
                         .border(1.dp, Color.Black.copy(alpha = 0.5f), CircleShape)
-                        .padding(10.dp)
-                        .paint(
-                            painter = painterResource(id = R.drawable.player_1),
-                            contentScale = ContentScale.FillBounds,
-                        )
                         .align(if (layoutDirection == PlayerLayoutDirection.LEFT || layoutDirection == PlayerLayoutDirection.BOTTOM) Alignment.BottomStart else Alignment.BottomEnd)
-                )
+                ){
+                    playerState.avatarId?.let { id ->
+                        val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(id))
+                        val progress by animateLottieCompositionAsState(
+                            composition = composition,
+                            iterations = 1,
+                            restartOnPlay = false, isPlaying = false
+                        )
+
+                        if (composition != null){
+                            LottieAnimation(
+                                composition = composition,
+                                progress = { progress },
+                                modifier = Modifier
+                                    .fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else{
+                            Image(
+                                painter = painterResource(id = R.drawable.player_1),
+                                contentDescription = "avatar",
+                                modifier = Modifier
+                                    .fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    } ?: run {
+                        Image(
+                            painter = painterResource(id = R.drawable.player_1),
+                            contentDescription = "avatar",
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
 
                 // Text box
                 Box(

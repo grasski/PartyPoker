@@ -2,6 +2,7 @@ package com.dabi.partypoker
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RawRes
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -33,6 +34,7 @@ fun Navigation() {
             PlayerView(
                 navController,
                 it.toRoute<PlayerScreen>().nickname,
+                it.toRoute<PlayerScreen>().avatarId,
             )
         }
 
@@ -52,10 +54,14 @@ fun Navigation() {
 object MenuScreen
 
 @Serializable
-data class PlayerScreen(val nickname: String)
+data class PlayerScreen(
+    val nickname: String,
+    @RawRes val avatarId: Int
+)
 
 @Serializable
 data class ServerScreen(
     val serverType: String,
-    val serverName: String
+    val serverName: String,
+    @RawRes val avatarId: Int
 )

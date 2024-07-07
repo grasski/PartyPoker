@@ -1,6 +1,7 @@
 package com.dabi.partypoker.featureClient.model
 
 import android.util.Log
+import androidx.annotation.RawRes
 import com.dabi.partypoker.managers.ClientEvents
 import com.dabi.partypoker.managers.ClientManager
 import com.dabi.partypoker.managers.ConnectionStatusEnum
@@ -23,7 +24,7 @@ import javax.inject.Inject
 
 
 sealed class ClientBridgeEvents{
-    data class Connect(val nickname: String): ClientBridgeEvents()
+    data class Connect(val nickname: String, @RawRes val avatarId: Int?): ClientBridgeEvents()
     data object ClientConnected: ClientBridgeEvents()
 
     data class UpdateClient(val playerState: PlayerState): ClientBridgeEvents()
@@ -54,7 +55,7 @@ class ClientBridge (
             is ClientEvents.Connect -> {
                 if (_clientState.value.connectionStatus == ConnectionStatusEnum.NONE || _clientState.value.connectionStatus == ConnectionStatusEnum.FAILED_TO_CONNECT){
                     ClientManager(connectionsClient, this::onClientEvent).startDiscovery(event.context, event.nickname)
-                    bridgeEvent(ClientBridgeEvents.Connect(event.nickname))
+                    bridgeEvent(ClientBridgeEvents.Connect(event.nickname, event.avatarId))
                 }
             }
             is ClientEvents.Connected -> {

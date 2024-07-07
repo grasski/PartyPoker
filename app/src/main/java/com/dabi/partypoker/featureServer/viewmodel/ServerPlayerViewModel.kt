@@ -44,7 +44,6 @@ class ServerPlayerViewModel @Inject constructor(
             id = "ServerPlayer",
             isServer = true,
             money = 1000,
-//            isReadyToPlay = true
         )
         _playerState.update { player }
 
@@ -66,6 +65,20 @@ class ServerPlayerViewModel @Inject constructor(
                 ) }
             }
         }
+    }
+
+    fun initPlayer(
+        nickname: String,
+        avatarId: Int,
+    ){
+        _playerState.update { it.copy(
+            nickname = nickname,
+            avatarId = avatarId,
+        ) }
+
+        _gameState.update { it.copy(
+            players = it.players + ("ServerPlayer" to _playerState.value),
+        ) }
     }
 
     override fun onPlayerEvent(event: PlayerEvents){
