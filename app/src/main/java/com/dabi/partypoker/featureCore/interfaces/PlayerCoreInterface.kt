@@ -27,6 +27,6 @@ interface PlayerCoreInterface {
         return 0
     }
     fun minimalRaise(): Int{
-        return activeCallValue() + getGameState().bigBlindAmount
+        return activeCallValue() + getGameState().gameSettings.bigBlindAmount
     }
 }

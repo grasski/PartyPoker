@@ -53,7 +53,8 @@ class GameManager {
                     players = gameState.players,
                     seatPositions = gameState.seatPositions,
                     messages = gameState.messages,
-                    bank = gameState.bank
+                    bank = gameState.bank,
+                    gameSettings = gameState.gameSettings
                 )
             }
 //            // To count correct dealer, smallBlind and bigBlind in new game rounds
@@ -70,7 +71,8 @@ class GameManager {
                     players = gameState.players,
                     seatPositions = gameState.seatPositions,
                     messages = gameState.messages,
-                    bank = gameState.bank
+                    bank = gameState.bank,
+                    gameSettings = gameState.gameSettings
                 )
             }
 
@@ -96,7 +98,7 @@ class GameManager {
                 round = 0,
                 bigBlindRaised = false,
 
-                nextGameIn = GameState().nextGameIn,
+                gameSettings = gameState.gameSettings,
                 gameOver = false,
                 winningCards = emptySet(),
 
@@ -114,12 +116,12 @@ class GameManager {
                 val player = gameState.players[playerId]
                 player?.let {
                     if (player.isSmallBlind){
-                        player.money -= gameState.smallBlindAmount
-                        player.called = gameState.smallBlindAmount
+                        player.money -= gameState.gameSettings.smallBlindAmount
+                        player.called = gameState.gameSettings.smallBlindAmount
                     }
                     if (player.isBigBlind){
-                        player.money -= gameState.bigBlindAmount
-                        player.called = gameState.bigBlindAmount
+                        player.money -= gameState.gameSettings.bigBlindAmount
+                        player.called = gameState.gameSettings.bigBlindAmount
                     }
                 }
             }
@@ -144,7 +146,7 @@ class GameManager {
             gameState.playingNow = playingNow
             gameState.roundStartedId = playingNow
 
-            gameState.activeRaise = Pair(gameState.bigBlindId!!, gameState.bigBlindAmount)
+            gameState.activeRaise = Pair(gameState.bigBlindId!!, gameState.gameSettings.bigBlindAmount)
 
             gameState.players.forEach { (_, player) ->
                 player.isPlayingNow = player.id == playingNow
@@ -210,7 +212,7 @@ class GameManager {
                     } else{
                         if (movePlayedBy == gameState.bigBlindId){
                             // Big blind CHECKED/FOLDED in round 1
-                            if (raiseAmount == gameState.bigBlindAmount){
+                            if (raiseAmount == gameState.gameSettings.bigBlindAmount){
                                 return newRound()
                             }
 

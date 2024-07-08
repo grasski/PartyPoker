@@ -13,6 +13,7 @@ import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.MessageData
 import com.dabi.partypoker.featureServer.model.data.SeatPosition
 import com.dabi.partypoker.managers.ServerEvents
+import com.dabi.partypoker.repository.gameSettings.GameSettingsDatabase
 import com.dabi.partypoker.utils.ClientPayloadType
 import com.dabi.partypoker.utils.ServerPayloadType
 import com.dabi.partypoker.utils.UiTexts
@@ -22,6 +23,9 @@ import com.google.android.gms.nearby.connection.ConnectionsClient
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -29,25 +33,34 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-@HiltViewModel
-open class ServerOwnerViewModel@Inject constructor(
-    connectionsClient: ConnectionsClient
-): ViewModel() {
+@HiltViewModel(assistedFactory = ServerOwnerViewModel.ServerOwnerViewModelFactory::class)
+open class ServerOwnerViewModel @AssistedInject constructor(
+    private val connectionsClient: ConnectionsClient,
+    private val db: GameSettingsDatabase,
+    @Assisted private val gameSettingsId: Int
+) : ViewModel() {
     protected val _gameState = MutableStateFlow(GameState())
     val gameState = _gameState.asStateFlow()
 
-    private val _playerMoveTimerMillis = MutableStateFlow(_gameState.value.playerTimerDurationMillis)
+    private val _playerMoveTimerMillis = MutableStateFlow(_gameState.value.gameSettings.playerTimerDurationMillis)
     val playerMoveTimerMillis = _playerMoveTimerMillis.asStateFlow()
-    private val _gameOverTimer = MutableStateFlow(_gameState.value.nextGameIn)
-    val gameOverTimer = _gameOverTimer.asStateFlow()
+    private val _gameOverTimerMillis = MutableStateFlow(_gameState.value.gameSettings.nextGameInMillis)
+    val gameOverTimerMillis = _gameOverTimerMillis.asStateFlow()
     private var timerJob: Job? = null
 
     val serverBridge = ServerBridge(connectionsClient, this::onServerBridgeEvent)
+
+    @AssistedFactory
+    interface ServerOwnerViewModelFactory {
+        fun create(gameSettingsId: Int): ServerOwnerViewModel
+    }
 
     override fun onCleared() {
         super.onCleared()
@@ -57,6 +70,17 @@ open class ServerOwnerViewModel@Inject constructor(
     }
     init {
         viewModelScope.launch {
+            val gameSettings = db.dao.getSettingById(gameSettingsId)
+            gameSettings.firstOrNull()?.let { settings ->
+                _gameState.update {
+                    it.copy(
+                        gameSettings = settings,
+                    )
+                }
+            }
+            _gameOverTimerMillis.update { _gameState.value.gameSettings.nextGameInMillis }
+            _playerMoveTimerMillis.update { _gameState.value.gameSettings.playerTimerDurationMillis }
+
             _gameState.collect { gameState ->
                 if ((gameState.playingNow != null && gameState.playingNow !in gameState.players.keys) || gameState.players[gameState.playingNow]?.isFolded == true){
                     autoFold()
@@ -71,21 +95,24 @@ open class ServerOwnerViewModel@Inject constructor(
                 val serverPayload = toServerPayload(ServerPayloadType.UPDATE_GAME_STATE, gameState)
                 serverBridge.sendPayload(serverPayload)
 
-                if (gameState.gameOver && _gameOverTimer.value >= gameState.nextGameIn){
+                if (gameState.gameOver && _gameOverTimerMillis.value >= gameState.gameSettings.nextGameInMillis){
                     timerJob?.cancel()
                     async {
-                        while (_gameOverTimer.value > 0){
-                            Log.e("", "GAME OVER TIMER: " + _gameOverTimer.value)
+                        _gameOverTimerMillis.update { _gameState.value.gameSettings.nextGameInMillis }
+                        while (_gameOverTimerMillis.value > 0){
+                            Log.e("", "GAME OVER TIMER: " + _gameOverTimerMillis.value)
                             delay(1000)
-                            _gameOverTimer.value --
+                            _gameOverTimerMillis.value -= 1000
                         }
                         _gameState.update { GameManager.startGame(_gameState.value).copy() }
                         handlePlayingPlayer()
-                        _gameOverTimer.value = _gameState.value.nextGameIn
+                        _gameOverTimerMillis.update { _gameState.value.gameSettings.nextGameInMillis }
                     }
                 }
             }
         }
+
+        Log.e("", "GAME: " + _gameState.value)
     }
 
     fun onGameEvent(event: GameEvents) {
@@ -110,7 +137,7 @@ open class ServerOwnerViewModel@Inject constructor(
     }
 
     private fun handlePlayingPlayer(){
-        _playerMoveTimerMillis.update { _gameState.value.playerTimerDurationMillis }
+        _playerMoveTimerMillis.update { _gameState.value.gameSettings.playerTimerDurationMillis }
 
         timerJob?.cancel()
         timerJob = this.viewModelScope.launch {
@@ -212,7 +239,7 @@ open class ServerOwnerViewModel@Inject constructor(
                             nickname = pair.first,
                             avatarId = pair.second,
                             id = clientID,
-                            money = 1000
+                            money = _gameState.value.gameSettings.playerMoney
                         )
 
                         if (_gameState.value.players.size >= 10){

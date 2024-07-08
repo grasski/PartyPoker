@@ -19,7 +19,7 @@ nearby = "19.3.0"
 gson = "2.10.1"
 permissions = "0.24.10-beta"
 
-hilt = "2.48"
+hilt = "2.49"
 androidxHilt = "1.2.0"
 
 serialization = "1.7.0"
@@ -29,6 +29,8 @@ material3AdaptiveAndroid = "1.0.0-beta03"
 
 lottie = "6.4.1"
 icons = "1.6.8"
+
+room = "2.6.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -57,8 +59,9 @@ google-permissions = { group = "com.google.accompanist", name = "accompanist-per
 dagger-hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 dagger-hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 dagger-hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
-androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "androidxHilt" }
 androidx-hilt = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHilt" }
+androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "androidxHilt" }
+androidx-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "androidxHilt" }
 
 kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization"}
 
@@ -66,6 +69,10 @@ coil = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 androidx-material3-adaptive-android = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "material3AdaptiveAndroid" }
 
 lottie = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
+
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

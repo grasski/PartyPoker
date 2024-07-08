@@ -1,6 +1,7 @@
 package com.dabi.partypoker.featureServer.model.data
 
 import android.content.Context
+import android.util.Log
 import androidx.annotation.IntRange
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInVertically
@@ -29,12 +30,20 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
+import androidx.room.Room
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.model.data.endpointID
+import com.dabi.partypoker.repository.gameSettings.GameSettings
+import com.dabi.partypoker.repository.gameSettings.GameSettingsDatabase
 import com.dabi.partypoker.utils.Card
 import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.UiTexts
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
+import javax.inject.Inject
 
 
 data class SeatPosition(@IntRange(from = 0, to = 9) val position: Int) {
@@ -143,9 +152,10 @@ data class MessageData(
 
 data class GameState(
     var players: Map<endpointID, PlayerState> = mapOf(),
-//    var playingPlayers: Map<endpointID, PlayerState> = mapOf(),
     var gameReadyPlayers: Map<endpointID, SeatPosition> = emptyMap(),
     var seatPositions: Map<endpointID, SeatPosition> = emptyMap(), // playerId, seatPosition
+
+    var gameSettings: GameSettings = GameSettings(),
 
     var started: Boolean = false,
     var ongoing: Boolean = false,
@@ -157,23 +167,17 @@ data class GameState(
     var bigBlindRaised: Boolean = false,    // BB raised in round 1
     var bank: Int = 0,
 
-    var smallBlindAmount: Int = 25,
-    var bigBlindAmount: Int = 50,
-
     var dealerId: endpointID? = null,
     var smallBlindId: endpointID? = null,
     var bigBlindId: endpointID? = null,
     var roundStartedId: endpointID? = null,
     var playingNow: endpointID? = null,
 
+    var messages: List<MessageData> = emptyList(),
+
     var round: Int = 0,
     var games: Int = 0,
-
-    var messages: List<MessageData> = emptyList(),
-    var playerTimerDurationMillis: Int = 8 * 1000,
-
     var gameOver: Boolean = false,
-    var nextGameIn: Int = 7,
     var winningCards: Set<Card> = emptySet(),
 ){
     fun getAvailableRandomPosition(): Int? {

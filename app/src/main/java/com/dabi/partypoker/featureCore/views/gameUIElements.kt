@@ -144,7 +144,7 @@ fun GameTable(
                     .fillMaxWidth(.60f)
                     .animatedBorder(
                         animate = gameState.gameOver,
-                        durationMillis = gameState.nextGameIn*1000 - 250,
+                        durationMillis = gameState.gameSettings.nextGameInMillis - 250,
                         colorStart = Color.Red,
                         colorStop = Color.Green,
                         borderPath = Path().apply {
@@ -207,7 +207,7 @@ fun GameTable(
                         ShowMoneyAnimated(
                             amount = gameState.bank,
                             isGameOver = gameState.gameOver,
-                            spinningDuration = gameState.nextGameIn / 2 *1000,
+                            spinningDuration = gameState.gameSettings.nextGameInMillis / 2,
                             textStyle = TextStyle(
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
@@ -485,7 +485,7 @@ fun PlayerBox(
                         .size(circleSize)
                         .animatedBorder(
                             animate = playerState.isPlayingNow,
-                            durationMillis = gameState.playerTimerDurationMillis - 250,
+                            durationMillis = gameState.gameSettings.playerTimerDurationMillis - 250,
                             colorStart = Color.Red,
                             colorStop = Color.Green,
                             borderPath = Path().apply {
@@ -578,7 +578,7 @@ fun PlayerBox(
                             ShowMoneyAnimated(
                                 amount = playerState.money,
                                 isGameOver = gameState.gameOver,
-                                spinningDuration = gameState.nextGameIn / 2 *1000,
+                                spinningDuration = gameState.gameSettings.nextGameInMillis / 2,
                                 textStyle = TextStyle(
                                     fontWeight = FontWeight.ExtraBold,
                                     textAlign = TextAlign.Center,

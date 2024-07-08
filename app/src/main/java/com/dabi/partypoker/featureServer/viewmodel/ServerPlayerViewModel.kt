@@ -9,21 +9,29 @@ import com.dabi.partypoker.featureCore.interfaces.PlayerCoreInterface
 import com.dabi.partypoker.featureServer.model.ServerBridgeEvents
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.SeatPosition
+import com.dabi.partypoker.repository.gameSettings.GameSettingsDatabase
 import com.dabi.partypoker.utils.ClientPayloadType
 import com.google.android.gms.nearby.connection.ConnectionsClient
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-@HiltViewModel
-class ServerPlayerViewModel @Inject constructor(
-    private val connectionsClient: ConnectionsClient
-): ServerOwnerViewModel(connectionsClient), PlayerCoreInterface{
+@HiltViewModel(assistedFactory = ServerPlayerViewModel.ServerPlayerViewModelFactory::class)
+class ServerPlayerViewModel @AssistedInject constructor(
+    private val connectionsClient: ConnectionsClient,
+    private val db: GameSettingsDatabase,
+    @Assisted private val gameSettingsId: Int
+): ServerOwnerViewModel(connectionsClient, db, gameSettingsId), PlayerCoreInterface{
 
     private val _playerState: MutableStateFlow<PlayerState> = MutableStateFlow(PlayerState())
     val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
@@ -33,26 +41,54 @@ class ServerPlayerViewModel @Inject constructor(
     )
     val playerActionsState = _playerActionsState.asStateFlow()
 
+
+    @AssistedFactory
+    interface ServerPlayerViewModelFactory {
+        fun create(gameSettingsId: Int): ServerPlayerViewModel
+    }
+
     override fun onCleared() {
         super.onCleared()
         Log.e("", "SERVER PLAYER KILLED")
     }
 
     init {
-        val player = PlayerState(
-            nickname = "ServerPlayer",
-            id = "ServerPlayer",
-            isServer = true,
-            money = 1000,
-        )
-        _playerState.update { player }
+//        val player = PlayerState(
+//            nickname = "ServerPlayer",
+//            id = "ServerPlayer",
+//            isServer = true,
+//            money = _gameState.value.gameSettings.playerMoney,
+//        )
+//        _playerState.update { player }
+//        _gameState.update { it.copy(
+//            players = it.players + ("ServerPlayer" to player),
+//            seatPositions = it.seatPositions + (player.id to SeatPosition(0))
+//        ) }
 
-        _gameState.update { it.copy(
-            players = it.players + ("ServerPlayer" to player),
-            seatPositions = it.seatPositions + (player.id to SeatPosition(0))
-        ) }
 
         viewModelScope.launch {
+            val gameSettings = db.dao.getSettingById(gameSettingsId)
+            gameSettings.firstOrNull()?.let { settings ->
+                _gameState.update {
+                    it.copy(
+                        gameSettings = settings,
+                    )
+                }
+            }
+            val player = PlayerState(
+                nickname = "ServerPlayer",
+                id = "ServerPlayer",
+                isServer = true,
+                money = _gameState.value.gameSettings.playerMoney,
+            )
+            Log.e("", "PLAYER: " + player)
+            _playerState.update { player }
+            _gameState.update { it.copy(
+                players = it.players + ("ServerPlayer" to player),
+                seatPositions = it.seatPositions + (player.id to SeatPosition(0))
+            ) }
+
+
             _gameState.collect{ gs ->
                 val playerUpdate = gs.players[_playerState.value.id]!!
                 _playerState.update { playerUpdate.copy() }

@@ -2,6 +2,7 @@ package com.dabi.partypoker.featureMenu.view
 
 import android.Manifest
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -27,6 +28,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -50,6 +52,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -58,6 +61,9 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Start
@@ -65,7 +71,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -87,13 +98,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -131,10 +146,13 @@ import com.dabi.partypoker.ServerScreen
 import com.dabi.partypoker.featureClient.viewmodel.PlayerViewModel
 import com.dabi.partypoker.featureCore.data.colors
 import com.dabi.partypoker.featureCore.views.AutoSizeText
+import com.dabi.partypoker.featureMenu.viewModel.MenuGameSettingsEvent
+import com.dabi.partypoker.featureMenu.viewModel.MenuViewModel
 import com.dabi.partypoker.featureServer.viewmodel.ServerOwnerViewModel
 import com.dabi.partypoker.managers.ClientEvents
 import com.dabi.partypoker.managers.ServerEvents
 import com.dabi.partypoker.managers.ServerType
+import com.dabi.partypoker.repository.gameSettings.GameSettings
 import com.dabi.partypoker.utils.UiTexts
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -151,7 +169,9 @@ enum class ViewPosition{
 }
 
 
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalComposeUiApi::class,
+    ExperimentalMaterial3Api::class
+)
 @Composable
 fun MenuView(
     navController: NavController
@@ -257,8 +277,32 @@ fun MenuView(
 
                     if (permissions.allPermissionsGranted) {
                         var localServerPlaying by rememberSaveable { mutableStateOf(false) }
+                        var showSettings by rememberSaveable { mutableStateOf(false) }
+
+                        val menuViewModel: MenuViewModel = hiltViewModel()
+                        val gameSettings by menuViewModel.gameSettings.collectAsStateWithLifecycle()
+                        val selectedSetting by menuViewModel.selectedSetting.collectAsStateWithLifecycle()
+
                         BoxWithConstraints(
                             modifier = Modifier.fillMaxSize()
+//                                .pointerInput(Unit) {
+//                                    detectTapGestures {
+//                                        Log.e("", "OFFSET: " + it)
+//                                        // Kliknutí bylo zachyceno BoxWithConstraints
+//                                        if (showSettings && it.x < this.size.width/2) {
+//                                            showSettings = false
+//                                        }
+//                                    }
+//                                }
+//                                .clickable(
+//                                    interactionSource = null,
+//                                    indication = null,
+//                                    onClick = {
+//                                        if (showSettings){
+//                                            showSettings = false
+//                                        }
+//                                    }
+//                                )
                         ) {
                             val maxHeight = this.constraints.maxHeight
                             var textFieldSize by remember { mutableStateOf(DpSize.Zero) }
@@ -338,104 +382,133 @@ fun MenuView(
                                 Crossfade(
                                     targetState = localServerPlaying,
                                 ) { isPlaying ->
-                                    if (isPlaying) {
-                                        TextField(
-                                            value = nickname,
-                                            onValueChange = { nickname = it },
-                                            placeholder = {
-                                                AutoSizeText(
-                                                    text = UiTexts.StringResource(R.string.enter_nickname).asString(),
-                                                    style = TextStyle(
-                                                        fontWeight = FontWeight.ExtraBold,
-                                                        fontSize = 20.sp,
-                                                    )
-                                                )
-                                            },
-                                            textStyle = TextStyle(
-                                                fontWeight = FontWeight.ExtraBold,
-                                                fontSize = 20.sp,
-                                                platformStyle = null
-                                            ),
-                                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                                            colors = TextFieldDefaults.colors(
-                                                unfocusedContainerColor = colors.buttonColor,
-                                                focusedContainerColor = colors.playerButtonsColor2,
-                                                focusedTextColor = colors.calledMoneyColor,
-                                                unfocusedTextColor = colors.calledMoneyColor,
-                                                focusedIndicatorColor = Color.Transparent,
-                                                unfocusedIndicatorColor = Color.Transparent,
-                                                cursorColor = colors.calledMoneyColor,
-                                                selectionColors = TextSelectionColors(
-                                                    handleColor = colors.calledMoneyColor,
-                                                    backgroundColor = colors.calledMoneyColor.copy(alpha = 0.2f)
-                                                ),
-                                                unfocusedPlaceholderColor = colors.calledMoneyColor.copy(alpha = 0.8f),
-                                                focusedPlaceholderColor = colors.calledMoneyColor.copy(alpha = 0.8f)
-                                            ),
-                                            trailingIcon = {
-                                                IconButton(
-                                                    onClick = {
-                                                        if (nickname.isNotBlank()){
-                                                            navController.navigate(
-                                                                ServerScreen(
-                                                                    serverType = ServerType.IS_PLAYER.toString(),
-                                                                    serverName = nickname.ifEmpty { "ServerOwner" },
-                                                                    avatarId = selectedAvatar
-                                                                )
-                                                            ) {
-                                                                popUpTo(MenuScreen){inclusive = true}
-                                                            }
-                                                        }
-                                                    },
-                                                    enabled = nickname.isNotBlank(),
-                                                    colors = IconButtonDefaults.iconButtonColors(
-                                                        containerColor = Color.Transparent,
-                                                        contentColor = colors.calledMoneyColor
-                                                    )
-                                                ){
-                                                    Icon(
-                                                        Icons.Default.Start,
-                                                        ""
-                                                    )
-                                                }
-                                            },
-                                            singleLine = true,
-                                            modifier = Modifier
-                                                .width(textFieldSize.width)
-                                                .height(55.dp),
-                                            shape = RoundedCornerShape(10.dp),
-                                        )
-                                    } else {
-                                        Box(
-                                            modifier = Modifier
-                                                .width(textFieldSize.width)
-                                                .height(55.dp),
-                                            contentAlignment = Alignment.Center
-                                        ){
-                                            Button(
-                                                onClick = {
-                                                    navController.navigate(
-                                                        ServerScreen(
-                                                            serverType = if(localServerPlaying) ServerType.IS_PLAYER.toString() else ServerType.IS_TABLE.toString(),
-                                                            serverName = nickname.ifEmpty { "ServerOwner" },
-                                                            avatarId = 0
+                                    Row(
+                                        modifier = Modifier
+                                            .padding(start = 55.dp)
+                                    ) {
+                                        if (isPlaying) {
+                                            TextField(
+                                                value = nickname,
+                                                onValueChange = { nickname = it },
+                                                placeholder = {
+                                                    AutoSizeText(
+                                                        text = UiTexts.StringResource(R.string.enter_nickname).asString(),
+                                                        style = TextStyle(
+                                                            fontWeight = FontWeight.ExtraBold,
+                                                            fontSize = 20.sp,
                                                         )
-                                                    ) {
-                                                        popUpTo(MenuScreen){inclusive = true}
+                                                    )
+                                                },
+                                                textStyle = TextStyle(
+                                                    fontWeight = FontWeight.ExtraBold,
+                                                    fontSize = 20.sp,
+                                                    platformStyle = null
+                                                ),
+                                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                                colors = TextFieldDefaults.colors(
+                                                    unfocusedContainerColor = colors.buttonColor,
+                                                    focusedContainerColor = colors.playerButtonsColor2,
+                                                    focusedTextColor = colors.calledMoneyColor,
+                                                    unfocusedTextColor = colors.calledMoneyColor,
+                                                    focusedIndicatorColor = Color.Transparent,
+                                                    unfocusedIndicatorColor = Color.Transparent,
+                                                    cursorColor = colors.calledMoneyColor,
+                                                    selectionColors = TextSelectionColors(
+                                                        handleColor = colors.calledMoneyColor,
+                                                        backgroundColor = colors.calledMoneyColor.copy(alpha = 0.2f)
+                                                    ),
+                                                    unfocusedPlaceholderColor = colors.calledMoneyColor.copy(alpha = 0.8f),
+                                                    focusedPlaceholderColor = colors.calledMoneyColor.copy(alpha = 0.8f)
+                                                ),
+                                                trailingIcon = {
+                                                    IconButton(
+                                                        onClick = {
+                                                            if (nickname.isNotBlank()){
+                                                                navController.navigate(
+                                                                    ServerScreen(
+                                                                        serverType = ServerType.IS_PLAYER.toString(),
+                                                                        serverName = nickname.ifEmpty { "ServerOwner" },
+                                                                        avatarId = selectedAvatar
+                                                                    )
+                                                                ) {
+                                                                    popUpTo(MenuScreen){inclusive = true}
+                                                                }
+                                                            }
+                                                        },
+                                                        enabled = nickname.isNotBlank(),
+                                                        colors = IconButtonDefaults.iconButtonColors(
+                                                            containerColor = Color.Transparent,
+                                                            contentColor = colors.calledMoneyColor
+                                                        )
+                                                    ){
+                                                        Icon(
+                                                            Icons.Default.Start,
+                                                            ""
+                                                        )
                                                     }
                                                 },
+                                                singleLine = true,
                                                 modifier = Modifier
-                                                    .fillMaxSize(),
-                                                contentPadding = PaddingValues(horizontal = 5.dp),
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = colors.buttonColor,
-                                                    contentColor = Color.White
-                                                ),
-                                                shape = RoundedCornerShape(10.dp)
+                                                    .width(textFieldSize.width)
+                                                    .height(55.dp),
+                                                shape = RoundedCornerShape(10.dp),
+                                            )
+                                        }
+                                        else {
+                                            Box(
+                                                modifier = Modifier
+                                                    .width(textFieldSize.width)
+                                                    .height(55.dp),
+                                                contentAlignment = Alignment.Center
                                             ){
-                                                AutoSizeText(
-                                                    text = UiTexts.StringResource(R.string.server_start).asString(),
-                                                    style = MaterialTheme.typography.titleLarge
+                                                Button(
+                                                    onClick = {
+                                                        navController.navigate(
+                                                            ServerScreen(
+                                                                serverType = if(localServerPlaying) ServerType.IS_PLAYER.toString() else ServerType.IS_TABLE.toString(),
+                                                                serverName = nickname.ifEmpty { "ServerOwner" },
+                                                                avatarId = 0
+                                                            )
+                                                        ) {
+                                                            popUpTo(MenuScreen){inclusive = true}
+                                                        }
+                                                    },
+                                                    modifier = Modifier
+                                                        .fillMaxSize(),
+                                                    contentPadding = PaddingValues(horizontal = 5.dp),
+                                                    colors = ButtonDefaults.buttonColors(
+                                                        containerColor = colors.buttonColor,
+                                                        contentColor = Color.White
+                                                    ),
+                                                    shape = RoundedCornerShape(10.dp)
+                                                ){
+                                                    AutoSizeText(
+                                                        text = UiTexts.StringResource(R.string.server_start).asString(),
+                                                        style = MaterialTheme.typography.titleLarge
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                        Box(
+                                            modifier = Modifier
+                                                .width(55.dp)
+                                                .height(55.dp)
+                                                .padding(5.dp),
+                                        ){
+                                            FloatingActionButton(
+                                                onClick = {
+                                                    showSettings = true
+                                                },
+                                                containerColor = colors.playerButtonsColor2,
+                                                contentColor = Color.White
+                                            ) {
+                                                Icon(
+                                                    Icons.Filled.Settings,
+                                                    "settings",
+                                                    modifier = Modifier
+                                                        .fillMaxSize()
+                                                        .padding(5.dp)
                                                 )
                                             }
                                         }
@@ -469,6 +542,219 @@ fun MenuView(
                                                 .fillMaxSize()
                                                 .background(Color.Transparent)
                                         ){}
+                                    }
+                                }
+                            }
+
+
+                            val orientation = LocalConfiguration.current.orientation
+                            AnimatedVisibility(
+                                visible = showSettings,
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd),
+                                enter = if (orientation == Configuration.ORIENTATION_PORTRAIT)  slideInVertically { it } else slideInHorizontally { it },
+                                exit = if (orientation == Configuration.ORIENTATION_PORTRAIT) slideOutVertically { it } else slideOutHorizontally { it }
+                            ) {
+                                val newSettings by remember { mutableStateOf(GameSettings("")) }
+                                var newSettingsActive by remember { mutableStateOf(false) }
+
+                                var activeSettings by remember { mutableStateOf(selectedSetting) }
+
+                                LazyColumn(modifier = Modifier
+                                    .fillMaxHeight(if (orientation == Configuration.ORIENTATION_PORTRAIT) 0.5f else 1f)
+                                    .fillMaxWidth(if (orientation == Configuration.ORIENTATION_PORTRAIT) 1f else 0.5f)
+                                    .clip(
+                                        RoundedCornerShape(
+                                            topStart = 10.dp,
+                                            topEnd = if (orientation == Configuration.ORIENTATION_PORTRAIT) 10.dp else 0.dp,
+                                            bottomEnd = 0.dp,
+                                            bottomStart = if (orientation == Configuration.ORIENTATION_PORTRAIT) 0.dp else 10.dp
+                                        )
+                                    )
+                                    .background(colors.playerButtonsColor)
+                                    .padding(8.dp)
+                                ){
+                                    item{
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            contentAlignment = Alignment.Center
+                                        ){
+                                            IconButton(
+                                                onClick = {
+                                                    showSettings = false
+                                                },
+                                                modifier = Modifier
+                                                    .align(Alignment.CenterStart)
+                                                    .border(
+                                                        2.dp,
+                                                        colors.calledMoneyColor,
+                                                        CircleShape
+                                                    )
+                                            ) {
+                                                Icon(
+                                                    Icons.Filled.Close,
+                                                    "close",
+                                                    tint = colors.calledMoneyColor
+                                                )
+                                            }
+
+                                            AutoSizeText(
+                                                text = "Herní nastavení",
+                                                style = MaterialTheme.typography.titleLarge.copy(
+                                                    textDecoration = TextDecoration.Underline,
+                                                    fontWeight = FontWeight.ExtraBold,
+                                                    color = colors.calledMoneyColor
+                                                )
+                                            )
+
+                                            IconButton(
+                                                onClick = {
+                                                    newSettingsActive = true
+                                                },
+                                                modifier = Modifier
+                                                    .align(Alignment.CenterEnd)
+                                                    .border(
+                                                        2.dp,
+                                                        colors.calledMoneyColor,
+                                                        CircleShape
+                                                    )
+                                            ) {
+                                                Icon(
+                                                    Icons.Filled.AddCircle,
+                                                    "create",
+                                                    tint = colors.calledMoneyColor,
+                                                    modifier = Modifier.fillMaxSize()
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    item {
+                                        var dropdownExpanded by rememberSaveable { mutableStateOf(false) }
+                                        gameSettings.map { it.title }
+
+                                        ExposedDropdownMenuBox(
+                                            expanded = dropdownExpanded,
+                                            onExpandedChange = {
+                                                if (gameSettings.size > 1) {
+                                                    dropdownExpanded = !dropdownExpanded
+                                                }
+                                            },
+                                            modifier = Modifier
+                                                .fillParentMaxWidth()
+                                        ){
+                                            TextField(
+                                                modifier = Modifier
+                                                    .menuAnchor()
+                                                    .fillParentMaxWidth(0.8f)
+                                                    .align(Alignment.Center),
+                                                value = selectedSetting.title,
+                                                onValueChange = {},
+                                                readOnly = true,
+                                                trailingIcon = {
+                                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                                        expanded = dropdownExpanded
+                                                    )
+                                                },
+                                                textStyle = TextStyle(
+                                                    fontWeight = FontWeight.ExtraBold,
+                                                    fontSize = 20.sp,
+                                                    platformStyle = null
+                                                ),
+                                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                                colors = TextFieldDefaults.colors(
+                                                    unfocusedContainerColor = colors.buttonColor,
+                                                    focusedContainerColor = colors.buttonColor,
+                                                    focusedTextColor = colors.calledMoneyColor,
+                                                    unfocusedTextColor = colors.calledMoneyColor,
+                                                    focusedIndicatorColor = Color.Transparent,
+                                                    unfocusedIndicatorColor = Color.Transparent,
+                                                    cursorColor = colors.calledMoneyColor,
+                                                    selectionColors = TextSelectionColors(
+                                                        handleColor = colors.calledMoneyColor,
+                                                        backgroundColor = colors.calledMoneyColor.copy(alpha = 0.2f)
+                                                    ),
+                                                    unfocusedPlaceholderColor = colors.calledMoneyColor.copy(alpha = 0.8f),
+                                                    focusedPlaceholderColor = colors.calledMoneyColor.copy(alpha = 0.8f),
+                                                    focusedTrailingIconColor = colors.calledMoneyColor,
+                                                    unfocusedTrailingIconColor = colors.calledMoneyColor
+                                                ),
+                                                shape = RoundedCornerShape(10.dp),
+                                            )
+
+                                            if (gameSettings.size > 1){
+                                                ExposedDropdownMenu(
+                                                    expanded = dropdownExpanded,
+                                                    onDismissRequest = { dropdownExpanded = false }
+                                                ) {
+                                                    gameSettings.forEach {
+                                                        DropdownMenuItem(
+                                                            text = { Text(it.title) },
+                                                            onClick = {
+                                                                menuViewModel.onEvent(MenuGameSettingsEvent.SelectSettings(it))
+                                                                dropdownExpanded = false
+                                                            }
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    item{
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ){
+                                            Text(text = "1. Title: ")
+                                            Text(text = selectedSetting.title)
+                                        }
+
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ){
+                                            Text(text = "2. Player money: ")
+                                            Text(text = selectedSetting.playerMoney.toString())
+                                        }
+
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ){
+                                            Text(text = "3. Small blind amount: ")
+                                            Text(text = selectedSetting.smallBlindAmount.toString())
+                                        }
+
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ){
+                                            Text(text = "4. Big blind amount: ")
+                                            Text(text = selectedSetting.bigBlindAmount.toString())
+                                        }
+
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ){
+                                            Text(text = "5. Game over timeout: ")
+                                            Text(text = selectedSetting.nextGameInMillis.toString())
+                                        }
+
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ){
+                                            Text(text = "6. Player move timeout: ")
+                                            Text(text = selectedSetting.playerTimerDurationMillis.toString())
+                                        }
                                     }
                                 }
                             }

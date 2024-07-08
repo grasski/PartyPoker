@@ -202,7 +202,8 @@ fun PlayerDrawItself(
                     } else{
                         RaiseSlider(
                             modifier = Modifier.weight(1f),
-                            valueRange = playerActionsState.raiseAmount.toFloat() .. player.money.toFloat()
+                            valueRange = playerActionsState.raiseAmount.toFloat() .. player.money.toFloat(),
+                            bigBlindAmount = gameState.gameSettings.bigBlindAmount
                         ){
                             raiseAmount = it
                         }
@@ -611,6 +612,7 @@ fun PlayerDrawItself(
 fun RaiseSlider(
     modifier: Modifier = Modifier,
     valueRange: ClosedFloatingPointRange<Float>,
+    bigBlindAmount: Int,
     valueF: (Int) -> Unit
 ) {
     val sliderState by remember { mutableStateOf(
@@ -638,7 +640,7 @@ fun RaiseSlider(
                     interactionSource = null,
                     onClick = {
                         sliderState.value =
-                            (Math.round((sliderState.value - GameState().bigBlindAmount) / 10) * 10).toFloat()
+                            (Math.round((sliderState.value - bigBlindAmount) / 10) * 10).toFloat()
                     }
                 ),
             tint = colors.calledMoneyColor
@@ -687,7 +689,7 @@ fun RaiseSlider(
                     interactionSource = null,
                     onClick = {
                         sliderState.value =
-                            (Math.round((sliderState.value + GameState().bigBlindAmount) / 10) * 10).toFloat()
+                            (Math.round((sliderState.value + bigBlindAmount) / 10) * 10).toFloat()
                     }
                 ),
             tint = colors.calledMoneyColor

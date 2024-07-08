@@ -73,9 +73,19 @@ fun ServerView(
     serverScreen: ServerScreen,
 ) {
     val serverViewModel = if (serverScreen.serverType == ServerType.IS_TABLE.toString()){
-        hiltViewModel<ServerOwnerViewModel>()
+//        hiltViewModel<ServerOwnerViewModel>()
+        hiltViewModel(
+            creationCallback = { factory : ServerOwnerViewModel.ServerOwnerViewModelFactory ->
+                factory.create(gameSettingsId = 20)
+            }
+        )
     } else {
-        hiltViewModel<ServerPlayerViewModel>()
+//        hiltViewModel<ServerPlayerViewModel>()
+        hiltViewModel(
+            creationCallback = { factory : ServerPlayerViewModel.ServerPlayerViewModelFactory ->
+                factory.create(gameSettingsId = 2)
+            }
+        )
     }
     val serverState by serverViewModel.serverBridge.serverState.collectAsStateWithLifecycle()
     val mappedState = when (serverState.serverStatus) {

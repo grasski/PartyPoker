@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.room.Room
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -36,6 +39,8 @@ import com.dabi.partypoker.featureCore.views.CardBox
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.SeatPosition
 import com.dabi.partypoker.managers.GameManager
+import com.dabi.partypoker.repository.gameSettings.GameSettings
+import com.dabi.partypoker.repository.gameSettings.GameSettingsDatabase
 import com.dabi.partypoker.ui.theme.PartyPokerTheme
 import com.dabi.partypoker.utils.Card
 import com.dabi.partypoker.utils.CardType
@@ -43,6 +48,8 @@ import com.dabi.partypoker.utils.evaluateGame
 import com.dabi.partypoker.utils.evaluatePlayerCards
 import com.dabi.partypoker.utils.handStrength
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -52,6 +59,12 @@ class MainActivity : ComponentActivity() {
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
 
+//        val db = Room.databaseBuilder(
+//            applicationContext,
+//            GameSettingsDatabase::class.java,
+//            "game_settings.db"
+//        ).build()
+
         setContent {
             PartyPokerTheme {
                 Scaffold (){
@@ -59,6 +72,28 @@ class MainActivity : ComponentActivity() {
                         .padding(it)
                         .fillMaxSize()
                     ){
+//                        val scope = rememberCoroutineScope()
+//                        LaunchedEffect(Unit) {
+//                            scope.launch {
+//                                db.dao.upsertSetting(GameSettings(
+//                                    title = "Prvni nastaveni",
+//                                    playerMoney = 1000,
+//                                    smallBlindAmount = 25,
+//                                    bigBlindAmount = 50,
+//                                    playerTimerDurationMillis = 8000,
+//                                    nextGameInMillis = 8000,
+//                                ))
+//                                db.dao.upsertSetting(GameSettings(
+//                                    title = "druhe nastaveni",
+//                                    playerMoney = 2000,
+//                                    smallBlindAmount = 50,
+//                                    bigBlindAmount = 100,
+//                                    playerTimerDurationMillis = 8000,
+//                                    nextGameInMillis = 8000,
+//                                ))
+//                            }
+//                        }
+
                         Navigation()
 //                        PlayerViewPrivate()
 
