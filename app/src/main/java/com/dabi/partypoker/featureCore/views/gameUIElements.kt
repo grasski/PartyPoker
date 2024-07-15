@@ -144,7 +144,7 @@ fun GameTable(
                     .fillMaxWidth(.60f)
                     .animatedBorder(
                         animate = gameState.gameOver,
-                        durationMillis = gameState.gameSettings.nextGameInMillis - 250,
+                        durationMillis = gameState.gameSettings.gameOverTimerDurationMillis - 250,
                         colorStart = Color.Red,
                         colorStop = Color.Green,
                         borderPath = Path().apply {
@@ -207,7 +207,7 @@ fun GameTable(
                         ShowMoneyAnimated(
                             amount = gameState.bank,
                             isGameOver = gameState.gameOver,
-                            spinningDuration = gameState.gameSettings.nextGameInMillis / 2,
+                            spinningDuration = gameState.gameSettings.gameOverTimerDurationMillis / 2,
                             textStyle = TextStyle(
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
@@ -578,7 +578,7 @@ fun PlayerBox(
                             ShowMoneyAnimated(
                                 amount = playerState.money,
                                 isGameOver = gameState.gameOver,
-                                spinningDuration = gameState.gameSettings.nextGameInMillis / 2,
+                                spinningDuration = gameState.gameSettings.gameOverTimerDurationMillis / 2,
                                 textStyle = TextStyle(
                                     fontWeight = FontWeight.ExtraBold,
                                     textAlign = TextAlign.Center,

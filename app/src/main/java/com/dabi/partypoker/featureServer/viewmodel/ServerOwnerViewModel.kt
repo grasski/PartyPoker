@@ -44,14 +44,14 @@ import javax.inject.Inject
 open class ServerOwnerViewModel @AssistedInject constructor(
     private val connectionsClient: ConnectionsClient,
     private val db: GameSettingsDatabase,
-    @Assisted private val gameSettingsId: Int
+    @Assisted private val gameSettingsId: Long
 ) : ViewModel() {
     protected val _gameState = MutableStateFlow(GameState())
     val gameState = _gameState.asStateFlow()
 
     private val _playerMoveTimerMillis = MutableStateFlow(_gameState.value.gameSettings.playerTimerDurationMillis)
     val playerMoveTimerMillis = _playerMoveTimerMillis.asStateFlow()
-    private val _gameOverTimerMillis = MutableStateFlow(_gameState.value.gameSettings.nextGameInMillis)
+    private val _gameOverTimerMillis = MutableStateFlow(_gameState.value.gameSettings.gameOverTimerDurationMillis)
     val gameOverTimerMillis = _gameOverTimerMillis.asStateFlow()
     private var timerJob: Job? = null
 
@@ -59,7 +59,7 @@ open class ServerOwnerViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface ServerOwnerViewModelFactory {
-        fun create(gameSettingsId: Int): ServerOwnerViewModel
+        fun create(gameSettingsId: Long): ServerOwnerViewModel
     }
 
     override fun onCleared() {
@@ -78,7 +78,7 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                     )
                 }
             }
-            _gameOverTimerMillis.update { _gameState.value.gameSettings.nextGameInMillis }
+            _gameOverTimerMillis.update { _gameState.value.gameSettings.gameOverTimerDurationMillis }
             _playerMoveTimerMillis.update { _gameState.value.gameSettings.playerTimerDurationMillis }
 
             _gameState.collect { gameState ->
@@ -95,10 +95,10 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                 val serverPayload = toServerPayload(ServerPayloadType.UPDATE_GAME_STATE, gameState)
                 serverBridge.sendPayload(serverPayload)
 
-                if (gameState.gameOver && _gameOverTimerMillis.value >= gameState.gameSettings.nextGameInMillis){
+                if (gameState.gameOver && _gameOverTimerMillis.value >= gameState.gameSettings.gameOverTimerDurationMillis){
                     timerJob?.cancel()
                     async {
-                        _gameOverTimerMillis.update { _gameState.value.gameSettings.nextGameInMillis }
+                        _gameOverTimerMillis.update { _gameState.value.gameSettings.gameOverTimerDurationMillis }
                         while (_gameOverTimerMillis.value > 0){
                             Log.e("", "GAME OVER TIMER: " + _gameOverTimerMillis.value)
                             delay(1000)
@@ -106,7 +106,7 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                         }
                         _gameState.update { GameManager.startGame(_gameState.value).copy() }
                         handlePlayingPlayer()
-                        _gameOverTimerMillis.update { _gameState.value.gameSettings.nextGameInMillis }
+                        _gameOverTimerMillis.update { _gameState.value.gameSettings.gameOverTimerDurationMillis }
                     }
                 }
             }

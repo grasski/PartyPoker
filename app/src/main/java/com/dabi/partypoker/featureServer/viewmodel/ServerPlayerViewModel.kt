@@ -30,7 +30,7 @@ import javax.inject.Inject
 class ServerPlayerViewModel @AssistedInject constructor(
     private val connectionsClient: ConnectionsClient,
     private val db: GameSettingsDatabase,
-    @Assisted private val gameSettingsId: Int
+    @Assisted private val gameSettingsId: Long
 ): ServerOwnerViewModel(connectionsClient, db, gameSettingsId), PlayerCoreInterface{
 
     private val _playerState: MutableStateFlow<PlayerState> = MutableStateFlow(PlayerState())
@@ -44,7 +44,7 @@ class ServerPlayerViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface ServerPlayerViewModelFactory {
-        fun create(gameSettingsId: Int): ServerPlayerViewModel
+        fun create(gameSettingsId: Long): ServerPlayerViewModel
     }
 
     override fun onCleared() {

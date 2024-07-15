@@ -2,8 +2,6 @@ package com.dabi.partypoker.featureServer.view
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
-import android.util.Log
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,7 +25,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +33,6 @@ import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -49,17 +45,14 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.dabi.partypoker.MenuScreen
-import com.dabi.partypoker.PlayerScreen
 import com.dabi.partypoker.R
 import com.dabi.partypoker.ServerScreen
 import com.dabi.partypoker.featureClient.view.PlayerGameView
-import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureCore.data.colors
 import com.dabi.partypoker.featureCore.views.AutoSizeText
 import com.dabi.partypoker.featureCore.views.LoadingAnimation
 import com.dabi.partypoker.featureServer.viewmodel.ServerOwnerViewModel
 import com.dabi.partypoker.featureServer.viewmodel.ServerPlayerViewModel
-import com.dabi.partypoker.managers.ClientEvents
 import com.dabi.partypoker.managers.GameEvents
 import com.dabi.partypoker.managers.ServerEvents
 import com.dabi.partypoker.managers.ServerStatusEnum
@@ -76,14 +69,14 @@ fun ServerView(
 //        hiltViewModel<ServerOwnerViewModel>()
         hiltViewModel(
             creationCallback = { factory : ServerOwnerViewModel.ServerOwnerViewModelFactory ->
-                factory.create(gameSettingsId = 20)
+                factory.create(gameSettingsId = serverScreen.serverGameSettingsId)
             }
         )
     } else {
 //        hiltViewModel<ServerPlayerViewModel>()
         hiltViewModel(
             creationCallback = { factory : ServerPlayerViewModel.ServerPlayerViewModelFactory ->
-                factory.create(gameSettingsId = 2)
+                factory.create(gameSettingsId = serverScreen.serverGameSettingsId)
             }
         )
     }
@@ -255,7 +248,7 @@ fun ServerView(
             ServerStatusEnum.OFF -> {
                 LaunchedEffect(key1 = serverStatus) {
                     navController.navigate(MenuScreen) {
-                        popUpTo(ServerScreen(serverScreen.serverType, serverScreen.serverName, serverScreen.avatarId)) {
+                        popUpTo(serverScreen) {
                             inclusive = true
                         }
                     }

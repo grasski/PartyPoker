@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface GameSettingsDao {
     @Upsert
-    suspend fun upsertSetting(settings: GameSettings)
+    suspend fun upsertSetting(settings: GameSettings): Long
 
     @Delete
     suspend fun deleteSetting(settings: GameSettings)
@@ -19,6 +19,6 @@ interface GameSettingsDao {
     fun getAllSettings(): Flow<List<GameSettings>>
 
     @Query("SELECT * FROM GameSettings WHERE id = :id")
-    fun getSettingById(id: Int): Flow<GameSettings?>
+    fun getSettingById(id: Long): Flow<GameSettings?>
 
 }

@@ -5,7 +5,8 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [GameSettings::class],
-    version = 1
+    version = 4,
+    exportSchema = false
 )
 abstract class GameSettingsDatabase: RoomDatabase() {
     abstract val dao: GameSettingsDao

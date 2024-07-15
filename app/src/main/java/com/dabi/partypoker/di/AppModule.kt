@@ -47,7 +47,9 @@ class AppModule2 {
         context,
         GameSettingsDatabase::class.java,
         "game_settings.db"
-    ).build()
+    )
+        .fallbackToDestructiveMigration()
+        .build()
 }
 
 @Module
@@ -110,14 +112,14 @@ object ViewModelModule {
 class ServerOwnerViewModelFactoryProvider @Inject constructor(
     private val factory: ServerOwnerViewModel.ServerOwnerViewModelFactory
 ) {
-    fun create(gameSettingsId: Int): ServerOwnerViewModel {
+    fun create(gameSettingsId: Long): ServerOwnerViewModel {
         return factory.create(gameSettingsId)
     }
 }
 class ServerPlayerViewModelFactoryProvider @Inject constructor(
     private val factory: ServerPlayerViewModel.ServerPlayerViewModelFactory
 ) {
-    fun create(gameSettingsId: Int): ServerPlayerViewModel {
+    fun create(gameSettingsId: Long): ServerPlayerViewModel {
         return factory.create(gameSettingsId)
     }
 }

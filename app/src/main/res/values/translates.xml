@@ -58,4 +58,7 @@
         <item quantity="one">%1$s won $%2$s with</item>
         <item quantity="other">%1$s won $%2$s each with</item>
     </plurals>
+
+
+    <string name="default_settings">Default</string>
 </resources>
