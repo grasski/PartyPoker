@@ -1,9 +1,5 @@
 package com.dabi.partypoker.featureCore.views
 
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,15 +25,12 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,12 +46,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
@@ -80,17 +71,18 @@ import androidx.compose.ui.window.DialogProperties
 import coil.compose.rememberAsyncImagePainter
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
-import com.dabi.partypoker.featureCore.data.colors
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.MessageData
 import com.dabi.partypoker.managers.GameEvents
 import com.dabi.partypoker.managers.ServerType
+import com.dabi.partypoker.ui.theme.inversePrimaryDark
+import com.dabi.partypoker.ui.theme.primaryDark
+import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.formatNumberToString
 
@@ -150,7 +142,11 @@ fun GameTable(
                         borderPath = Path().apply {
                             reset()
                             lineTo(
-                                x = with(density) { sizeOfCardsSpace.width.toDp().toPx() },
+                                x = with(density) {
+                                    sizeOfCardsSpace.width
+                                        .toDp()
+                                        .toPx()
+                                },
                                 y = 0f
                             )
                         },
@@ -167,7 +163,11 @@ fun GameTable(
                             cardId,
                             Modifier
                                 .padding(5.dp)
-                                .border(1.dp, Color.White.copy(alpha = 1f), RoundedCornerShape(6.dp))
+                                .border(
+                                    1.dp,
+                                    Color.White.copy(alpha = 1f),
+                                    RoundedCornerShape(6.dp)
+                                )
                                 .padding(5.dp)
                                 .weight(1f)
                                 .glowItem(3.dp, card in gameState.winningCards)
@@ -462,12 +462,7 @@ fun PlayerBox(
                         }
                         drawPath(
                             path,
-                            brush = Brush.verticalGradient(
-                                colorStops = arrayOf(
-                                    0f to colors.playerBoxColor1,
-                                    1f to colors.playerBoxColor2
-                                )
-                            ),
+                            color = inversePrimaryDark
                         )
                         drawPath(
                             path = path,
@@ -475,7 +470,7 @@ fun PlayerBox(
                                 width = 3.5f,
                                 cap = StrokeCap.Round
                             ),
-                            color = colors.buttonColor
+                            color = primaryDark
                         )
                     }
             ){
@@ -490,12 +485,23 @@ fun PlayerBox(
                             colorStop = Color.Green,
                             borderPath = Path().apply {
                                 addArc(
-                                    oval = Rect(offset = Offset.Zero, size = with (density) { Size(circleSize.toPx(), circleSize.toPx()) }),
+                                    oval = Rect(
+                                        offset = Offset.Zero,
+                                        size = with(density) {
+                                            Size(
+                                                circleSize.toPx(),
+                                                circleSize.toPx()
+                                            )
+                                        }),
                                     startAngleDegrees = -90f,
                                     sweepAngleDegrees = -360f,
                                 )
                             },
-                            changeStateKeys = arrayOf(playerState.isPlayingNow, gameState.round, gameState.games)
+                            changeStateKeys = arrayOf(
+                                playerState.isPlayingNow,
+                                gameState.round,
+                                gameState.games
+                            )
                         )
                         .clip(CircleShape)
                         .background(Color.White)
@@ -559,17 +565,19 @@ fun PlayerBox(
                             .padding(vertical = 3.dp, horizontal = 5.dp),
                         horizontalAlignment = if (layoutDirection == PlayerLayoutDirection.LEFT || layoutDirection == PlayerLayoutDirection.BOTTOM) Alignment.Start else Alignment.End
                     ){
-                        Text(
-                            text = playerState.nickname,
-                            style = TextStyle(
-                                platformStyle = PlatformTextStyle(
-                                    includeFontPadding = false
+                        Box(modifier = Modifier.weight(0.8f)){
+                            AutoSizeText(
+                                text = playerState.nickname,
+                                style = TextStyle(
+                                    platformStyle = PlatformTextStyle(
+                                        includeFontPadding = false
+                                    ),
+                                    fontSize = fontSize,
+                                    color = Color.Black
                                 ),
-                                fontSize = fontSize,
-                                color = Color.Black
-                            ),
-                            modifier = Modifier.weight(0.8f)
-                        )
+                            )
+                        }
+
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(),
@@ -647,7 +655,7 @@ private fun VerticalPlayerItems(
                 .fillMaxWidth()
                 .padding(horizontal = 5.dp)
                 .background(
-                    if (playerState.called != 0) colors.calledMoneyColor else Color.Transparent,
+                    if (playerState.called != 0) textColor else Color.Transparent,
                     RoundedCornerShape(10.dp)
                 )
                 .padding(horizontal = 2.dp)
@@ -719,7 +727,7 @@ private fun HorizontalPlayerItems(
                 .fillMaxWidth()
                 .padding(horizontal = 5.dp)
                 .background(
-                    if (playerState.called != 0) colors.calledMoneyColor else Color.Transparent,
+                    if (playerState.called != 0) textColor else Color.Transparent,
                     RoundedCornerShape(10.dp)
                 )
                 .padding(horizontal = 2.dp)
@@ -944,7 +952,7 @@ fun MessagesView(
     ) {
         Card(
             colors = CardDefaults.cardColors(
-                containerColor = colors.messagesCard
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
             )
         ) {
             LazyColumn(
@@ -973,7 +981,7 @@ fun MessagesView(
                             maxLines = 4,
                             fontSize = fontSize * 1.5f
                         )
-                        HorizontalDivider()
+                        HorizontalDivider(color = MaterialTheme.colorScheme.onSecondaryContainer)
                     }
                 }
             }

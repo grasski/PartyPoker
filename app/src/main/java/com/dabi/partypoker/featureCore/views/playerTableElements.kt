@@ -1,11 +1,6 @@
 package com.dabi.partypoker.featureCore.views
 
-import android.util.Log
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.Easing
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -14,10 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,31 +29,22 @@ import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.PlusOne
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TooltipDefaults.rememberPlainTooltipPositionProvider
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,17 +52,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -90,22 +69,20 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupPositionProvider
-import androidx.compose.ui.window.PopupProperties
-import coil.transform.Transformation
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureCore.data.PlayerActionsState
 import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
-import com.dabi.partypoker.featureCore.data.colors
 import com.dabi.partypoker.featureServer.model.data.GameState
+import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.CardsCombination
 import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.evaluatePlayerCards
 import com.dabi.partypoker.utils.formatNumberToString
 import com.dabi.partypoker.utils.handStrength
+
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -131,7 +108,7 @@ fun PlayerDrawItself(
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .offset {
                     IntOffset(
@@ -186,9 +163,9 @@ fun PlayerDrawItself(
                             tablePosition.y.toDp() + tableSize.height.toDp() - sizeConstant.height - (raiseButtonPos.y.toDp() - playerBoxSize.height)
                         }
                     )
-                    .padding(end = 8.dp)
+                    .padding(horizontal = 8.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(colors.playerButtonsColor2)
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
             ){
                 Row(
                     modifier = Modifier
@@ -245,9 +222,9 @@ fun PlayerDrawItself(
                         y = (tablePosition.y + tableSize.height - sizeConstant.height.toPx()).toInt()
                     )
                 }
-                .padding(end = 8.dp)
+                .padding(horizontal = 8.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(colors.playerButtonsColor2)
+                .background(MaterialTheme.colorScheme.surfaceContainer)
                 .padding(6.dp),
         ) { ready ->
             Column {
@@ -320,10 +297,11 @@ fun PlayerDrawItself(
                                         Card(
                                             modifier = Modifier
                                                 .fillMaxWidth(0.4f)
-                                                .fillMaxHeight(0.5f),
+                                                .fillMaxHeight(0.5f)
+                                                .padding(8.dp),
                                             colors = CardDefaults.cardColors(
-                                                containerColor = colors.playerButtonsColor2,
-                                                contentColor = colors.calledMoneyColor
+                                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                                contentColor = textColor
                                             )
                                         ){
                                             val texts = UiTexts.ArrayResource(R.array.cards_tooltip).asArray()
@@ -336,7 +314,7 @@ fun PlayerDrawItself(
                                                     Box(
                                                         modifier = Modifier
                                                             .fillMaxWidth()
-                                                            .background(colors.playerButtonsColor2)
+                                                            .background(MaterialTheme.colorScheme.surfaceContainer)
                                                             .padding(bottom = 10.dp),
                                                         contentAlignment = Alignment.Center
                                                     ){
@@ -390,7 +368,7 @@ fun PlayerDrawItself(
                                     LinearProgressIndicator(
                                         progress = { strength },
                                         color = animatedColor,
-                                        trackColor = colors.playerButtonsColor,
+                                        trackColor = MaterialTheme.colorScheme.surfaceBright,
                                         modifier = Modifier
                                             .height(with(density) { fontSize.toDp() * 1f })
                                             .fillMaxWidth()
@@ -401,7 +379,7 @@ fun PlayerDrawItself(
                                                     val spaceBetween = size.width / 5
                                                     for (i in 1..4) {
                                                         drawLine(
-                                                            color = colors.calledMoneyColor,
+                                                            color = textColor,
                                                             start = Offset(spaceBetween * i, 0f),
                                                             end = Offset(
                                                                 spaceBetween * i,
@@ -414,7 +392,7 @@ fun PlayerDrawItself(
                                             }
                                             .border(
                                                 1.dp,
-                                                colors.calledMoneyColor,
+                                                textColor,
                                                 RoundedCornerShape(5.dp)
                                             )
                                             .clip(RoundedCornerShape(5.dp))
@@ -448,12 +426,12 @@ fun PlayerDrawItself(
                                     .fillMaxHeight(),
                                 shape = RoundedCornerShape(5.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = colors.buttonColor,
-                                    contentColor = colors.calledMoneyColor
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = textColor,
                                 ),
                                 border = BorderStroke(
                                     1.dp,
-                                    colors.calledMoneyColor.copy(alpha = 0.5f)
+                                    textColor.copy(alpha = 0.5f)
                                 ),
                                 contentPadding = PaddingValues(0.dp)
                             ) {
@@ -466,7 +444,7 @@ fun PlayerDrawItself(
                                     fontSize = fontSize * 1.2f,
                                     fontWeight = FontWeight.ExtraBold,
                                     textAlign = TextAlign.Center,
-                                    color = colors.calledMoneyColor,
+                                    color = textColor,
                                     style = TextStyle(
                                         platformStyle = PlatformTextStyle(
                                             includeFontPadding = false
@@ -496,12 +474,12 @@ fun PlayerDrawItself(
                                     },
                                 shape = RoundedCornerShape(5.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = colors.buttonColor,
-                                    contentColor = colors.calledMoneyColor
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = textColor,
                                 ),
                                 border = BorderStroke(
                                     1.dp,
-                                    colors.calledMoneyColor.copy(alpha = 0.5f)
+                                    textColor.copy(alpha = 0.5f)
                                 ),
                                 contentPadding = PaddingValues(0.dp)
                             ) {
@@ -512,7 +490,7 @@ fun PlayerDrawItself(
                                         fontSize = fontSize * 1.2f,
                                         fontWeight = FontWeight.ExtraBold,
                                         textAlign = TextAlign.Center,
-                                        color = colors.calledMoneyColor,
+                                        color = textColor,
                                         platformStyle = PlatformTextStyle(
                                             includeFontPadding = false
                                         )
@@ -543,12 +521,12 @@ fun PlayerDrawItself(
                                     .fillMaxHeight(),
                                 shape = RoundedCornerShape(5.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = colors.buttonColor,
-                                    contentColor = colors.calledMoneyColor
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = textColor,
                                 ),
                                 border = BorderStroke(
                                     1.dp,
-                                    colors.calledMoneyColor.copy(alpha = 0.5f)
+                                    textColor.copy(alpha = 0.5f)
                                 ),
                                 contentPadding = PaddingValues(0.dp)
                             ) {
@@ -557,7 +535,7 @@ fun PlayerDrawItself(
                                     fontSize = fontSize * 1.2f,
                                     fontWeight = FontWeight.ExtraBold,
                                     textAlign = TextAlign.Center,
-                                    color = colors.calledMoneyColor,
+                                    color = textColor,
                                     style = TextStyle(
                                         platformStyle = PlatformTextStyle(
                                             includeFontPadding = false
@@ -577,13 +555,9 @@ fun PlayerDrawItself(
                             .fillMaxSize()
                             .padding(10.dp),
                         shape = RoundedCornerShape(5.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = colors.buttonColor,
-                            contentColor = colors.calledMoneyColor
-                        ),
                         border = BorderStroke(
                             1.dp,
-                            colors.calledMoneyColor.copy(alpha = 0.5f)
+                            textColor.copy(alpha = 0.5f)
                         ),
                         contentPadding = PaddingValues(5.dp)
                     ) {
@@ -592,7 +566,7 @@ fun PlayerDrawItself(
                             fontSize = fontSize * 1.5f,
                             fontWeight = FontWeight.ExtraBold,
                             textAlign = TextAlign.Center,
-                            color = colors.calledMoneyColor,
+                            color = textColor,
                             style = TextStyle(
                                 platformStyle = PlatformTextStyle(
                                     includeFontPadding = false
@@ -643,7 +617,7 @@ fun RaiseSlider(
                             (Math.round((sliderState.value - bigBlindAmount) / 10) * 10).toFloat()
                     }
                 ),
-            tint = colors.calledMoneyColor
+            tint = textColor
         )
 
         Slider(
@@ -655,7 +629,7 @@ fun RaiseSlider(
                         .fillMaxHeight(0.8f)
                         .border(2.dp, Color.White, RoundedCornerShape(20.dp))
                         .clip(RoundedCornerShape(20.dp))
-                        .background(colors.calledMoneyColor),
+                        .background(textColor),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ){
@@ -692,7 +666,7 @@ fun RaiseSlider(
                             (Math.round((sliderState.value + bigBlindAmount) / 10) * 10).toFloat()
                     }
                 ),
-            tint = colors.calledMoneyColor
+            tint = textColor
         )
     }
 }

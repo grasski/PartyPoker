@@ -3,6 +3,7 @@ package com.dabi.partypoker.featureServer.model.data
 import android.content.Context
 import android.util.Log
 import androidx.annotation.IntRange
+import androidx.annotation.Keep
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -52,7 +53,7 @@ data class SeatPosition(@IntRange(from = 0, to = 9) val position: Int) {
     }
 }
 
-
+@Keep
 data class MessageData(
 //    val filterType: FilterType,   maybe in future
     val sender: String? = null,

@@ -2,20 +2,14 @@ package com.dabi.partypoker.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.Resources
-import android.util.Log
 import androidx.annotation.ArrayRes
 import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import com.google.gson.*
-import com.google.gson.reflect.TypeToken
-import com.google.gson.stream.JsonReader
-import com.google.gson.stream.JsonWriter
 import java.lang.reflect.Type
 import kotlinx.serialization.Serializable
 
@@ -80,7 +74,6 @@ sealed class UiTexts{
         }
     }
 }
-
 
 
 class UiTextsAdapter : JsonSerializer<UiTexts>, JsonDeserializer<UiTexts> {

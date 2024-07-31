@@ -19,8 +19,8 @@ android {
         applicationId = "com.dabi.partypoker"
         minSdk = 26
         targetSdk = 34
-        versionCode = 8
-        versionName = "1.7"
+        versionCode = 14
+        versionName = "2.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -28,13 +28,18 @@ android {
         }
     }
 
+    ndkVersion = "27.0.11902837"
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            android.defaultConfig.ndk.debugSymbolLevel = "FULL"
         }
     }
     compileOptions {

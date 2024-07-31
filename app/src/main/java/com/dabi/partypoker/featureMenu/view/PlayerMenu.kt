@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material3.Icon
@@ -36,8 +35,8 @@ import androidx.navigation.NavController
 import com.dabi.partypoker.MenuScreen
 import com.dabi.partypoker.PlayerScreen
 import com.dabi.partypoker.R
-import com.dabi.partypoker.featureCore.data.colors
 import com.dabi.partypoker.featureCore.data.myColors
+import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.UiTexts
 
 
@@ -86,7 +85,7 @@ fun PlayerMenuView(
                         enabled = nickname.isNotBlank(),
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = Color.Transparent,
-                            contentColor = colors.calledMoneyColor
+                            contentColor = textColor
                         )
                     ){
                         Icon(

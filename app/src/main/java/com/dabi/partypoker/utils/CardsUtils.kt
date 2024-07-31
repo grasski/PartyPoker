@@ -1,7 +1,7 @@
 package com.dabi.partypoker.utils
 
+import androidx.annotation.Keep
 import com.dabi.partypoker.R
-import kotlin.math.pow
 
 
 enum class CardType{
@@ -10,6 +10,7 @@ enum class CardType{
     HEART,
     SPADE
 }
+@Keep
 data class Card(
     val type: CardType,
     val value: Int

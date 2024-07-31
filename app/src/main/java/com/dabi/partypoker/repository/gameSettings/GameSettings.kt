@@ -3,6 +3,7 @@ package com.dabi.partypoker.repository.gameSettings
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+
 @Entity
 data class GameSettings(
     var isDefault: Boolean = true,

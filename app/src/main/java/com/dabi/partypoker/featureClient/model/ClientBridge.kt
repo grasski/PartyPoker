@@ -93,16 +93,20 @@ class ClientBridge (
                             .registerTypeAdapter(UiTexts::class.java, UiTextsAdapter())
                             .create()
 
+                        Log.e("", "TADYYY 1")
                         val playerState = gson.fromJson(gson.toJson(data), PlayerState::class.java)
                         bridgeEvent(ClientBridgeEvents.UpdateClient(playerState))
+                        Log.e("", "TADYYY 2")
                     }
                     ServerPayloadType.UPDATE_GAME_STATE -> {
                         val gson = GsonBuilder()
                             .registerTypeAdapter(UiTexts::class.java, UiTextsAdapter())
                             .create()
 
+                        Log.e("", "TADYYY 3")
                         val gameState = gson.fromJson(gson.toJson(data), GameState::class.java)
                         bridgeEvent(ClientBridgeEvents.UpdateGameState(gameState))
+                        Log.e("", "TADYYY 4")
                     }
                 }
             }

@@ -39,6 +39,8 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Start
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -87,14 +89,15 @@ import androidx.navigation.NavController
 import com.dabi.partypoker.MenuScreen
 import com.dabi.partypoker.R
 import com.dabi.partypoker.ServerScreen
-import com.dabi.partypoker.featureCore.data.colors
 import com.dabi.partypoker.featureCore.data.myColors
+import com.dabi.partypoker.featureCore.data.myColorsSettings
 import com.dabi.partypoker.featureCore.views.AutoSizeText
 import com.dabi.partypoker.featureMenu.viewModel.MenuGameSettingsEvent
 import com.dabi.partypoker.featureMenu.viewModel.MenuViewModel
 import com.dabi.partypoker.featureMenu.viewModel.NewSettingsEvent
 import com.dabi.partypoker.managers.ServerType
 import com.dabi.partypoker.repository.gameSettings.GameSettings
+import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.UiTexts
 import kotlin.math.roundToInt
 
@@ -158,10 +161,10 @@ fun ServerMenuView(
                     .clip(RoundedCornerShape(10.dp))
                     .border(
                         2.dp,
-                        colors.calledMoneyColor,
+                        textColor,
                         RoundedCornerShape(10.dp)
                     )
-                    .background(colors.playerButtonsColor2.copy(0.8f))
+                    .background(MaterialTheme.colorScheme.surfaceContainer.copy(0.8f))
                     .widthIn(220.dp)
                     .onGloballyPositioned {
                         textFieldSize = with(density) {
@@ -185,7 +188,7 @@ fun ServerMenuView(
                     checked = localServerPlaying,
                     onCheckedChange = { localServerPlaying = it },
                     colors = CheckboxDefaults.colors(
-                        checkedColor = colors.calledMoneyColor,
+                        checkedColor = textColor,
                         uncheckedColor = Color.White
                     )
                 )
@@ -237,7 +240,7 @@ fun ServerMenuView(
                                     enabled = nickname.isNotBlank(),
                                     colors = IconButtonDefaults.iconButtonColors(
                                         containerColor = Color.Transparent,
-                                        contentColor = colors.calledMoneyColor
+                                        contentColor = textColor
                                     )
                                 ){
                                     Icon(
@@ -276,10 +279,6 @@ fun ServerMenuView(
                                 modifier = Modifier
                                     .fillMaxSize(),
                                 contentPadding = PaddingValues(horizontal = 5.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = colors.buttonColor,
-                                    contentColor = Color.White
-                                ),
                                 shape = RoundedCornerShape(10.dp)
                             ){
                                 AutoSizeText(
@@ -300,7 +299,7 @@ fun ServerMenuView(
                             onClick = {
                                 showSettings = true
                             },
-                            containerColor = colors.playerButtonsColor2,
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
                             contentColor = Color.White
                         ) {
                             Icon(
@@ -402,7 +401,7 @@ fun ServerSettingsView(
                 bottomStart = if (orientation == Configuration.ORIENTATION_PORTRAIT) 0.dp else 10.dp
             )
         )
-        .background(colors.playerButtonsColor)
+        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
         .padding(8.dp)
     ){
         item{
@@ -418,14 +417,14 @@ fun ServerSettingsView(
                         .align(Alignment.CenterStart)
                         .border(
                             2.dp,
-                            colors.calledMoneyColor,
+                            textColor,
                             CircleShape
                         )
                 ) {
                     Icon(
                         Icons.Filled.Close,
                         "close",
-                        tint = colors.calledMoneyColor
+                        tint = textColor
                     )
                 }
 
@@ -434,7 +433,7 @@ fun ServerSettingsView(
                     style = MaterialTheme.typography.titleLarge.copy(
                         textDecoration = TextDecoration.Underline,
                         fontWeight = FontWeight.ExtraBold,
-                        color = colors.calledMoneyColor
+                        color = textColor
                     )
                 )
 
@@ -447,14 +446,14 @@ fun ServerSettingsView(
                         .align(Alignment.CenterEnd)
                         .border(
                             2.dp,
-                            colors.calledMoneyColor,
+                            textColor,
                             CircleShape
                         )
                 ) {
                     Icon(
                         Icons.Filled.AddCircle,
                         "create",
-                        tint = colors.calledMoneyColor,
+                        tint = textColor,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -629,18 +628,21 @@ private fun UpsertSettingsDialog (
         onDismissRequest = { dismiss() },
         properties = dialogProperties
     ) {
-        Column(
+        Card(
             modifier = Modifier
                 .fillMaxHeight(if (orientation == Configuration.ORIENTATION_PORTRAIT) 0.7f else 1f)
                 .fillMaxWidth()
-                .padding(vertical = 16.dp)
+                .padding(vertical = 8.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(colors.messagesCard)
-                .padding(16.dp),
+                .padding(8.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
+            )
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
                 contentAlignment = Alignment.Center
             ){
                 AutoSizeText(
@@ -648,6 +650,7 @@ private fun UpsertSettingsDialog (
                     style = MaterialTheme.typography.titleLarge,
                 )
             }
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -671,7 +674,7 @@ private fun UpsertSettingsDialog (
                         ),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        colors = TextFieldDefaults.myColors(),
+                        colors = TextFieldDefaults.myColorsSettings(),
                         shape = RoundedCornerShape(10.dp),
                     )
                 }
@@ -693,7 +696,7 @@ private fun UpsertSettingsDialog (
                             imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Decimal
                         ),
-                        colors = TextFieldDefaults.myColors(),
+                        colors = TextFieldDefaults.myColorsSettings(),
                         shape = RoundedCornerShape(10.dp),
                     )
                 }
@@ -715,7 +718,7 @@ private fun UpsertSettingsDialog (
                             imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Decimal
                         ),
-                        colors = TextFieldDefaults.myColors(),
+                        colors = TextFieldDefaults.myColorsSettings(),
                         shape = RoundedCornerShape(10.dp),
                     )
                 }
@@ -737,7 +740,7 @@ private fun UpsertSettingsDialog (
                             imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Decimal
                         ),
-                        colors = TextFieldDefaults.myColors(),
+                        colors = TextFieldDefaults.myColorsSettings(),
                         shape = RoundedCornerShape(10.dp),
                     )
                 }
@@ -762,7 +765,7 @@ private fun UpsertSettingsDialog (
                             imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Decimal
                         ),
-                        colors = TextFieldDefaults.myColors(),
+                        colors = TextFieldDefaults.myColorsSettings(),
                         shape = RoundedCornerShape(10.dp),
                     )
                 }
@@ -787,7 +790,7 @@ private fun UpsertSettingsDialog (
                             imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Decimal
                         ),
-                        colors = TextFieldDefaults.myColors(),
+                        colors = TextFieldDefaults.myColorsSettings(),
                         shape = RoundedCornerShape(10.dp),
                     )
                 }
@@ -795,19 +798,30 @@ private fun UpsertSettingsDialog (
 
             Row(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ){
-                Button(onClick = {
-                    dismiss()
-                }) {
+                Button(
+                    onClick = {
+                        dismiss()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    )
+                ) {
                     Text("Cancel")
                 }
                 Button(
                     onClick = {
                         newSettingEvent(NewSettingsEvent.SaveSettings)
                         dismiss()
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    )
                 ) {
                     Text("Save")
                 }

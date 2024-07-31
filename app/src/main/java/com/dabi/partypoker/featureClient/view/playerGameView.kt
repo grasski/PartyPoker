@@ -1,12 +1,7 @@
 package com.dabi.partypoker.featureClient.view
 
-import android.util.Log
 import androidx.annotation.RawRes
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -37,7 +32,6 @@ import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -54,14 +48,13 @@ import com.dabi.partypoker.PlayerScreen
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureClient.viewmodel.PlayerViewModel
-import com.dabi.partypoker.featureCore.data.colors
 import com.dabi.partypoker.featureCore.views.AutoSizeText
 import com.dabi.partypoker.featureCore.views.LoadingAnimation
-import com.dabi.partypoker.featureMenu.view.ViewPosition
 import com.dabi.partypoker.featureServer.model.data.ServerState
 import com.dabi.partypoker.managers.ClientEvents
 import com.dabi.partypoker.managers.ConnectionStatusEnum
 import com.dabi.partypoker.managers.ServerType
+import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.UiTexts
 
 
@@ -121,14 +114,14 @@ fun PlayerView(
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent,
-                            contentColor = colors.calledMoneyColor
+                            contentColor = textColor
                         ),
                         contentPadding = PaddingValues(5.dp, vertical = 0.dp),
                         modifier = Modifier
                             .padding(16.dp)
-                            .border(2.dp, colors.calledMoneyColor, RoundedCornerShape(10.dp))
+                            .border(2.dp, textColor, RoundedCornerShape(10.dp))
                             .clip(RoundedCornerShape(10.dp))
-                            .background(colors.playerButtonsColor2.copy(0.8f))
+                            .background(MaterialTheme.colorScheme.surfaceContainer.copy(0.8f))
                             .align(Alignment.TopStart)
                     ) {
                         Row(
@@ -168,10 +161,10 @@ fun PlayerView(
                                 .clip(RoundedCornerShape(10.dp))
                                 .border(
                                     2.dp,
-                                    colors.calledMoneyColor,
+                                    textColor,
                                     RoundedCornerShape(10.dp)
                                 )
-                                .background(colors.playerButtonsColor2.copy(0.8f))
+                                .background(MaterialTheme.colorScheme.surfaceContainer.copy(0.8f))
                                 .padding(8.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ){
@@ -190,10 +183,6 @@ fun PlayerView(
                                 },
                                 modifier = Modifier
                                     .padding(top = 10.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = colors.playerBoxColor1,
-                                    contentColor = Color.White
-                                ),
                                 shape = RoundedCornerShape(10.dp)
                             ){
                                 AutoSizeText(

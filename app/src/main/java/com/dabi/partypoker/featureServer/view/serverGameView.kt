@@ -48,7 +48,6 @@ import com.dabi.partypoker.MenuScreen
 import com.dabi.partypoker.R
 import com.dabi.partypoker.ServerScreen
 import com.dabi.partypoker.featureClient.view.PlayerGameView
-import com.dabi.partypoker.featureCore.data.colors
 import com.dabi.partypoker.featureCore.views.AutoSizeText
 import com.dabi.partypoker.featureCore.views.LoadingAnimation
 import com.dabi.partypoker.featureServer.viewmodel.ServerOwnerViewModel
@@ -57,6 +56,7 @@ import com.dabi.partypoker.managers.GameEvents
 import com.dabi.partypoker.managers.ServerEvents
 import com.dabi.partypoker.managers.ServerStatusEnum
 import com.dabi.partypoker.managers.ServerType
+import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.UiTexts
 
 
@@ -131,14 +131,14 @@ fun ServerView(
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Transparent,
-                            contentColor = colors.calledMoneyColor
+                            contentColor = textColor
                         ),
                         contentPadding = PaddingValues(5.dp, vertical = 0.dp),
                         modifier = Modifier
                             .padding(16.dp)
-                            .border(2.dp, colors.calledMoneyColor, RoundedCornerShape(10.dp))
+                            .border(2.dp, textColor, RoundedCornerShape(10.dp))
                             .clip(RoundedCornerShape(10.dp))
-                            .background(colors.playerButtonsColor2.copy(0.8f))
+                            .background(MaterialTheme.colorScheme.surfaceContainer.copy(0.8f))
                             .align(Alignment.TopStart)
                     ) {
                         Row(
@@ -177,18 +177,19 @@ fun ServerView(
                                 .clip(RoundedCornerShape(10.dp))
                                 .border(
                                     2.dp,
-                                    colors.calledMoneyColor,
+                                    textColor,
                                     RoundedCornerShape(10.dp)
                                 )
-                                .background(colors.playerButtonsColor2.copy(0.8f))
+                                .background(MaterialTheme.colorScheme.surfaceContainer.copy(0.8f))
                                 .padding(8.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ){
-                            Text(
+                            AutoSizeText(
                                 text = UiTexts.StringResource(R.string.fail_start).asString(),
-                                style = MaterialTheme.typography.bodyLarge,
-                                textAlign = TextAlign.Center,
-                                color = Color.White
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    textAlign = TextAlign.Center,
+                                    color = Color.White
+                                ),
                             )
 
                             Button(
@@ -199,10 +200,6 @@ fun ServerView(
                                 },
                                 modifier = Modifier
                                     .padding(top = 10.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = colors.playerBoxColor1,
-                                    contentColor = Color.White
-                                ),
                                 shape = RoundedCornerShape(10.dp)
                             ){
                                 AutoSizeText(
