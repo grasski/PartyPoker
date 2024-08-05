@@ -15,6 +15,11 @@
     <string name="server_playing">Hraješ taky?</string>
     <string name="server_start">Zapni server se hrou</string>
 
+    <string name="menu">Menu</string>
+    <string name="settings">Herní nastavení</string>
+    <string name="settings_update">Změna nastavení</string>
+    <string name="settings_new">Vytvoř nové nastavení</string>
+
     <string-array name="permissions">
         <item>Chceš vytvořit lokální server hry?</item>
         <item>Chceš se připojit k lokální hře?</item>

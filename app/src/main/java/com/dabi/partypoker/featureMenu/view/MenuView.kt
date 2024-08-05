@@ -119,7 +119,7 @@ fun MenuView(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     "back"
                 )
-                Text("Menu")
+                Text(UiTexts.StringResource(R.string.menu).asString())
             }
         }
     }
@@ -373,7 +373,8 @@ fun NoPermissionsView(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
@@ -404,7 +405,8 @@ fun NoPermissionsView(
                         RoundedCornerShape(10.dp)
                     )
                     .background(MaterialTheme.colorScheme.surfaceContainer.copy(0.8f))
-                    .padding(8.dp),
+                    .padding(8.dp)
+                    .weight(1f, false),
             ) {
                 Text(
                     text = if (forServer) textsArray[0] else textsArray[1],

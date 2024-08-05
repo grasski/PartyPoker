@@ -14,6 +14,11 @@
     <string name="server_playing">Are you playing too?</string>
     <string name="server_start">Start server with game</string>
 
+    <string name="menu">Menu</string>
+    <string name="settings">Game settings</string>
+    <string name="settings_update">Update settings</string>
+    <string name="settings_new">Create new settings</string>
+
     <string-array name="permissions">
         <item>Would you like to host a local game?</item>
         <item>Would you like to join a local game?</item>

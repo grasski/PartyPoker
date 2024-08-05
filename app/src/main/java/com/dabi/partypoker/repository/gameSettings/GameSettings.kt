@@ -13,7 +13,7 @@ data class GameSettings(
     var smallBlindAmount: Int = 25,
     var bigBlindAmount: Int = 50,
 
-    var playerTimerDurationMillis: Int = 8000,
+    var playerTimerDurationMillis: Int = 12000,
     var gameOverTimerDurationMillis: Int = 7000,
 
     @PrimaryKey(autoGenerate = true)

@@ -2,10 +2,11 @@ package com.dabi.partypoker.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 
-private val darkScheme = darkColorScheme(
+private val darkScheme = lightColorScheme(
     primary = primaryDark,
     onPrimary = onPrimaryDark,
     primaryContainer = primaryContainerDark,

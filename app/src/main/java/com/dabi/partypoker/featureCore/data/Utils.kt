@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.dabi.partypoker.ui.theme.onSecondaryDark
 import com.dabi.partypoker.ui.theme.textColor
 
 
@@ -61,4 +62,7 @@ fun TextFieldDefaults.myColorsSettings() = this.colors(
 
     focusedTrailingIconColor = MaterialTheme.colorScheme.onSecondary,
     unfocusedTrailingIconColor = MaterialTheme.colorScheme.onSecondary,
+
+    errorIndicatorColor = Color.Transparent,
+    errorContainerColor = MaterialTheme.colorScheme.errorContainer
 )

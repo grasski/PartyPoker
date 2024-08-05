@@ -1,6 +1,7 @@
 package com.dabi.partypoker.featureMenu.view
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
@@ -95,10 +96,12 @@ import com.dabi.partypoker.featureCore.views.AutoSizeText
 import com.dabi.partypoker.featureMenu.viewModel.MenuGameSettingsEvent
 import com.dabi.partypoker.featureMenu.viewModel.MenuViewModel
 import com.dabi.partypoker.featureMenu.viewModel.NewSettingsEvent
+import com.dabi.partypoker.featureMenu.viewModel.SettingsError
 import com.dabi.partypoker.managers.ServerType
 import com.dabi.partypoker.repository.gameSettings.GameSettings
 import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.UiTexts
+import kotlinx.coroutines.runBlocking
 import kotlin.math.roundToInt
 
 
@@ -158,156 +161,156 @@ fun ServerMenuView(
         ) {
             Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .border(
-                        2.dp,
-                        textColor,
-                        RoundedCornerShape(10.dp)
-                    )
-                    .background(MaterialTheme.colorScheme.surfaceContainer.copy(0.8f))
-                    .widthIn(220.dp)
-                    .onGloballyPositioned {
-                        textFieldSize = with(density) {
-                            DpSize(
-                                it.size.width.toDp(),
-                                it.size.height.toDp()
-                            )
-                        }
-                    }
-                    .padding(start = 10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(start = 55.dp)
             ) {
-                AutoSizeText(
-                    text = UiTexts.StringResource(R.string.server_playing).asString(),
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        color = Color.White
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .border(
+                            2.dp,
+                            textColor,
+                            RoundedCornerShape(10.dp)
+                        )
+                        .background(MaterialTheme.colorScheme.surfaceContainer.copy(0.8f))
+                        .widthIn(220.dp)
+                        .onGloballyPositioned {
+                            textFieldSize = with(density) {
+                                DpSize(
+                                    it.size.width.toDp(),
+                                    it.size.height.toDp()
+                                )
+                            }
+                        }
+                        .padding(start = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    AutoSizeText(
+                        text = UiTexts.StringResource(R.string.server_playing).asString(),
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            color = Color.White
+                        )
                     )
-                )
-                Checkbox(
-                    checked = localServerPlaying,
-                    onCheckedChange = { localServerPlaying = it },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = textColor,
-                        uncheckedColor = Color.White
+                    Checkbox(
+                        checked = localServerPlaying,
+                        onCheckedChange = { localServerPlaying = it },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = textColor,
+                            uncheckedColor = Color.White
+                        )
                     )
-                )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .width(55.dp)
+                        .height(55.dp)
+                        .padding(5.dp),
+                ){
+                    FloatingActionButton(
+                        onClick = {
+                            showSettings = true
+                        },
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        contentColor = Color.White
+                    ) {
+                        Icon(
+                            Icons.Filled.Settings,
+                            "settings",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(5.dp)
+                        )
+                    }
+                }
             }
 
             Crossfade(
                 targetState = localServerPlaying,
             ) { isPlaying ->
-                Row(
-                    modifier = Modifier
-                        .padding(start = 55.dp)
-                ) {
-                    if (isPlaying) {
-                        TextField(
-                            value = nickname,
-                            onValueChange = { nickname = it },
-                            placeholder = {
-                                AutoSizeText(
-                                    text = UiTexts.StringResource(R.string.enter_nickname).asString(),
-                                    style = TextStyle(
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 20.sp,
-                                    )
+                if (isPlaying) {
+                    TextField(
+                        value = nickname,
+                        onValueChange = { nickname = it },
+                        placeholder = {
+                            AutoSizeText(
+                                text = UiTexts.StringResource(R.string.enter_nickname).asString(),
+                                style = TextStyle(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 20.sp,
                                 )
-                            },
-                            textStyle = TextStyle(
-                                fontWeight = FontWeight.ExtraBold,
-                                fontSize = 20.sp,
-                                platformStyle = null
-                            ),
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                            colors = TextFieldDefaults.myColors(),
-                            trailingIcon = {
-                                IconButton(
-                                    onClick = {
-                                        if (nickname.isNotBlank()){
-                                            navController.navigate(
-                                                ServerScreen(
-                                                    serverType = ServerType.IS_PLAYER.toString(),
-                                                    serverName = nickname.ifEmpty { "ServerOwner" },
-                                                    avatarId = selectedAvatar,
-                                                    serverGameSettingsId = serverGameSettingsId
-                                                )
-                                            ) {
-                                                popUpTo(MenuScreen){inclusive = true}
-                                            }
-                                        }
-                                    },
-                                    enabled = nickname.isNotBlank(),
-                                    colors = IconButtonDefaults.iconButtonColors(
-                                        containerColor = Color.Transparent,
-                                        contentColor = textColor
-                                    )
-                                ){
-                                    Icon(
-                                        Icons.Default.Start,
-                                        ""
-                                    )
-                                }
-                            },
-                            singleLine = true,
-                            modifier = Modifier
-                                .width(textFieldSize.width)
-                                .height(55.dp),
-                            shape = RoundedCornerShape(10.dp),
-                        )
-                    }
-                    else {
-                        Box(
-                            modifier = Modifier
-                                .width(textFieldSize.width)
-                                .height(55.dp),
-                            contentAlignment = Alignment.Center
-                        ){
-                            Button(
+                            )
+                        },
+                        textStyle = TextStyle(
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 20.sp,
+                            platformStyle = null
+                        ),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        colors = TextFieldDefaults.myColors(),
+                        trailingIcon = {
+                            IconButton(
                                 onClick = {
-                                    navController.navigate(
-                                        ServerScreen(
-                                            serverType = if(localServerPlaying) ServerType.IS_PLAYER.toString() else ServerType.IS_TABLE.toString(),
-                                            serverName = nickname.ifEmpty { "ServerOwner" },
-                                            avatarId = 0,
-                                            serverGameSettingsId = serverGameSettingsId
-                                        )
-                                    ) {
-                                        popUpTo(MenuScreen){inclusive = true}
+                                    if (nickname.isNotBlank()){
+                                        navController.navigate(
+                                            ServerScreen(
+                                                serverType = ServerType.IS_PLAYER.toString(),
+                                                serverName = nickname.ifEmpty { "ServerOwner" },
+                                                avatarId = selectedAvatar,
+                                                serverGameSettingsId = serverGameSettingsId
+                                            )
+                                        ) {
+                                            popUpTo(MenuScreen){inclusive = true}
+                                        }
                                     }
                                 },
-                                modifier = Modifier
-                                    .fillMaxSize(),
-                                contentPadding = PaddingValues(horizontal = 5.dp),
-                                shape = RoundedCornerShape(10.dp)
+                                enabled = nickname.isNotBlank(),
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    containerColor = Color.Transparent,
+                                    contentColor = textColor
+                                )
                             ){
-                                AutoSizeText(
-                                    text = UiTexts.StringResource(R.string.server_start).asString(),
-                                    style = MaterialTheme.typography.titleLarge
+                                Icon(
+                                    Icons.Default.Start,
+                                    ""
                                 )
                             }
-                        }
-                    }
-
+                        },
+                        singleLine = true,
+                        modifier = Modifier
+                            .width(textFieldSize.width)
+                            .height(55.dp),
+                        shape = RoundedCornerShape(10.dp),
+                    )
+                }
+                else {
                     Box(
                         modifier = Modifier
-                            .width(55.dp)
-                            .height(55.dp)
-                            .padding(5.dp),
+                            .width(textFieldSize.width)
+                            .height(55.dp),
+                        contentAlignment = Alignment.Center
                     ){
-                        FloatingActionButton(
+                        Button(
                             onClick = {
-                                showSettings = true
+                                navController.navigate(
+                                    ServerScreen(
+                                        serverType = if(localServerPlaying) ServerType.IS_PLAYER.toString() else ServerType.IS_TABLE.toString(),
+                                        serverName = nickname.ifEmpty { "ServerOwner" },
+                                        avatarId = 0,
+                                        serverGameSettingsId = serverGameSettingsId
+                                    )
+                                ) {
+                                    popUpTo(MenuScreen){inclusive = true}
+                                }
                             },
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                            contentColor = Color.White
-                        ) {
-                            Icon(
-                                Icons.Filled.Settings,
-                                "settings",
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(5.dp)
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentPadding = PaddingValues(horizontal = 5.dp),
+                            shape = RoundedCornerShape(10.dp)
+                        ){
+                            AutoSizeText(
+                                text = UiTexts.StringResource(R.string.server_start).asString(),
+                                style = MaterialTheme.typography.titleLarge
                             )
                         }
                     }
@@ -380,12 +383,22 @@ fun ServerSettingsView(
     var openSettings by rememberSaveable { mutableStateOf(false) }
     var isUpdating by rememberSaveable { mutableStateOf(false) }
     val newSettings by menuViewModel.newSettings.collectAsStateWithLifecycle()
+    val settingsErrors by menuViewModel.errors.collectAsStateWithLifecycle()
 
     if (openSettings){
         UpsertSettingsDialog(
             settings = newSettings,
+            errors = settingsErrors,
             update = isUpdating,
-            dismiss = { openSettings = false },
+            dismiss = { fromSave ->
+                if (!fromSave){
+                    openSettings = false
+                }
+
+                if (settingsErrors.isEmpty()){
+                    openSettings = false
+                }
+            },
             newSettingEvent = menuViewModel::onChangeEvent
         )
     }
@@ -429,7 +442,7 @@ fun ServerSettingsView(
                 }
 
                 AutoSizeText(
-                    text = "Herní nastavení",
+                    text = UiTexts.StringResource(R.string.settings).asString(),
                     style = MaterialTheme.typography.titleLarge.copy(
                         textDecoration = TextDecoration.Underline,
                         fontWeight = FontWeight.ExtraBold,
@@ -589,7 +602,7 @@ fun ServerSettingsView(
                 verticalAlignment = Alignment.CenterVertically
             ){
                 Text(text = "5. Game over timeout: ")
-                Text(text = selectedSetting.gameOverTimerDurationMillis.toString())
+                Text(text = selectedSetting.gameOverTimerDurationMillis.div(1000).toString())
             }
 
             Row(
@@ -598,7 +611,7 @@ fun ServerSettingsView(
                 verticalAlignment = Alignment.CenterVertically
             ){
                 Text(text = "6. Player move timeout: ")
-                Text(text = selectedSetting.playerTimerDurationMillis.toString())
+                Text(text = selectedSetting.playerTimerDurationMillis.div(1000).toString())
             }
         }
     }
@@ -608,8 +621,9 @@ fun ServerSettingsView(
 @Composable
 private fun UpsertSettingsDialog (
     settings: GameSettings,
+    errors: List<SettingsError>,
     update: Boolean,
-    dismiss: () -> Unit = {},
+    dismiss: (fromSave: Boolean) -> Unit = {},
     newSettingEvent: (NewSettingsEvent) -> Unit
 ) {
     if (!update){
@@ -625,7 +639,7 @@ private fun UpsertSettingsDialog (
         dismissOnClickOutside = false
     )) }
     Dialog(
-        onDismissRequest = { dismiss() },
+        onDismissRequest = { dismiss(false) },
         properties = dialogProperties
     ) {
         Card(
@@ -646,7 +660,7 @@ private fun UpsertSettingsDialog (
                 contentAlignment = Alignment.Center
             ){
                 AutoSizeText(
-                    text = if(update) "Update settings" else "Create new settings",
+                    text = if(update) UiTexts.StringResource(R.string.settings_update).asString() else UiTexts.StringResource(R.string.settings_new).asString(),
                     style = MaterialTheme.typography.titleLarge,
                 )
             }
@@ -664,6 +678,7 @@ private fun UpsertSettingsDialog (
                             .fillMaxWidth(0.75f),
                         value = settings.title,
                         onValueChange = { newSettingEvent(NewSettingsEvent.ChangeTitle(it)) },
+                        isError = errors.contains(SettingsError.EMPTY_TITLE),
                         label = {
                             Text(text = "Title")
                         },
@@ -682,8 +697,13 @@ private fun UpsertSettingsDialog (
                     TextField(
                         modifier = Modifier
                             .fillMaxWidth(0.75f),
-                        value = settings.playerMoney.toString(),
-                        onValueChange = { newSettingEvent(NewSettingsEvent.ChangePlayerMoney(it.toIntOrNull())) },
+                        value = settings.playerMoney.takeIf { it > 0 }?.toString() ?: "",
+                        onValueChange = {
+                            if (it.toIntOrNull() != null || it.isEmpty()){
+                                newSettingEvent(NewSettingsEvent.ChangePlayerMoney(it.toIntOrNull()))
+                            }
+                        },
+                        isError = errors.contains(SettingsError.INVALID_PLAYER_MONEY) || errors.contains(SettingsError.BIG_BLIND_GREATER_THAN_PLAYER_MONEY),
                         label = {
                             Text(text = "Player money")
                         },
@@ -704,8 +724,13 @@ private fun UpsertSettingsDialog (
                     TextField(
                         modifier = Modifier
                             .fillMaxWidth(0.75f),
-                        value = settings.smallBlindAmount.toString(),
-                        onValueChange = { newSettingEvent(NewSettingsEvent.ChangeSmallBlindAmount(it.toIntOrNull())) },
+                        value = settings.smallBlindAmount.takeIf { it > 0 }?.toString() ?: "",
+                        onValueChange = {
+                            if (it.toIntOrNull() != null || it.isEmpty()){
+                                newSettingEvent(NewSettingsEvent.ChangeSmallBlindAmount(it.toIntOrNull()))
+                            }
+                        },
+                        isError = errors.contains(SettingsError.INVALID_SMALL_BLIND) || errors.contains(SettingsError.SMALL_BLIND_GREATER_THAN_BIG_BLIND),
                         label = {
                             Text(text = "Small blind amount")
                         },
@@ -726,8 +751,17 @@ private fun UpsertSettingsDialog (
                     TextField(
                         modifier = Modifier
                             .fillMaxWidth(0.75f),
-                        value = settings.bigBlindAmount.toString(),
-                        onValueChange = { newSettingEvent(NewSettingsEvent.ChangeBigBlindAmount(it.toIntOrNull())) },
+                        value = settings.bigBlindAmount.takeIf { it > 0 }?.toString() ?: "",
+                        onValueChange = {
+                            if (it.toIntOrNull() != null || it.isEmpty()){
+                                newSettingEvent(NewSettingsEvent.ChangeBigBlindAmount(it.toIntOrNull()))
+                            }
+                        },
+                        isError = (
+                                errors.contains(SettingsError.INVALID_BIG_BLIND) ||
+                                errors.contains(SettingsError.SMALL_BLIND_GREATER_THAN_BIG_BLIND) ||
+                                errors.contains(SettingsError.BIG_BLIND_GREATER_THAN_PLAYER_MONEY)
+                        ),
                         label = {
                             Text(text = "Big blind amount")
                         },
@@ -748,11 +782,13 @@ private fun UpsertSettingsDialog (
                     TextField(
                         modifier = Modifier
                             .fillMaxWidth(0.75f),
-                        value = settings.playerTimerDurationMillis.div(1000f).toString(),
+                        value = settings.playerTimerDurationMillis.div(1000).takeIf { it > 0 }?.toString() ?: "",
                         onValueChange = {
-                            if (it.count{ c -> c == '.' } >= 1){
-                                newSettingEvent(NewSettingsEvent.ChangePlayerTimeout(it.toFloatOrNull()))
-                            } },
+                            if (it.toIntOrNull() != null || it.isEmpty()){
+                                newSettingEvent(NewSettingsEvent.ChangePlayerTimeout(it.toIntOrNull()))
+                            }
+                        },
+                        isError = errors.contains(SettingsError.INVALID_PLAYER_TIMER),
                         label = {
                             Text(text = "Player move timeout [s]")
                         },
@@ -773,11 +809,13 @@ private fun UpsertSettingsDialog (
                     TextField(
                         modifier = Modifier
                             .fillMaxWidth(0.75f),
-                        value = settings.gameOverTimerDurationMillis.div(1000f).toString(),
+                        value = settings.gameOverTimerDurationMillis.div(1000).takeIf { it > 0 }?.toString() ?: "",
+                        isError = errors.contains(SettingsError.INVALID_GAME_OVER_TIMER),
                         onValueChange = {
-                            if (it.count{ c -> c == '.' } >= 1){
-                                newSettingEvent(NewSettingsEvent.ChangeGameOverTimeout(it.toFloatOrNull()))
-                            } },
+                            if (it.toIntOrNull() != null || it.isEmpty()) {
+                                newSettingEvent(NewSettingsEvent.ChangeGameOverTimeout(it.toIntOrNull()))
+                            }
+                        },
                         label = {
                             Text(text = "Game over timeout [s]")
                         },
@@ -804,7 +842,7 @@ private fun UpsertSettingsDialog (
             ){
                 Button(
                     onClick = {
-                        dismiss()
+                        dismiss(false)
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -813,10 +851,11 @@ private fun UpsertSettingsDialog (
                 ) {
                     Text("Cancel")
                 }
+
                 Button(
                     onClick = {
                         newSettingEvent(NewSettingsEvent.SaveSettings)
-                        dismiss()
+                        dismiss(true)
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
