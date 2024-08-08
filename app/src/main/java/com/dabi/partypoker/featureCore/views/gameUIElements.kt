@@ -1,5 +1,6 @@
 package com.dabi.partypoker.featureCore.views
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -76,14 +78,17 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
+import com.dabi.partypoker.featureMenu.view.ViewPosition
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.MessageData
 import com.dabi.partypoker.managers.GameEvents
 import com.dabi.partypoker.managers.ServerType
+import com.dabi.partypoker.ui.theme.errorContainerDark
 import com.dabi.partypoker.ui.theme.inversePrimaryDark
 import com.dabi.partypoker.ui.theme.primaryDark
 import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.CardsUtils
+import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.formatNumberToString
 
 
@@ -263,10 +268,65 @@ fun GameTable(
                 }
             }
         } else{
-            Button(onClick = {
-                onGameEvent(GameEvents.StartGame)
-            }) {
-                Text(text = "Start the game")
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ){
+                Button(
+                    onClick = {
+                        onGameEvent(GameEvents.StartGame)
+                    },
+                    modifier = Modifier
+                        .padding(10.dp),
+                    shape = RoundedCornerShape(10.dp)
+                ){
+                    AutoSizeText(
+                        text = UiTexts.StringResource(R.string.start_game).asString(),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f)
+                        .height(playerBoxSize.height / 2)
+                        .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color.Black.copy(0.35f)),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ){
+                    var showMessages by remember { mutableStateOf(false) }
+                    if (showMessages){
+                        MessagesView(
+                            onDismissRequest = { showMessages = false },
+                            messages = gameState.messages
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 5.dp)
+                    ){
+                        gameState.messages.lastOrNull()?.ShowMessage(
+                            maxLines = 1,
+                            fontSize = fontSize,
+                            textColor = Color.White
+                        )
+                    }
+
+                    Icon(
+                        Icons.Default.MoreVert,
+                        contentDescription = "",
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .clickable(onClick = {
+                                showMessages = true
+                            }),
+                        tint = Color.White
+                    )
+                }
             }
         }
     }
@@ -380,6 +440,73 @@ fun PlayerBox(
         Box(
             modifier = Modifier.alpha(if(playerState.isFolded) 0.6f else 1f)
         ){
+            Crossfade(targetState = playerState.isReadyToPlay) { ready ->
+                if (!ready && gameState.gameReadyPlayers.containsKey(playerState.id)){
+                    val iconSize = circleSize.div(3)
+                    Icon(
+                        Icons.Default.TrackChanges,
+                        "",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier
+                            .offset {
+                                IntOffset(
+                                    if (layoutDirection == PlayerLayoutDirection.LEFT || layoutDirection == PlayerLayoutDirection.BOTTOM) {
+                                        circleSize.div(2).toPx().toInt() - iconSize.toPx().toInt()/2
+                                    } else {
+                                        size.width.toPx().toInt() - circleSize.div(2).toPx().toInt() - iconSize.toPx().toInt()/2
+                                    },
+                                    iconSize.toPx().toInt().div(2)
+                                )
+                            }
+                            .size(iconSize)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.errorContainer)
+                    )
+                }
+                if (!ready && !gameState.gameReadyPlayers.containsKey(playerState.id)){
+                    val labelSize = DpSize(
+                        width = size.width - circleSize.div(2),
+                        height = (size.height - boxSize.height) / 1.4f + 16.dp
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .size(labelSize)
+                            .offset {
+                                IntOffset(
+                                    if (layoutDirection == PlayerLayoutDirection.LEFT || layoutDirection == PlayerLayoutDirection.BOTTOM) {
+                                        circleSize
+                                            .div(2)
+                                            .toPx()
+                                            .toInt()
+                                    } else {
+                                        0
+                                    },
+                                    ((size.height - boxSize.height) - labelSize.height + 16.dp)
+                                        .toPx()
+                                        .toInt()
+                                )
+                            }
+                            .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                            .background(MaterialTheme.colorScheme.errorContainer),
+                        contentAlignment = Alignment.Center
+                    ){
+                        Box(
+                            modifier = Modifier
+                                .offset(
+                                    0.dp,
+                                    (-8).dp
+                                )
+                        ){
+                            AutoSizeText(
+                                text = UiTexts.StringResource(R.string.unready).asString(),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+            }
+
             // Cards row
             Row(
                 modifier = Modifier
@@ -565,7 +692,12 @@ fun PlayerBox(
                             .padding(vertical = 3.dp, horizontal = 5.dp),
                         horizontalAlignment = if (layoutDirection == PlayerLayoutDirection.LEFT || layoutDirection == PlayerLayoutDirection.BOTTOM) Alignment.Start else Alignment.End
                     ){
-                        Box(modifier = Modifier.weight(0.8f)){
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ){
                             AutoSizeText(
                                 text = playerState.nickname,
                                 style = TextStyle(
@@ -573,7 +705,8 @@ fun PlayerBox(
                                         includeFontPadding = false
                                     ),
                                     fontSize = fontSize,
-                                    color = Color.Black
+                                    color = Color.Black,
+                                    fontWeight = FontWeight.Bold
                                 ),
                             )
                         }
@@ -590,7 +723,7 @@ fun PlayerBox(
                                 textStyle = TextStyle(
                                     fontWeight = FontWeight.ExtraBold,
                                     textAlign = TextAlign.Center,
-                                    fontSize = fontSize * 1.4f,
+                                    fontSize = fontSize * 1.2f,
                                     color = Color.Green,
 
                                     platformStyle = PlatformTextStyle(

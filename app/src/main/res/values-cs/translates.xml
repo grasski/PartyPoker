@@ -4,10 +4,16 @@
     <string name="connect_local">Připojit se k lokální hře</string>
     <string name="create_local">Vytvoř lokální hru</string>
 
-    <string name="client_disconnected">Player se odpojil ze hry.</string>
+    <string name="client_disconnected">%1$s se odpojil ze hry.</string>
     <string name="client_connected">%1$s se připojil do hry.</string>
     <string name="server_starting">Server se zapíná, prosím čekejte.</string>
     <string name="client_connecting">Připojování k serveru, prosím čekejte.</string>
+
+    <string name="game_created">Herní místnost byla vytvořena.</string>
+    <string name="start_game">Spustit hru</string>
+    <string name="player_ready">%1$s je připraven ke hře!</string>
+    <string name="unready">Nepřipraven</string>
+    <string name="player_unready">%1$s již není připraven!</string>
 
     <string name="enter_nickname">Zadejte své herní jméno</string>
     <string name="choose_avatar">Vyberte si svého avatara</string>

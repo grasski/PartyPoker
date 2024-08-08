@@ -21,12 +21,18 @@ interface PlayerCoreInterface {
         if (!getPlayerState().isPlayingNow || getGameState().activeRaise == null || getGameState().round == 0){
             return 0
         }
-        getGameState().activeRaise?.let { (playerId, amount) ->
+        getGameState().activeRaise?.let { (_, amount) ->
             return amount - getPlayerState().called
         }
         return 0
     }
     fun minimalRaise(): Int{
-        return activeCallValue() + getGameState().gameSettings.bigBlindAmount
+        if (activeCallValue() == 0){
+            return getGameState().gameSettings.bigBlindAmount
+        }
+        if (activeCallValue() == getGameState().gameSettings.smallBlindAmount){
+            return getGameState().gameSettings.smallBlindAmount + getGameState().gameSettings.bigBlindAmount
+        }
+        return activeCallValue() * 2
     }
 }

@@ -228,7 +228,7 @@ fun PlayerDrawItself(
                 .padding(6.dp),
         ) { ready ->
             Column {
-                if(ready){
+                if(ready || gameState.gameReadyPlayers.containsKey(player.id)){
                     if (player.holeCards.isEmpty()){
                         Box(
                             modifier = Modifier

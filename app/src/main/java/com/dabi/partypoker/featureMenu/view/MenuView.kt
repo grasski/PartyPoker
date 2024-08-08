@@ -320,29 +320,23 @@ fun AvatarsSelectionView(
 fun CheckPermissions(
     permissionsState: (MultiplePermissionsState) -> Unit
 ) {
-    var permissionsList = listOf<String>()
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-        permissionsList = listOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.NEARBY_WIFI_DEVICES,
-            Manifest.permission.BLUETOOTH_ADVERTISE,
-            Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.BLUETOOTH_SCAN,
-        )
-    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        permissionsList = listOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.BLUETOOTH_ADVERTISE,
-            Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.BLUETOOTH_SCAN,
-        )
-    } else{
-        permissionsList = listOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        )
+    val permissionsList = mutableListOf(
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_WIFI_STATE,
+        Manifest.permission.CHANGE_WIFI_STATE,
+    )
+    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R){
+        permissionsList.add(Manifest.permission.BLUETOOTH)
+        permissionsList.add(Manifest.permission.BLUETOOTH_ADMIN)
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+        permissionsList.add(Manifest.permission.BLUETOOTH_ADVERTISE)
+        permissionsList.add(Manifest.permission.BLUETOOTH_CONNECT)
+        permissionsList.add(Manifest.permission.BLUETOOTH_SCAN)
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+        permissionsList.add(Manifest.permission.NEARBY_WIFI_DEVICES)
     }
 
     val permissions = rememberMultiplePermissionsState(permissions = permissionsList)

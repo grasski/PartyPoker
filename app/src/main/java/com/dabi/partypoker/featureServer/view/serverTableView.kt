@@ -31,6 +31,7 @@ fun ServerGameView(
     GamePopUpMenu(
         isPlayer = false,
         onPlayerEvent = {  },
+        playerState = null,
         onGameEvent = onGameEvent,
         serverStatus = serverState
     )

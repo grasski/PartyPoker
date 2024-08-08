@@ -51,6 +51,7 @@ fun PlayerGameView(
     GamePopUpMenu(
         isPlayer = !playerState.isServer,
         onPlayerEvent = onPlayerEvent,
+        playerState = playerState,
         onGameEvent = onGameEvent,
         serverStatus = serverState
     )

@@ -3,10 +3,16 @@
     <string name="connect_local">Connect to local game</string>
     <string name="create_local">Create local game</string>
 
-    <string name="client_disconnected">Player disconnected from the game.</string>
+    <string name="client_disconnected">%1$s disconnected from the game.</string>
     <string name="client_connected">%1$s connected to the game.</string>
     <string name="server_starting">Server is starting, please wait.</string>
     <string name="client_connecting">Connecting to the server, please wait.</string>
+
+    <string name="game_created">Game room was created.</string>
+    <string name="start_game">Start the game</string>
+    <string name="player_ready">%1$s is ready to play!</string>
+    <string name="unready">Unready</string>
+    <string name="player_unready">%1$s is no longer ready!</string>
 
     <string name="enter_nickname">Enter your nickname</string>
     <string name="choose_avatar">Choose your avatar</string>

@@ -227,6 +227,7 @@ fun Modifier.glowItem(
 fun GamePopUpMenu(
     isPlayer: Boolean,
     onPlayerEvent: (PlayerEvents) -> Unit,
+    playerState: PlayerState?,
 
     onGameEvent: (GameEvents) -> Unit,
     serverStatus: ServerState = ServerState()
@@ -250,15 +251,15 @@ fun GamePopUpMenu(
                     .background(MaterialTheme.colorScheme.secondaryContainer)
                     .padding(16.dp),
             ) {
-                when (isPlayer) {
-                    true -> {
-                        //TODO: in future some settings, change view, etc.
-                        Column(
-                            modifier = Modifier
-                                .align(Alignment.Center),
-                            verticalArrangement = Arrangement.SpaceBetween,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.Center),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    when (isPlayer) {
+                        true -> {
+                            //TODO: in future some settings, change view, etc.
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxWidth(0.65f)
@@ -308,41 +309,10 @@ fun GamePopUpMenu(
                                     }
                                 }
                             }
-
-                            Row (
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.Bottom,
-                                horizontalArrangement = Arrangement.End
-                            ){
-                                Button(
-                                    modifier = Modifier,
-                                    onClick = { showPopUpMenu = false },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                        contentColor = MaterialTheme.colorScheme.onSecondary
-                                    ),
-                                ) {
-                                    AutoSizeText(
-                                        text = UiTexts.StringResource(R.string.continue_game).asString(),
-                                        style = TextStyle(
-                                            fontSize = 20.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    )
-                                }
-                            }
                         }
-                    }
 
-                    false -> {
-                        //TODO: in future some settings, kicking people, etc.
-                        Column(
-                            modifier = Modifier
-                                .align(Alignment.Center),
-                            verticalArrangement = Arrangement.SpaceBetween,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
+                        false -> {
+                            //TODO: in future some settings, kicking people, etc.
                             Column(
                                 modifier = Modifier
                                     .align(Alignment.Start)
@@ -372,10 +342,10 @@ fun GamePopUpMenu(
                                 }
                                 AutoSizeText(
                                     text =
-                                        if (serverStatus.serverStatus == ServerStatusEnum.ADVERTISING)
-                                            UiTexts.StringResource(R.string.server_status_advertising).asString()
-                                        else
-                                            UiTexts.StringResource(R.string.server_status_active).asString(),
+                                    if (serverStatus.serverStatus == ServerStatusEnum.ADVERTISING)
+                                        UiTexts.StringResource(R.string.server_status_advertising).asString()
+                                    else
+                                        UiTexts.StringResource(R.string.server_status_active).asString(),
                                     style = TextStyle(fontSize = 20.sp),
                                 )
                             }
@@ -447,30 +417,52 @@ fun GamePopUpMenu(
                                     }
                                 }
                             }
+                        }
+                    }
 
-                            Row (
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.Bottom,
-                                horizontalArrangement = Arrangement.Center
-                            ){
-                                Button(
-                                    modifier = Modifier,
-                                    onClick = { showPopUpMenu = false },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                        contentColor = MaterialTheme.colorScheme.onSecondary
-                                    ),
-                                ) {
-                                    AutoSizeText(
-                                        text = UiTexts.StringResource(R.string.continue_game).asString(),
-                                        style = TextStyle(
-                                            fontSize = 20.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
+                    Row (
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ){
+                        playerState?.let {
+                            Button(
+                                modifier = Modifier,
+                                onClick = {
+                                    showPopUpMenu = false
+                                    onPlayerEvent(PlayerEvents.Ready)
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondary
+                                ),
+                                enabled = playerState.isReadyToPlay
+                            ) {
+                                AutoSizeText(
+                                    text = UiTexts.StringResource(R.string.unready).asString(),
+                                    style = TextStyle(
+                                        fontSize = 20.sp,
                                     )
-                                }
+                                )
                             }
+                        }
+
+                        Button(
+                            modifier = Modifier,
+                            onClick = { showPopUpMenu = false },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondary
+                            ),
+                        ) {
+                            AutoSizeText(
+                                text = UiTexts.StringResource(R.string.continue_game).asString(),
+                                style = TextStyle(
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
                         }
                     }
                 }

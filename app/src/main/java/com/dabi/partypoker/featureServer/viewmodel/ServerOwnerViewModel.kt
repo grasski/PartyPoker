@@ -78,6 +78,15 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                     )
                 }
             }
+            _gameState.update {
+                it.copy(
+                    messages = it.messages.plus(
+                        MessageData(
+                            messages = listOf(UiTexts.StringResource(R.string.game_created))
+                        )
+                    )
+                )
+            }
             _gameOverTimerMillis.update { _gameState.value.gameSettings.gameOverTimerDurationMillis }
             _playerMoveTimerMillis.update { _gameState.value.gameSettings.playerTimerDurationMillis }
 
@@ -196,6 +205,7 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                 val clientID = event.endpointID
 
                 _gameState.update { gameState ->
+                    val nick = gameState.players[clientID]?.nickname
                     gameState.copy(
                         bank = gameState.bank + (gameState.players[clientID]?.called ?: 0),
                         players = gameState.players.filter { it.key != clientID },
@@ -203,7 +213,7 @@ open class ServerOwnerViewModel @AssistedInject constructor(
 
                         messages = gameState.messages.plus(
                             MessageData(
-                                messages = listOf(UiTexts.StringResource(R.string.client_disconnected))
+                                messages = listOf(UiTexts.StringResource(R.string.client_disconnected, nick ?: ""))
                             )
                         )
                     )
@@ -281,10 +291,21 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                             }
                             _gameState.update { gameState ->
                                 gameState.copy(
-                                    players = updatedPlayers
+                                    players = updatedPlayers,
+
+                                    messages = gameState.messages.plus(
+                                        MessageData(
+                                            messages = listOf(
+                                                if (updatedPlayer.isReadyToPlay){
+                                                    UiTexts.StringResource(R.string.player_ready, player.nickname)
+                                                } else{
+                                                    UiTexts.StringResource(R.string.player_unready, player.nickname)
+                                                }
+                                            )
+                                        )
+                                    )
                                 )
                             }
-//                            _gameState.value = _gameState.value.copy(players = updatedPlayers)
                         }
                     }
 
