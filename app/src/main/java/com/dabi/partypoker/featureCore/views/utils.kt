@@ -187,7 +187,7 @@ fun LoadingAnimation(
                 shape = RoundedCornerShape(10.dp)
             ){
                 AutoSizeText(
-                    text = "Cancel",
+                    text = UiTexts.StringResource(R.string.cancel).asString(),
                     style = MaterialTheme.typography.titleLarge
                 )
             }
@@ -281,7 +281,7 @@ fun GamePopUpMenu(
                                             ),
                                         ) {
                                             AutoSizeText(
-                                                text = "Change view",
+                                                text = UiTexts.StringResource(R.string.view_change).asString(),
                                                 style = TextStyle(
                                                     fontSize = 20.sp,
                                                 )
@@ -389,7 +389,7 @@ fun GamePopUpMenu(
                                         ),
                                     ) {
                                         AutoSizeText(
-                                            text = "PLAYERS",
+                                            text = UiTexts.StringResource(R.string.players).asString(),
                                             style = TextStyle(
                                                 fontSize = 20.sp
                                             )

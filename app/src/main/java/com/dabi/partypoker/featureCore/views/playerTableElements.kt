@@ -63,9 +63,11 @@ import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
@@ -76,6 +78,7 @@ import com.dabi.partypoker.featureCore.data.PlayerActionsState
 import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.ui.theme.textColor
+import com.dabi.partypoker.utils.Card
 import com.dabi.partypoker.utils.CardsCombination
 import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.UiTexts
@@ -174,35 +177,30 @@ fun PlayerDrawItself(
                     horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically
                 ){
-                    if (playerActionsState.raiseAmount.toFloat() > player.money.toFloat()){
-                        Text(text = "Not enought money to raise")
-                    } else{
-                        RaiseSlider(
-                            modifier = Modifier.weight(1f),
-                            valueRange = playerActionsState.raiseAmount.toFloat() .. player.money.toFloat(),
-                            bigBlindAmount = gameState.gameSettings.bigBlindAmount
-                        ){
-                            raiseAmount = it
-                        }
-                        
-                        Button(
-                            onClick = {
-                                raiseEnabled = false
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth(0.2f),
-                            shape = RoundedCornerShape(10.dp),
-                            contentPadding = PaddingValues(0.dp)
-                        ){
-                            Text(
-                                text = "CANCEL",
-                                fontSize = fontSize,
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center
-                            )
-                        }
+                    RaiseSlider(
+                        modifier = Modifier.weight(1f),
+                        valueRange = playerActionsState.raiseAmount.toFloat() .. player.money.toFloat(),
+                        bigBlindAmount = gameState.gameSettings.bigBlindAmount
+                    ){
+                        raiseAmount = it
                     }
 
+                    Button(
+                        onClick = {
+                            raiseEnabled = false
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth(0.2f),
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ){
+                        Text(
+                            text = UiTexts.StringResource(R.string.cancel).asString(),
+                            fontSize = fontSize,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }
@@ -357,47 +355,10 @@ fun PlayerDrawItself(
                                     }
                                 }
 
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                ){
-                                    val strength by remember(cardsCombination) { mutableStateOf(handStrength(cardsCombination)) }
-                                    val animatedColor by remember(strength) {
-                                        mutableStateOf(lerp(Color.Red, Color.Green, strength))
-                                    }
-                                    LinearProgressIndicator(
-                                        progress = { strength },
-                                        color = animatedColor,
-                                        trackColor = MaterialTheme.colorScheme.surfaceBright,
-                                        modifier = Modifier
-                                            .height(with(density) { fontSize.toDp() * 1f })
-                                            .fillMaxWidth()
-                                            .drawWithCache {
-                                                onDrawWithContent {
-                                                    drawContent()
-
-                                                    val spaceBetween = size.width / 5
-                                                    for (i in 1..4) {
-                                                        drawLine(
-                                                            color = textColor,
-                                                            start = Offset(spaceBetween * i, 0f),
-                                                            end = Offset(
-                                                                spaceBetween * i,
-                                                                size.height
-                                                            ),
-                                                            strokeWidth = 1.dp.toPx()
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                            .border(
-                                                1.dp,
-                                                textColor,
-                                                RoundedCornerShape(5.dp)
-                                            )
-                                            .clip(RoundedCornerShape(5.dp))
-                                    )
-                                }
+                                HandStrengthIndicator(
+                                    cardsCombination = cardsCombination,
+                                    indicatorHeight = with(density) { fontSize.toDp() * 1f }
+                                )
                             } ?: run {
                                 Spacer(modifier = Modifier.height(with(density) { fontSize.toDp() * 1f }))
                             }
@@ -667,6 +628,55 @@ fun RaiseSlider(
                     }
                 ),
             tint = textColor
+        )
+    }
+}
+
+
+@Composable
+fun HandStrengthIndicator(
+    cardsCombination: Pair<CardsCombination, List<Card>>,
+    indicatorHeight: Dp
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+    ){
+        val strength by remember(cardsCombination) { mutableStateOf(handStrength(cardsCombination)) }
+        val animatedColor by remember(strength) {
+            mutableStateOf(lerp(Color.Red, Color.Green, strength))
+        }
+        LinearProgressIndicator(
+            progress = { strength },
+            color = animatedColor,
+            trackColor = MaterialTheme.colorScheme.surfaceBright,
+            modifier = Modifier
+                .height(indicatorHeight)
+                .fillMaxWidth()
+                .drawWithCache {
+                    onDrawWithContent {
+                        drawContent()
+
+                        val spaceBetween = size.width / 5
+                        for (i in 1..4) {
+                            drawLine(
+                                color = textColor,
+                                start = Offset(spaceBetween * i, 0f),
+                                end = Offset(
+                                    spaceBetween * i,
+                                    size.height
+                                ),
+                                strokeWidth = 1.dp.toPx()
+                            )
+                        }
+                    }
+                }
+                .border(
+                    1.dp,
+                    textColor,
+                    RoundedCornerShape(5.dp)
+                )
+                .clip(RoundedCornerShape(5.dp))
         )
     }
 }

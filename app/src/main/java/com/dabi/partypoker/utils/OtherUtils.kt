@@ -17,9 +17,9 @@ import kotlinx.serialization.Serializable
 @SuppressLint("DefaultLocale")
 fun Int.formatNumberToString(): String {
     return when {
-        this >= 1000000 -> String.format("%.1fM", this / 1000000.0).replace(".0", "") + " $"
-        this >= 1000 -> String.format("%.1fK", this / 1000.0).replace(".0", "") + " $"
-        else -> this.toString() + " $"
+        this >= 1000000 -> "$" + String.format("%.1fM", this / 1000000.0).replace(".0", "")
+        this >= 1000 -> "$" + String.format("%.1fK", this / 1000.0).replace(".0", "")
+        else -> "$$this"
     }
 }
 

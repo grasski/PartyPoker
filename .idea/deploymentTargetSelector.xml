@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DIALOG" />
-        <DropdownSelection timestamp="2024-08-08T10:21:07.718106100Z">
+        <DropdownSelection timestamp="2024-08-10T08:44:10.262159900Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\jirka\.android\avd\Medium_Tablet_API_VanillaIceCream.avd" />
+              <DeviceId pluginId="Default" identifier="serial=192.168.1.216:39839;connection=5c082e16" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -15,17 +15,17 @@
           <targets>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="Default" identifier="serial=192.168.1.216:40875;connection=4db4d335" />
-              </handle>
-            </Target>
-            <Target type="DEFAULT_BOOT">
-              <handle>
-                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\jirka\.android\avd\Small_Phone_API_VanillaIceCream.avd" />
+                <DeviceId pluginId="Default" identifier="serial=192.168.1.216:39839;connection=5c082e16" />
               </handle>
             </Target>
             <Target type="DEFAULT_BOOT">
               <handle>
                 <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\jirka\.android\avd\Medium_Tablet_API_VanillaIceCream.avd" />
+              </handle>
+            </Target>
+            <Target type="DEFAULT_BOOT">
+              <handle>
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\jirka\.android\avd\Small_Phone_API_VanillaIceCream.avd" />
               </handle>
             </Target>
           </targets>

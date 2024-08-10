@@ -148,7 +148,7 @@ fun ServerView(
                                 Icons.AutoMirrored.Filled.ArrowBack,
                                 "back"
                             )
-                            Text("Menu")
+                            Text(UiTexts.StringResource(R.string.menu).asString())
                         }
                     }
 
@@ -203,7 +203,7 @@ fun ServerView(
                                 shape = RoundedCornerShape(10.dp)
                             ){
                                 AutoSizeText(
-                                    text = "Try again",
+                                    text = UiTexts.StringResource(R.string.try_again).asString(),
                                     style = MaterialTheme.typography.titleLarge
                                 )
                             }

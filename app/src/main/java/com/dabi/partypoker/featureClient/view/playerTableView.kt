@@ -35,10 +35,10 @@ import com.dabi.partypoker.managers.ServerType
 
 @Composable
 fun PlayerGameView(
-    gameState: GameState,
     playerState: PlayerState,
     playerActionsState: PlayerActionsState,
     onPlayerEvent: (PlayerEvents) -> Unit,
+    gameState: GameState,
 
     onGameEvent: (GameEvents) -> Unit = { },
     serverState: ServerState = ServerState()

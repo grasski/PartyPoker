@@ -20,6 +20,9 @@
     <string name="server_playing">Are you playing too?</string>
     <string name="server_start">Start server with game</string>
 
+    <string name="view_change">Change view</string>
+    <string name="players">Players</string>
+
     <string name="menu">Menu</string>
     <string name="settings">Game settings</string>
     <string name="settings_update">Update settings</string>
@@ -33,7 +36,8 @@
 
     <string name="fail_connect">Failed to connect to the server! This most likely happen due to missing Location service enabled. Turn on your Location and try it again.</string>
     <string name="fail_start">Failed to start the game server! Please try it again.</string>
-
+    <string name="try_again">Try again</string>
+    <string name="cancel">Cancel</string>
 
     <string name="server_status">Server status:</string>
     <string name="server_status_advertising">Advertising - open for new connections.</string>
@@ -63,6 +67,8 @@
     <string name="action_raise">RAISE</string>
     <string name="action_fold">FOLD</string>
 
+    <string name="message_center">Message center</string>
+
     <string name="game_sender">Hra %1$s</string>
     <string name="winner_private">%1$s won the game before showdown and earned $%2$s!</string>
     <plurals name="winner_public">
@@ -70,6 +76,11 @@
         <item quantity="other">%1$s won $%2$s each with</item>
     </plurals>
 
-
     <string name="default_settings">Default</string>
+    <string name="game_settings_title">Title</string>
+    <string name="game_settings_player_money">Player money</string>
+    <string name="game_settings_small_blind_amount">Small blind amount</string>
+    <string name="game_settings_big_blind_amount">Big blind amount</string>
+    <string name="game_settings_player_timer_duration">Player timeout (s)</string>
+    <string name="save">Save</string>
 </resources>

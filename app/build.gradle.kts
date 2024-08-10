@@ -19,8 +19,8 @@ android {
         applicationId = "com.dabi.partypoker"
         minSdk = 26
         targetSdk = 34
-        versionCode = 14
-        versionName = "2.4"
+        versionCode = 15
+        versionName = "b_2.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

@@ -131,7 +131,7 @@ fun PlayerView(
                                 Icons.AutoMirrored.Filled.ArrowBack,
                                 "back"
                             )
-                            Text("Menu")
+                            Text(UiTexts.StringResource(R.string.menu).asString())
                         }
                     }
 
@@ -186,7 +186,7 @@ fun PlayerView(
                                 shape = RoundedCornerShape(10.dp)
                             ){
                                 AutoSizeText(
-                                    text = "Try again",
+                                    text = UiTexts.StringResource(R.string.try_again).asString(),
                                     style = MaterialTheme.typography.titleLarge
                                 )
                             }
@@ -198,32 +198,37 @@ fun PlayerView(
             ConnectionStatusEnum.CONNECTED -> {
                 when(clientState.serverType){
                     ServerType.IS_TABLE -> {
+                        val gameState by playerViewModel.gameState.collectAsStateWithLifecycle()
                         if (changeView){
-                            val gameState by playerViewModel.gameState.collectAsStateWithLifecycle()
-
                             PlayerGameView(
-                                gameState,
-                                playerState,
-                                playerActionsState,
+                                playerState = playerState,
+                                playerActionsState = playerActionsState,
                                 onPlayerEvent = playerViewModel::onPlayerEvent,
 
+                                gameState = gameState,
                                 onGameEvent = {}
                             )
                         } else{
-                            PlayerViewPrivate()
+                            PlayerViewPrivate(
+                                playerState = playerState,
+                                playerActionsState = playerActionsState,
+                                onPlayerEvent = playerViewModel::onPlayerEvent,
+
+                                gameState = gameState
+                            )
                         }
                     }
                     ServerType.IS_PLAYER -> {
                         val gameState by playerViewModel.gameState.collectAsStateWithLifecycle()
 
                         PlayerGameView(
-                            gameState,
-                            playerState,
-                            playerActionsState,
+                            playerState = playerState,
+                            playerActionsState = playerActionsState,
                             onPlayerEvent = playerViewModel::onPlayerEvent,
 
+                            gameState = gameState,
+                            onGameEvent = {},
                             serverState = ServerState(serverType = ServerType.IS_PLAYER),
-                            onGameEvent = {}
                         )
                     }
                 }

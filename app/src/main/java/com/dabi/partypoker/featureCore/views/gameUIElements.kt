@@ -340,6 +340,7 @@ fun CardBox(cardId: Int?, modifier: Modifier) {
             painter = painterResource(id = id),
             contentDescription = "card",
             modifier = modifier
+                .clip(RoundedCornerShape(3.dp))
         )
     } ?: run {
         Image(
@@ -451,11 +452,26 @@ fun PlayerBox(
                             .offset {
                                 IntOffset(
                                     if (layoutDirection == PlayerLayoutDirection.LEFT || layoutDirection == PlayerLayoutDirection.BOTTOM) {
-                                        circleSize.div(2).toPx().toInt() - iconSize.toPx().toInt()/2
+                                        circleSize
+                                            .div(2)
+                                            .toPx()
+                                            .toInt() - iconSize
+                                            .toPx()
+                                            .toInt() / 2
                                     } else {
-                                        size.width.toPx().toInt() - circleSize.div(2).toPx().toInt() - iconSize.toPx().toInt()/2
+                                        size.width
+                                            .toPx()
+                                            .toInt() - circleSize
+                                            .div(2)
+                                            .toPx()
+                                            .toInt() - iconSize
+                                            .toPx()
+                                            .toInt() / 2
                                     },
-                                    iconSize.toPx().toInt().div(2)
+                                    iconSize
+                                        .toPx()
+                                        .toInt()
+                                        .div(2)
                                 )
                             }
                             .size(iconSize)
@@ -1097,7 +1113,7 @@ fun MessagesView(
             ) {
                 item {
                     Text(
-                        text = "Seznam zpráv",
+                        text = UiTexts.StringResource(R.string.message_center).asString(),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                         fontWeight = FontWeight.ExtraBold,

@@ -13,6 +13,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -101,6 +102,7 @@ import com.dabi.partypoker.managers.ServerType
 import com.dabi.partypoker.repository.gameSettings.GameSettings
 import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.UiTexts
+import com.dabi.partypoker.utils.formatNumberToString
 import kotlinx.coroutines.runBlocking
 import kotlin.math.roundToInt
 
@@ -349,6 +351,21 @@ fun ServerMenuView(
         }
 
         val orientation = LocalConfiguration.current.orientation
+        Crossfade(targetState = showSettings) {
+            if (it) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.DarkGray.copy(0.6f))
+                        .clickable(
+                            interactionSource = null,
+                            indication = null
+                        ) {
+                            showSettings = false
+                        }
+                )
+            }
+        }
         AnimatedVisibility(
             visible = showSettings,
             modifier = Modifier
@@ -415,7 +432,7 @@ fun ServerSettingsView(
             )
         )
         .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-        .padding(8.dp)
+        .padding(8.dp),
     ){
         item{
             Box(
@@ -574,8 +591,19 @@ fun ServerSettingsView(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ){
-                Text(text = "2. Player money: ")
-                Text(text = selectedSetting.playerMoney.toString())
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(0.7f)
+                ) {
+                    AutoSizeText(
+                        text = UiTexts.StringResource(R.string.game_settings_player_money)
+                            .asString() + ": ",
+                        style = MaterialTheme.typography.displaySmall.copy(
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    )
+                }
+                AutoSizeText(text = selectedSetting.playerMoney.formatNumberToString(), style = MaterialTheme.typography.displaySmall)
             }
 
             Row(
@@ -583,8 +611,19 @@ fun ServerSettingsView(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ){
-                Text(text = "3. Small blind amount: ")
-                Text(text = selectedSetting.smallBlindAmount.toString())
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(0.7f)
+                ) {
+                    AutoSizeText(
+                        text = UiTexts.StringResource(R.string.game_settings_small_blind_amount)
+                            .asString() + ": ",
+                        style = MaterialTheme.typography.displaySmall.copy(
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    )
+                }
+                AutoSizeText(text = selectedSetting.smallBlindAmount.formatNumberToString(), style = MaterialTheme.typography.displaySmall)
             }
 
             Row(
@@ -592,26 +631,40 @@ fun ServerSettingsView(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ){
-                Text(text = "4. Big blind amount: ")
-                Text(text = selectedSetting.bigBlindAmount.toString())
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(0.7f)
+                ) {
+                    AutoSizeText(
+                        text = UiTexts.StringResource(R.string.game_settings_big_blind_amount)
+                            .asString() + ": ",
+                        style = MaterialTheme.typography.displaySmall.copy(
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    )
+                }
+                AutoSizeText(text = selectedSetting.bigBlindAmount.formatNumberToString(), style = MaterialTheme.typography.displaySmall)
             }
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ){
-                Text(text = "5. Game over timeout: ")
-                Text(text = selectedSetting.gameOverTimerDurationMillis.div(1000).toString())
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ){
-                Text(text = "6. Player move timeout: ")
-                Text(text = selectedSetting.playerTimerDurationMillis.div(1000).toString())
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(0.7f)
+                ){
+                    AutoSizeText(
+                        text = UiTexts.StringResource(R.string.game_settings_player_timer_duration).asString() + ": ",
+                        style = MaterialTheme.typography.displaySmall.copy(
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    )
+                }
+                Box(modifier = Modifier.weight(1f, fill = false)){
+                    AutoSizeText(text = selectedSetting.playerTimerDurationMillis.div(1000).toString(), style = MaterialTheme.typography.displaySmall)
+                }
             }
         }
     }
@@ -680,7 +733,7 @@ private fun UpsertSettingsDialog (
                         onValueChange = { newSettingEvent(NewSettingsEvent.ChangeTitle(it)) },
                         isError = errors.contains(SettingsError.EMPTY_TITLE),
                         label = {
-                            Text(text = "Title")
+                            Text(text = UiTexts.StringResource(R.string.game_settings_title).asString())
                         },
                         textStyle = TextStyle(
                             fontWeight = FontWeight.ExtraBold,
@@ -705,7 +758,7 @@ private fun UpsertSettingsDialog (
                         },
                         isError = errors.contains(SettingsError.INVALID_PLAYER_MONEY) || errors.contains(SettingsError.BIG_BLIND_GREATER_THAN_PLAYER_MONEY),
                         label = {
-                            Text(text = "Player money")
+                            Text(text = UiTexts.StringResource(R.string.game_settings_player_money).asString())
                         },
                         textStyle = TextStyle(
                             fontWeight = FontWeight.ExtraBold,
@@ -732,7 +785,7 @@ private fun UpsertSettingsDialog (
                         },
                         isError = errors.contains(SettingsError.INVALID_SMALL_BLIND) || errors.contains(SettingsError.SMALL_BLIND_GREATER_THAN_BIG_BLIND),
                         label = {
-                            Text(text = "Small blind amount")
+                            Text(text = UiTexts.StringResource(R.string.game_settings_small_blind_amount).asString())
                         },
                         textStyle = TextStyle(
                             fontWeight = FontWeight.ExtraBold,
@@ -763,7 +816,7 @@ private fun UpsertSettingsDialog (
                                 errors.contains(SettingsError.BIG_BLIND_GREATER_THAN_PLAYER_MONEY)
                         ),
                         label = {
-                            Text(text = "Big blind amount")
+                            Text(text = UiTexts.StringResource(R.string.game_settings_big_blind_amount).asString())
                         },
                         textStyle = TextStyle(
                             fontWeight = FontWeight.ExtraBold,
@@ -790,34 +843,7 @@ private fun UpsertSettingsDialog (
                         },
                         isError = errors.contains(SettingsError.INVALID_PLAYER_TIMER),
                         label = {
-                            Text(text = "Player move timeout [s]")
-                        },
-                        textStyle = TextStyle(
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 20.sp,
-                            platformStyle = null
-                        ),
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Done,
-                            keyboardType = KeyboardType.Decimal
-                        ),
-                        colors = TextFieldDefaults.myColorsSettings(),
-                        shape = RoundedCornerShape(10.dp),
-                    )
-                }
-                item {
-                    TextField(
-                        modifier = Modifier
-                            .fillMaxWidth(0.75f),
-                        value = settings.gameOverTimerDurationMillis.div(1000).takeIf { it > 0 }?.toString() ?: "",
-                        isError = errors.contains(SettingsError.INVALID_GAME_OVER_TIMER),
-                        onValueChange = {
-                            if (it.toIntOrNull() != null || it.isEmpty()) {
-                                newSettingEvent(NewSettingsEvent.ChangeGameOverTimeout(it.toIntOrNull()))
-                            }
-                        },
-                        label = {
-                            Text(text = "Game over timeout [s]")
+                            Text(text = UiTexts.StringResource(R.string.game_settings_player_timer_duration).asString())
                         },
                         textStyle = TextStyle(
                             fontWeight = FontWeight.ExtraBold,
@@ -849,7 +875,7 @@ private fun UpsertSettingsDialog (
                         contentColor = MaterialTheme.colorScheme.onSecondary
                     )
                 ) {
-                    Text("Cancel")
+                    Text(UiTexts.StringResource(R.string.cancel).asString())
                 }
 
                 Button(
@@ -862,7 +888,7 @@ private fun UpsertSettingsDialog (
                         contentColor = MaterialTheme.colorScheme.onSecondary
                     )
                 ) {
-                    Text("Save")
+                    Text(UiTexts.StringResource(R.string.save).asString())
                 }
             }
         }

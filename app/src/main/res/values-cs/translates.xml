@@ -21,6 +21,9 @@
     <string name="server_playing">Hraješ taky?</string>
     <string name="server_start">Zapni server se hrou</string>
 
+    <string name="view_change">Změň pohled</string>
+    <string name="players">Hráči</string>
+
     <string name="menu">Menu</string>
     <string name="settings">Herní nastavení</string>
     <string name="settings_update">Změna nastavení</string>
@@ -34,6 +37,8 @@
 
     <string name="fail_connect">Chyba při připojování k serveru! Pravděpodobně nemáte zaplou službu určování polohy. Zapněte ji a zkuste se připojit znovu.</string>
     <string name="fail_start">Chyba při zapínání herního serveru! Prosím, zkuste to znovu.</string>
+    <string name="try_again">Zkusit znovu</string>
+    <string name="cancel">Zrušit</string>
 
 
     <string name="server_status">Stav serveru:</string>
@@ -64,6 +69,8 @@
     <string name="action_raise">Navýšit</string>
     <string name="action_fold">Složit</string>
 
+    <string name="message_center">Centrum zpráv</string>
+
     <string name="game_sender">Game %1$s</string>
     <string name="winner_private">%1$s vyhrál hru před koncem a získal $%2$s!</string>
     <plurals name="winner_public" tools:ignore="MissingQuantity">
@@ -73,5 +80,11 @@
 
 
     <string name="default_settings">Výchozí</string>
+    <string name="game_settings_title">Název</string>
+    <string name="game_settings_player_money">Peníze hráče</string>
+    <string name="game_settings_small_blind_amount">Malá sázka</string>
+    <string name="game_settings_big_blind_amount">Velká sázka</string>
+    <string name="game_settings_player_timer_duration">Časový limit hráče (s)</string>
+    <string name="save">Uložit</string>
 
 </resources>

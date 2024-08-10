@@ -27,7 +27,6 @@ sealed class NewSettingsEvent{
     class ChangeSmallBlindAmount(val amount: Int?): NewSettingsEvent()
     class ChangeBigBlindAmount(val amount: Int?): NewSettingsEvent()
     class ChangePlayerTimeout(val timeout: Int?): NewSettingsEvent()
-    class ChangeGameOverTimeout(val timeout: Int?): NewSettingsEvent()
 }
 
 enum class SettingsError {
@@ -38,7 +37,6 @@ enum class SettingsError {
     SMALL_BLIND_GREATER_THAN_BIG_BLIND,
     BIG_BLIND_GREATER_THAN_PLAYER_MONEY,
     INVALID_PLAYER_TIMER,
-    INVALID_GAME_OVER_TIMER
 }
 
 @HiltViewModel
@@ -80,7 +78,6 @@ class MenuViewModel @Inject constructor(
         if (settings.smallBlindAmount > settings.bigBlindAmount) errors.add(SettingsError.SMALL_BLIND_GREATER_THAN_BIG_BLIND)
         if (settings.bigBlindAmount > settings.playerMoney) errors.add(SettingsError.BIG_BLIND_GREATER_THAN_PLAYER_MONEY)
         if (settings.playerTimerDurationMillis <= 0) errors.add(SettingsError.INVALID_PLAYER_TIMER)
-        if (settings.gameOverTimerDurationMillis <= 0) errors.add(SettingsError.INVALID_GAME_OVER_TIMER)
         return errors
     }
 
@@ -169,17 +166,6 @@ class MenuViewModel @Inject constructor(
                     }
                 }
                 _newSettings.update { it.copy(playerTimerDurationMillis = 0) }
-                _errors.update { validateSettings(_newSettings.value) }
-            }
-            is NewSettingsEvent.ChangeGameOverTimeout -> {
-                event.timeout?.let {
-                    if (event.timeout > 0) {
-                        _newSettings.update { it.copy(gameOverTimerDurationMillis = (event.timeout * 1000)) }
-                        _errors.update { validateSettings(_newSettings.value) }
-                        return
-                    }
-                }
-                _newSettings.update { it.copy(gameOverTimerDurationMillis = 0) }
                 _errors.update { validateSettings(_newSettings.value) }
             }
         }
