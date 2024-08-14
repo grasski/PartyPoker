@@ -21,13 +21,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -45,6 +48,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
@@ -53,9 +57,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.copy
+import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -65,6 +72,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -238,6 +246,7 @@ fun GamePopUpMenu(
     }) {
         Icon(Icons.Default.Menu, contentDescription = "Menu")
     }
+    var showSettings by rememberSaveable { mutableStateOf(false) }
 
     if (showPopUpMenu) {
         Dialog(
@@ -245,15 +254,27 @@ fun GamePopUpMenu(
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
                     .padding(vertical = 16.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.secondaryContainer)
                     .padding(16.dp),
             ) {
+                IconButton(
+                    modifier = Modifier
+                        .offset(16.dp, (-16).dp)
+                        .align(Alignment.TopEnd),
+                    onClick = { showPopUpMenu = false }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "close",
+                    )
+                }
+
                 Column(
                     modifier = Modifier
-                        .align(Alignment.Center),
+                        .align(Alignment.Center)
+                        .padding(top = 8.dp),
                     verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -263,7 +284,7 @@ fun GamePopUpMenu(
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxWidth(0.65f)
-                                    .weight(1f),
+                                    .weight(1f, false),
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
@@ -292,8 +313,8 @@ fun GamePopUpMenu(
                                     Button(
                                         modifier = Modifier.fillMaxWidth(),
                                         onClick = {
+                                            showSettings = true
                                             showPopUpMenu = false
-                                            onPlayerEvent(PlayerEvents.Leave)
                                         },
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -301,9 +322,9 @@ fun GamePopUpMenu(
                                         ),
                                     ) {
                                         AutoSizeText(
-                                            text = UiTexts.StringResource(R.string.leave_game).asString(),
+                                            text = UiTexts.StringResource(R.string.player_settings).asString(),
                                             style = TextStyle(
-                                                fontSize = 20.sp,
+                                                fontSize = 20.sp
                                             )
                                         )
                                     }
@@ -353,7 +374,8 @@ fun GamePopUpMenu(
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxWidth(0.65f)
-                                    .weight(1f),
+                                    .padding(vertical = 10.dp)
+                                    .weight(1f, false),
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
@@ -387,6 +409,7 @@ fun GamePopUpMenu(
                                             containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
                                             contentColor = MaterialTheme.colorScheme.onSecondary
                                         ),
+                                        enabled = false
                                     ) {
                                         AutoSizeText(
                                             text = UiTexts.StringResource(R.string.players).asString(),
@@ -399,8 +422,8 @@ fun GamePopUpMenu(
                                     Button(
                                         modifier = Modifier.fillMaxWidth(),
                                         onClick = {
+                                            showSettings = true
                                             showPopUpMenu = false
-                                            onGameEvent(GameEvents.CloseGame)
                                         },
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -408,8 +431,7 @@ fun GamePopUpMenu(
                                         ),
                                     ) {
                                         AutoSizeText(
-                                            text = UiTexts.StringResource(R.string.leave_game)
-                                                .asString(),
+                                            text = UiTexts.StringResource(R.string.player_settings).asString(),
                                             style = TextStyle(
                                                 fontSize = 20.sp
                                             )
@@ -422,13 +444,36 @@ fun GamePopUpMenu(
 
                     Row (
                         modifier = Modifier
-                            .fillMaxWidth(),
+                            .fillMaxWidth(0.95f),
                         verticalAlignment = Alignment.Bottom,
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ){
+                        Button(
+                            modifier = Modifier.weight(1f, false),
+                            onClick = {
+                                showPopUpMenu = false
+                                if (isPlayer) {
+                                    onPlayerEvent(PlayerEvents.Leave)
+                                } else{
+                                    onGameEvent(GameEvents.CloseGame)
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondary
+                            ),
+                        ) {
+                            AutoSizeText(
+                                text = UiTexts.StringResource(R.string.leave_game).asString(),
+                                style = TextStyle(
+                                    fontSize = 20.sp,
+                                )
+                            )
+                        }
+
                         playerState?.let {
                             Button(
-                                modifier = Modifier,
+                                modifier = Modifier.weight(1f, false),
                                 onClick = {
                                     showPopUpMenu = false
                                     onPlayerEvent(PlayerEvents.Ready)
@@ -443,32 +488,26 @@ fun GamePopUpMenu(
                                     text = UiTexts.StringResource(R.string.unready).asString(),
                                     style = TextStyle(
                                         fontSize = 20.sp,
+                                        platformStyle = PlatformTextStyle(
+                                            includeFontPadding = false
+                                        )
                                     )
                                 )
                             }
-                        }
-
-                        Button(
-                            modifier = Modifier,
-                            onClick = { showPopUpMenu = false },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondary
-                            ),
-                        ) {
-                            AutoSizeText(
-                                text = UiTexts.StringResource(R.string.continue_game).asString(),
-                                style = TextStyle(
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            )
                         }
                     }
                 }
             }
         }
     }
+
+    PlayerSettings(
+        isVisible = showSettings,
+        showSettings = {
+            if (!it) showPopUpMenu = true
+            showSettings = it
+        },
+    )
 }
 
 
@@ -505,12 +544,13 @@ fun ShowMoneyAnimated(
                 }
                 AnimatedContent(
                     targetState = char,
+                    label = "money_animated",
                     transitionSpec = {
                         slideInVertically { it } togetherWith slideOutVertically { -it }
                     }
-                ) { char ->
+                ) {
                     Text(
-                        text = char.toString(),
+                        text = it.toString(),
                         style = textStyle
                     )
                 }
@@ -527,6 +567,7 @@ fun Modifier.animatedBorder(
     colorStart: Color,
     colorStop: Color,
     borderPath: Path,
+    borderSize: Dp = 7.dp,
     vararg changeStateKeys: Any?
 ): Modifier {
     val animationTimer = remember {
@@ -566,10 +607,21 @@ fun Modifier.animatedBorder(
                 startWithMoveTo = true
             )
 
+            if (animate){
+                drawPath(
+                    path = path,
+                    style = Stroke(
+                        borderSize.toPx(),
+                        cap = StrokeCap.Round,
+                    ),
+                    color = Color.Black.copy(alpha = 0.5f)
+                )
+            }
+
             drawPath(
                 path = pathWithProgress,
                 style = Stroke(
-                    7.dp.toPx(),
+                    borderSize.toPx(),
                     cap = StrokeCap.Round,
                 ),
                 color = if (animate) animatedColor else Color.Transparent

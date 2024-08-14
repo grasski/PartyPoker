@@ -13,14 +13,14 @@ plugins {
 
 android {
     namespace = "com.dabi.partypoker"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.dabi.partypoker"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 15
-        versionName = "b_2.5"
+        targetSdk = 35
+        versionCode = 17
+        versionName = "b_2.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -94,6 +94,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel)
 
+    // datastore
+    implementation(libs.datastore.preferences)
 
     // NearbyConnectionAPI
     implementation(libs.google.nearby)

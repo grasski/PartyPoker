@@ -6,43 +6,35 @@ import android.content.pm.ActivityInfo
 import android.util.Log
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipDefaults.rememberPlainTooltipPositionProvider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,21 +43,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.paint
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
@@ -76,13 +66,10 @@ import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Popup
-import coil.compose.rememberAsyncImagePainter
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
@@ -91,13 +78,10 @@ import com.dabi.partypoker.R
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureCore.data.PlayerActionsState
-import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
 import com.dabi.partypoker.featureCore.views.AutoSizeText
-import com.dabi.partypoker.featureCore.views.CalculatePlayerBoxSize
-import com.dabi.partypoker.featureCore.views.CardBox
 import com.dabi.partypoker.featureCore.views.GamePopUpMenu
+import com.dabi.partypoker.featureCore.views.HandInfoPopUp
 import com.dabi.partypoker.featureCore.views.HandStrengthIndicator
-import com.dabi.partypoker.featureCore.views.PlayerDrawItself
 import com.dabi.partypoker.featureCore.views.RaiseSlider
 import com.dabi.partypoker.featureCore.views.ShowMoneyAnimated
 import com.dabi.partypoker.featureCore.views.animatedBorder
@@ -109,10 +93,8 @@ import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.evaluatePlayerCards
 import com.dabi.partypoker.utils.formatNumberToString
-import com.dabi.partypoker.utils.handStrength
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @SuppressLint("SourceLockedOrientationActivity")
 @Composable
 fun PlayerViewPrivate(
@@ -135,28 +117,36 @@ fun PlayerViewPrivate(
         onGameEvent = {},
     )
 
+
     val density = LocalDensity.current
 
-    val circleSize = 150.dp
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
     ){
         Column(
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
+                .align(Alignment.CenterHorizontally),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            BoxWithConstraints(
+            var avatarSize by remember { mutableStateOf(DpSize.Zero) }
+            Box(
                 modifier = Modifier
                     .fillMaxHeight(0.25f)
-                    .fillMaxWidth()
-                    .padding(8.dp),
+                    .onGloballyPositioned {
+                        with(density) {
+                            avatarSize = DpSize(
+                                it.size.width.toDp(),
+                                it.size.height.toDp()
+                            )
+                        }
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Box(
                     modifier = Modifier
-                        .size(with(density){ this@BoxWithConstraints.constraints.maxHeight.toDp() })
+                        .size(avatarSize.height)
                         .animatedBorder(
                             animate = playerState.isPlayingNow,
                             durationMillis = gameState.gameSettings.playerTimerDurationMillis - 250,
@@ -168,14 +158,15 @@ fun PlayerViewPrivate(
                                         offset = Offset.Zero,
                                         size = with(density) {
                                             Size(
-                                                constraints.minHeight.toDp().toPx(),
-                                                constraints.minHeight.toDp().toPx()
+                                                avatarSize.height.toPx(),
+                                                avatarSize.height.toPx()
                                             )
                                         }),
                                     startAngleDegrees = -90f,
                                     sweepAngleDegrees = -360f,
                                 )
                             },
+                            borderSize = 7.dp,
                             changeStateKeys = arrayOf(
                                 playerState.isPlayingNow,
                                 gameState.round,
@@ -199,7 +190,7 @@ fun PlayerViewPrivate(
                                 composition = composition,
                                 progress = { progress },
                                 modifier = Modifier
-                                    .size(with(density) { this@BoxWithConstraints.constraints.maxHeight.toDp() }),
+                                    .size(avatarSize.height),
                                 contentScale = ContentScale.Crop
                             )
                         } else{
@@ -207,7 +198,7 @@ fun PlayerViewPrivate(
                                 painter = painterResource(id = R.drawable.player_1),
                                 contentDescription = "avatar",
                                 modifier = Modifier
-                                    .size(with(density) { this@BoxWithConstraints.constraints.maxHeight.toDp() }),
+                                    .size(avatarSize.height),
                                 contentScale = ContentScale.Crop
                             )
                         }
@@ -215,7 +206,7 @@ fun PlayerViewPrivate(
                         Image(
                             painter = painterResource(id = R.drawable.player_1),
                             contentDescription = "avatar",
-                            modifier = Modifier.size(with(density) { this@BoxWithConstraints.constraints.maxHeight.toDp() }),
+                            modifier = Modifier.size(avatarSize.height),
                             contentScale = ContentScale.Crop
                         )
                     }
@@ -226,169 +217,156 @@ fun PlayerViewPrivate(
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .align(Alignment.CenterHorizontally)
-                    .width(150.dp)
+                    .width(avatarSize.width)
+                    .height(70.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .border(1.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.inversePrimary),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .background(MaterialTheme.colorScheme.inversePrimary)
+                ,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
                 AutoSizeText(text = playerState.nickname, style = MaterialTheme.typography.titleLarge)
                 HorizontalDivider(modifier = Modifier.fillMaxWidth(0.9f))
-                AutoSizeText(text = playerState.money.formatNumberToString(), style = MaterialTheme.typography.titleMedium)
+                ShowMoneyAnimated(
+                    amount = playerState.money,
+                    isGameOver = gameState.gameOver,
+                    spinningDuration = gameState.gameSettings.gameOverTimerDurationMillis / 2,
+                    textStyle = MaterialTheme.typography.titleMedium
+                )
             }
         }
 
+        Spacer(modifier = Modifier.height(40.dp))
         Spacer(modifier = Modifier.weight(1f))
 
-
         val fontSize = with(density) { 17.dp.toSp() }
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ){
-            val cardsCombination = evaluatePlayerCards(
-                tableCards = gameState.cardsTable,
-                holeCards = playerState.holeCards
-            )
-            val id = if (cardsCombination.first == CardsCombination.NONE) null else CardsUtils.combinationsTranslationID[cardsCombination.first]
-            id?.let {
-                Text(
-                    text = UiTexts.StringResource(id).asString().uppercase(),
-                    fontSize = fontSize,
-                    color = Color.White,
-                    fontWeight = FontWeight.ExtraBold,
-                    style = TextStyle(
-                        platformStyle = PlatformTextStyle(
-                            includeFontPadding = false
+                .fillMaxSize()
+                .weight(10000f)
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .align(Alignment.CenterHorizontally),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            var cardsWidth by remember { mutableStateOf(0.dp) }
+            Row(
+                modifier = Modifier
+                    .width(cardsWidth),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ){
+                val cardsCombination = evaluatePlayerCards(
+                    tableCards = gameState.cardsTable,
+                    holeCards = playerState.holeCards
+                )
+                val id = if (cardsCombination.first == CardsCombination.NONE) null else CardsUtils.combinationsTranslationID[cardsCombination.first]
+                id?.let {
+                    Text(
+                        text = UiTexts.StringResource(id).asString().uppercase(),
+                        fontSize = fontSize,
+                        color = Color.White,
+                        fontWeight = FontWeight.ExtraBold,
+                        style = TextStyle(
+                            platformStyle = PlatformTextStyle(
+                                includeFontPadding = false
+                            )
                         )
                     )
-                )
 
-                var showPopup by remember { mutableStateOf(false) }
-                Icon(
-                    Icons.AutoMirrored.Default.Help,
-                    contentDescription = "Help",
-                    tint = Color.White,
-                    modifier = Modifier
-                        .clickable(
-                            interactionSource = null,
-                            indication = null,
-                            onClick = {
-                                showPopup = true
-                            }
-                        )
-                        .padding(start = 10.dp, end = 5.dp)
-                        .size(fontSize.value.dp * 1.2f)
-                )
-                if (showPopup){
-                    Popup(
-                        onDismissRequest = { showPopup = false },
-                        popupPositionProvider = rememberPlainTooltipPositionProvider()
-                    ) {
-                        Card(
+                    var showPopup by remember { mutableStateOf(false) }
+                    Icon(
+                        Icons.AutoMirrored.Default.Help,
+                        contentDescription = "Help",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .clickable(
+                                interactionSource = null,
+                                indication = null,
+                                onClick = {
+                                    showPopup = true
+                                }
+                            )
+                            .padding(start = 10.dp, end = 5.dp)
+                            .size(fontSize.value.dp * 1.2f)
+                    )
+                    if (showPopup){
+                        HandInfoPopUp(
                             modifier = Modifier
                                 .fillMaxWidth(0.9f)
                                 .fillMaxHeight(0.5f)
                                 .padding(8.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                contentColor = textColor
-                            )
-                        ){
-                            val texts = UiTexts.ArrayResource(R.array.cards_tooltip).asArray()
-                            LazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(8.dp)
-                            ) {
-                                stickyHeader {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .background(MaterialTheme.colorScheme.surfaceContainer)
-                                            .padding(bottom = 10.dp),
-                                        contentAlignment = Alignment.Center
-                                    ){
-                                        Text(
-                                            text = texts[0].uppercase(),
-                                            style = TextStyle(
-                                                fontSize = fontSize,
-                                                fontWeight = FontWeight.ExtraBold,
-                                                textAlign = TextAlign.Center
-                                            )
-                                        )
-                                    }
+                            showPopup = { showPopup = it },
+                            fontSize = fontSize
+                        )
+                    }
+
+                    HandStrengthIndicator(
+                        cardsCombination = cardsCombination,
+                        indicatorHeight = with(density) { fontSize.toDp() * 1f }
+                    )
+                } ?: run {
+                    Spacer(modifier = Modifier.height(with(density) { fontSize.toDp() * 1f }))
+                }
+            }
+
+            var showCards by remember { mutableStateOf(false) }
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .onGloballyPositioned {
+                        with(density) {
+                            cardsWidth = it.size.width.toDp()
+                        }
+                    }
+                    .pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                val event = awaitPointerEvent()
+
+                                if (event.type == PointerEventType.Press){
+                                    showCards = true
                                 }
-                                itemsIndexed(texts){index, text ->
-                                    if (index > 0){
-                                        val textRow = text.split(": ")
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(vertical = 5.dp),
-                                        ){
-                                            Text(
-                                                text = textRow[0] + ": ",
-                                                style = TextStyle(
-                                                    fontSize = fontSize,
-                                                    fontWeight = FontWeight.ExtraBold
-                                                )
-                                            )
-                                            Text(
-                                                text = textRow[1],
-                                                style = TextStyle(
-                                                    fontSize = fontSize,
-                                                )
-                                            )
-                                        }
-                                    }
+                                if (event.type == PointerEventType.Release){
+                                    showCards = false
                                 }
                             }
                         }
+                    },
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            ) {
+                if (playerState.holeCards.isNotEmpty()){
+                    for (i in 0..1){
+                        val card = playerState.holeCards.getOrNull(i)
+                        var cardID = R.drawable.card_back_side
+                        if (showCards || gameState.gameOver){
+                            card?.let {
+                                cardID = CardsUtils.cardIDs[card.type.name.lowercase() + "_" + card.value] ?: R.drawable.gray_back
+                            }
+                        }
+
+                        val painter = painterResource(cardID)
+                        Image(
+                            painter = painter,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .padding(top = 5.dp)
+                                .weight(1f, false)
+                                .aspectRatio(painter.intrinsicSize.width / painter.intrinsicSize.height)
+                                .glowItem(
+                                    3.dp,
+                                    active = card in gameState.winningCards
+                                )
+                                .clip(RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.Crop
+                        )
                     }
                 }
-
-                HandStrengthIndicator(
-                    cardsCombination = cardsCombination,
-                    indicatorHeight = with(density) { fontSize.toDp() * 1f }
-                )
-            } ?: run {
-                Spacer(modifier = Modifier.height(with(density) { fontSize.toDp() * 1f }))
             }
         }
 
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 4.dp)
-                .align(Alignment.CenterHorizontally),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-        ) {
-            if (playerState.holeCards.isNotEmpty()){
-                for (i in 0..1){
-                    val card = playerState.holeCards.getOrNull(i)
-                    var cardID = R.drawable.gray_back
-                    card?.let {
-                        cardID = CardsUtils.cardIDs[card.type.name.lowercase() + "_" + card.value] ?: R.drawable.gray_back
-                    }
-
-                    Image(
-                        painter = painterResource(id = cardID),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .padding(top = 5.dp)
-                            .weight(1f, false)
-                            .glowItem(
-                                3.dp,
-                                active = card in gameState.winningCards
-                            )
-                            .clip(RoundedCornerShape(12.dp))
-                    )
-                }
-            }
-        }
 
         Spacer(modifier = Modifier.weight(1f))
         var raiseButtonPos by remember { mutableStateOf(Offset.Zero) }
@@ -454,7 +432,7 @@ fun PlayerViewPrivate(
                 .background(MaterialTheme.colorScheme.surfaceContainer)
                 .padding(6.dp),
         ) { ready ->
-            if (ready){
+            if(ready || gameState.gameReadyPlayers.containsKey(playerState.id)){
                 Row(
                     modifier = Modifier
                         .weight(1f)

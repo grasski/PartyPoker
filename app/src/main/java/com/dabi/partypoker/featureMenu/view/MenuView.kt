@@ -2,10 +2,18 @@ package com.dabi.partypoker.featureMenu.view
 
 import android.Manifest
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Build
-import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,9 +24,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -50,6 +60,7 @@ import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -57,10 +68,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -68,8 +80,9 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.dabi.partypoker.R
+import com.dabi.partypoker.featureCore.viewModel.PlayerSettingsViewModel
 import com.dabi.partypoker.featureCore.views.AutoSizeText
-import com.dabi.partypoker.managers.GameEvents
+import com.dabi.partypoker.featureCore.views.PlayerSettings
 import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.UiTexts
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -168,6 +181,38 @@ fun MenuView(
                         )
                     }
                 }
+
+
+                var showSettings by rememberSaveable { mutableStateOf(false) }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.TopEnd
+                ){
+                    FloatingActionButton(
+                        modifier = Modifier
+                            .width(50.dp)
+                            .height(50.dp),
+                        onClick = {
+                            showSettings = true
+                        },
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        contentColor = Color.White
+                    ) {
+                        Icon(
+                            Icons.Filled.Settings,
+                            "settings",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(5.dp)
+                        )
+                    }
+                }
+                PlayerSettings(
+                    isVisible = showSettings,
+                    showSettings = { showSettings = it },
+                )
             }
             ViewPosition.LOCAL_SERVER -> {
                 BackHandler(true) {

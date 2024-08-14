@@ -1,9 +1,14 @@
 package com.dabi.partypoker.di
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.dabi.partypoker.featureClient.model.ClientBridge
 import com.dabi.partypoker.featureClient.viewmodel.PlayerViewModel
+import com.dabi.partypoker.featureCore.repository.PlayerSettingsRepository
+import com.dabi.partypoker.featureCore.viewModel.PlayerSettingsViewModel
 import com.dabi.partypoker.featureMenu.viewModel.MenuViewModel
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.viewmodel.ServerOwnerViewModel
@@ -50,44 +55,65 @@ class AppModule2 {
     )
         .fallbackToDestructiveMigration()
         .build()
+
+
+    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
+        name = "setting"
+    )
+    @Provides
+    @Singleton
+    fun providePlayerSettingsRepository(
+        @ApplicationContext context: Context
+    ): PlayerSettingsRepository{
+        return PlayerSettingsRepository(
+            context.dataStore
+        )
+    }
+//    @Provides
+//    @Singleton
+//    fun providePlayerSettingsViewModel(
+//        playerSettingsRepository: PlayerSettingsRepository
+//    ): PlayerSettingsViewModel{
+//        return PlayerSettingsViewModel(playerSettingsRepository)
+//    }
 }
 
-@Module
-@InstallIn(ViewModelComponent::class)
-class AppModule {
-    @Provides
-    @ViewModelScoped
-    fun providePlayerViewModel(
-        connectionsClient: ConnectionsClient
-    ): PlayerViewModel {
-        return PlayerViewModel(connectionsClient)
-    }
-
-    @Provides
-    @ViewModelScoped
-    fun provideMenuViewModel(
-        db: GameSettingsDatabase
-    ): MenuViewModel {
-        return MenuViewModel(db)
-    }
-
+//@Module
+//@InstallIn(ViewModelComponent::class)
+//class AppModule {
 //    @Provides
 //    @ViewModelScoped
-//    fun provideServerOwnerViewModel(
-//        connectionsClient: ConnectionsClient,
-//        db: GameSettingsDatabase
-//    ): ServerOwnerViewModel {
-//        return ServerOwnerViewModel(connectionsClient, db, 0)
-//    }
-
-//    @Provides
-//    @ViewModelScoped
-//    fun provideServerPlayerViewModel(
+//    fun providePlayerViewModel(
 //        connectionsClient: ConnectionsClient
-//    ): ServerPlayerViewModel {
-//        return ServerPlayerViewModel(connectionsClient)
+//    ): PlayerViewModel {
+//        return PlayerViewModel(connectionsClient)
 //    }
-}
+//
+//    @Provides
+//    @ViewModelScoped
+//    fun provideMenuViewModel(
+//        db: GameSettingsDatabase
+//    ): MenuViewModel {
+//        return MenuViewModel(db)
+//    }
+//
+////    @Provides
+////    @ViewModelScoped
+////    fun provideServerOwnerViewModel(
+////        connectionsClient: ConnectionsClient,
+////        db: GameSettingsDatabase
+////    ): ServerOwnerViewModel {
+////        return ServerOwnerViewModel(connectionsClient, db, 0)
+////    }
+//
+////    @Provides
+////    @ViewModelScoped
+////    fun provideServerPlayerViewModel(
+////        connectionsClient: ConnectionsClient
+////    ): ServerPlayerViewModel {
+////        return ServerPlayerViewModel(connectionsClient)
+////    }
+//}
 
 
 @Module

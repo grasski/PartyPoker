@@ -24,9 +24,15 @@
     <string name="players">Players</string>
 
     <string name="menu">Menu</string>
-    <string name="settings">Game settings</string>
-    <string name="settings_update">Update settings</string>
-    <string name="settings_new">Create new settings</string>
+    <string name="game_settings">Game room settings</string>
+    <string name="game_settings_update">Update settings</string>
+    <string name="game_settings_new">Create new settings</string>
+
+    <string name="player_settings">Settings</string>
+    <string-array name="vibration">
+        <item>Vibration</item>
+        <item>Be alerted by vibration when you are on move.</item>
+    </string-array>
 
     <string-array name="permissions">
         <item>Would you like to host a local game?</item>
@@ -48,7 +54,7 @@
 
     <string name="game_wait">Wait for start of the game.</string>
     <string-array name="cards_tooltip">
-        <item>Strength is represented by the best combination of 5 cards.</item>
+        <item>Best combination of 5 cards.</item>
         <item>ROYAL FLUSH: 5 cards in sequence from Ace to Ten all in same suit.</item>
         <item>STRAIGHT FLUSH: 5 cards in sequence all in same suit.</item>
         <item>4 OF A KIND: 4 cards of the same rank.</item>

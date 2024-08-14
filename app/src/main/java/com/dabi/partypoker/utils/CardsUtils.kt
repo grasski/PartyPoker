@@ -14,7 +14,11 @@ enum class CardType{
 data class Card(
     val type: CardType,
     val value: Int
-)
+){
+    fun toImageId(): Int{
+        return CardsUtils.cardIDs["${type.name.lowercase()}_${value}"]!!
+    }
+}
 
 enum class CardsCombination(val powerIndex: Int) {
     ROYAL_FLUSH(10),

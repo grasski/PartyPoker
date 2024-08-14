@@ -45,7 +45,14 @@ class ServerBridge(
     fun onServerEvent(event: ServerEvents){
         when(event) {
             is ServerEvents.StartServer -> {
-                if (_serverState.value.serverStatus == ServerStatusEnum.NONE){
+                if (_serverState.value.serverStatus == ServerStatusEnum.NONE ||
+                    _serverState.value.serverStatus == ServerStatusEnum.ADVERTISING_FAILED
+                ){
+                    _serverState.update {
+                        it.copy(
+                            serverStatus = ServerStatusEnum.NONE
+                        )
+                    }
                     ServerManager(connectionsClient, this::onServerEvent).startAdvertising(
                         context = event.context,
                         name = event.serverName

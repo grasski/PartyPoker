@@ -43,6 +43,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipDefaults.rememberPlainTooltipPositionProvider
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
@@ -79,6 +81,7 @@ import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.Card
+import com.dabi.partypoker.utils.CardType
 import com.dabi.partypoker.utils.CardsCombination
 import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.UiTexts
@@ -87,7 +90,6 @@ import com.dabi.partypoker.utils.formatNumberToString
 import com.dabi.partypoker.utils.handStrength
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PlayerDrawItself(
     player: PlayerState,
@@ -288,71 +290,14 @@ fun PlayerDrawItself(
                                         .size(fontSize.value.dp * 1.2f)
                                 )
                                 if (showPopup){
-                                    Popup(
-                                        onDismissRequest = { showPopup = false },
-                                        popupPositionProvider = rememberPlainTooltipPositionProvider()
-                                    ) {
-                                        Card(
-                                            modifier = Modifier
-                                                .fillMaxWidth(0.4f)
-                                                .fillMaxHeight(0.5f)
-                                                .padding(8.dp),
-                                            colors = CardDefaults.cardColors(
-                                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                                contentColor = textColor
-                                            )
-                                        ){
-                                            val texts = UiTexts.ArrayResource(R.array.cards_tooltip).asArray()
-                                            LazyColumn(
-                                                modifier = Modifier
-                                                    .fillMaxSize()
-                                                    .padding(8.dp)
-                                            ) {
-                                                stickyHeader {
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth()
-                                                            .background(MaterialTheme.colorScheme.surfaceContainer)
-                                                            .padding(bottom = 10.dp),
-                                                        contentAlignment = Alignment.Center
-                                                    ){
-                                                        Text(
-                                                            text = texts[0].uppercase(),
-                                                            style = TextStyle(
-                                                                fontSize = fontSize,
-                                                                fontWeight = FontWeight.ExtraBold,
-                                                                textAlign = TextAlign.Center
-                                                            )
-                                                        )
-                                                    }
-                                                }
-                                                itemsIndexed(texts){index, text ->
-                                                    if (index > 0){
-                                                        val textRow = text.split(": ")
-                                                        Row(
-                                                            modifier = Modifier
-                                                                .fillMaxWidth()
-                                                                .padding(vertical = 5.dp),
-                                                        ){
-                                                            Text(
-                                                                text = textRow[0] + ": ",
-                                                                style = TextStyle(
-                                                                    fontSize = fontSize,
-                                                                    fontWeight = FontWeight.ExtraBold
-                                                                )
-                                                            )
-                                                            Text(
-                                                                text = textRow[1],
-                                                                style = TextStyle(
-                                                                    fontSize = fontSize,
-                                                                )
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                    HandInfoPopUp(
+                                        modifier = Modifier
+                                            .fillMaxWidth(0.4f)
+                                            .fillMaxHeight(0.7f)
+                                            .padding(8.dp),
+                                        showPopup = { showPopup = it },
+                                        fontSize = fontSize
+                                    )
                                 }
 
                                 HandStrengthIndicator(
@@ -678,5 +623,166 @@ fun HandStrengthIndicator(
                 )
                 .clip(RoundedCornerShape(5.dp))
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@Composable
+fun HandInfoPopUp(
+    modifier: Modifier = Modifier,
+    fontSize: TextUnit,
+    showPopup: (Boolean) -> Unit
+) {
+    Popup(
+        onDismissRequest = { showPopup(false) },
+        popupPositionProvider = rememberPlainTooltipPositionProvider()
+    ) {
+        Card(
+            modifier = modifier,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                contentColor = textColor
+            )
+        ){
+            val texts = UiTexts.ArrayResource(R.array.cards_tooltip).asArray()
+            val combinations = listOf(
+                listOf(
+                    Pair(Card(CardType.CLUB, 14), true),
+                    Pair(Card(CardType.CLUB, 13), true),
+                    Pair(Card(CardType.CLUB, 12), true),
+                    Pair(Card(CardType.CLUB, 11), true),
+                    Pair(Card(CardType.CLUB, 10), true),
+                ),
+                listOf(
+                    Pair(Card(CardType.DIAMOND, 8), true),
+                    Pair(Card(CardType.DIAMOND, 7), true),
+                    Pair(Card(CardType.DIAMOND, 6), true),
+                    Pair(Card(CardType.DIAMOND, 5), true),
+                    Pair(Card(CardType.DIAMOND, 4), true),
+                ),
+                listOf(
+                    Pair(Card(CardType.DIAMOND, 3), true),
+                    Pair(Card(CardType.CLUB, 3), true),
+                    Pair(Card(CardType.HEART, 3), true),
+                    Pair(Card(CardType.SPADE, 3), true),
+                    Pair(Card(CardType.DIAMOND, 10), false),
+                ),
+                listOf(
+                    Pair(Card(CardType.DIAMOND, 2), true),
+                    Pair(Card(CardType.CLUB, 2), true),
+                    Pair(Card(CardType.HEART, 7), true),
+                    Pair(Card(CardType.SPADE, 7), true),
+                    Pair(Card(CardType.DIAMOND, 7), true),
+                ),
+                listOf(
+                    Pair(Card(CardType.CLUB, 10), true),
+                    Pair(Card(CardType.CLUB, 7), true),
+                    Pair(Card(CardType.CLUB, 12), true),
+                    Pair(Card(CardType.CLUB, 3), true),
+                    Pair(Card(CardType.CLUB, 4), true),
+                ),
+                listOf(
+                    Pair(Card(CardType.CLUB, 8), true),
+                    Pair(Card(CardType.DIAMOND, 7), true),
+                    Pair(Card(CardType.HEART, 6), true),
+                    Pair(Card(CardType.SPADE, 5), true),
+                    Pair(Card(CardType.DIAMOND, 4), true),
+                ),
+                listOf(
+                    Pair(Card(CardType.SPADE, 11), true),
+                    Pair(Card(CardType.HEART, 11), true),
+                    Pair(Card(CardType.DIAMOND, 11), true),
+                    Pair(Card(CardType.DIAMOND, 5), false),
+                    Pair(Card(CardType.CLUB, 12), false),
+                ),
+                listOf(
+                    Pair(Card(CardType.SPADE, 11), true),
+                    Pair(Card(CardType.HEART, 11), true),
+                    Pair(Card(CardType.DIAMOND, 12), true),
+                    Pair(Card(CardType.CLUB, 12), true),
+                    Pair(Card(CardType.CLUB, 5), false),
+                ),
+                listOf(
+                    Pair(Card(CardType.SPADE, 14), true),
+                    Pair(Card(CardType.HEART, 14), true),
+                    Pair(Card(CardType.DIAMOND, 5), false),
+                    Pair(Card(CardType.CLUB, 7), false),
+                    Pair(Card(CardType.CLUB, 9), false),
+                ),
+                listOf(
+                    Pair(Card(CardType.SPADE, 14), true),
+                    Pair(Card(CardType.HEART, 2), false),
+                    Pair(Card(CardType.DIAMOND, 5), false),
+                    Pair(Card(CardType.CLUB, 7), false),
+                    Pair(Card(CardType.CLUB, 9), false),
+                ),
+            )
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp)
+            ) {
+                stickyHeader {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surfaceContainer),
+                        contentAlignment = Alignment.Center
+                    ){
+                        AutoSizeText(
+                            text = texts[0].uppercase(),
+                            style = TextStyle(
+                                fontSize = fontSize,
+                                fontWeight = FontWeight.ExtraBold,
+                                textAlign = TextAlign.Center
+                            )
+                        )
+                    }
+                }
+                itemsIndexed(texts){index, text ->
+                    if (index > 0){
+                        val textRow = text.split(": ")
+                        HorizontalDivider(modifier = Modifier.padding(8.dp))
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            AutoSizeText(
+                                text = index.toString() + ". " + textRow[0] + ": ",
+                                style = MaterialTheme.typography.titleLarge.copy(
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            )
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(5.dp),
+                                horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
+                            ) {
+                                combinations.getOrNull(index-1)?.let {
+                                    for (pair in it){
+                                        val card = pair.first
+                                        val isVisible = pair.second
+
+                                        CardBox(cardId = card.toImageId(), modifier = Modifier
+                                            .weight(1f, false)
+                                            .alpha(if (isVisible) 1f else 0.5f)
+                                        )
+                                    }
+                                }
+                            }
+
+                            Text(
+                                text = textRow[1],
+                                style = TextStyle(
+                                    fontSize = fontSize,
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }

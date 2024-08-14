@@ -2,7 +2,13 @@ package com.dabi.partypoker
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RawRes
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -11,6 +17,7 @@ import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.view.PlayerView
 import com.dabi.partypoker.featureClient.view.PlayerViewPrivate
 import com.dabi.partypoker.featureCore.data.PlayerActionsState
+import com.dabi.partypoker.featureCore.views.HandInfoPopUp
 import com.dabi.partypoker.featureMenu.view.MenuView
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.view.ServerView
@@ -37,7 +44,7 @@ fun Navigation() {
 //                    id = "1",
 //                    isPlayingNow = true,
 //                    money = 1000,
-//                    isReadyToPlay = false,
+//                    isReadyToPlay = true,
 //                    holeCards = listOf(
 //                        Card(CardType.CLUB, 14),
 //                        Card(CardType.HEART, 14)

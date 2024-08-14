@@ -25,9 +25,15 @@
     <string name="players">Hráči</string>
 
     <string name="menu">Menu</string>
-    <string name="settings">Herní nastavení</string>
-    <string name="settings_update">Změna nastavení</string>
-    <string name="settings_new">Vytvoř nové nastavení</string>
+    <string name="game_settings">Nastavení místnosti hry</string>
+    <string name="game_settings_update">Změna nastavení</string>
+    <string name="game_settings_new">Vytvoř nové nastavení</string>
+
+    <string name="player_settings">Nastavení</string>
+    <string-array name="vibration">
+        <item>Vibrace</item>
+        <item>Buďte upozorněni vibrací, když budete na tahu.</item>
+    </string-array>
 
     <string-array name="permissions">
         <item>Chceš vytvořit lokální server hry?</item>
@@ -50,7 +56,7 @@
 
     <string name="game_wait">Počkej na začátek hry.</string>
     <string-array name="cards_tooltip">
-        <item>Síla karet je reprezentovaná nejlepší kombinací 5 karet.</item>
+        <item>Nejlepší kombinace 5 karet.</item>
         <item>KRÁLOVSKÁ POSTUPKA: 5 karet v řadě od Esa po Desítku a to všechny ve stejné barvě.</item>
         <item>POSTUPKA V BARVĚ: 5 karet v řadě a to všechny ve stejné barvě.</item>
         <item>ČTVEŘICE: 4 karty stejné hodnoty.</item>

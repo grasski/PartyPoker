@@ -1,7 +1,6 @@
 package com.dabi.partypoker.featureMenu.view
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
@@ -103,7 +102,6 @@ import com.dabi.partypoker.repository.gameSettings.GameSettings
 import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.formatNumberToString
-import kotlinx.coroutines.runBlocking
 import kotlin.math.roundToInt
 
 
@@ -168,6 +166,7 @@ fun ServerMenuView(
                 Row(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10.dp))
+                        .height(55.dp)
                         .border(
                             2.dp,
                             textColor,
@@ -203,27 +202,24 @@ fun ServerMenuView(
                     )
                 }
 
-                Box(
+                FloatingActionButton(
                     modifier = Modifier
                         .width(55.dp)
                         .height(55.dp)
                         .padding(5.dp),
-                ){
-                    FloatingActionButton(
-                        onClick = {
-                            showSettings = true
-                        },
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        contentColor = Color.White
-                    ) {
-                        Icon(
-                            Icons.Filled.Settings,
-                            "settings",
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(5.dp)
-                        )
-                    }
+                    onClick = {
+                        showSettings = true
+                    },
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    contentColor = Color.White
+                ) {
+                    Icon(
+                        Icons.Filled.Settings,
+                        "settings",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(5.dp)
+                    )
                 }
             }
 
@@ -370,7 +366,7 @@ fun ServerMenuView(
             visible = showSettings,
             modifier = Modifier
                 .align(Alignment.BottomEnd),
-            enter = if (orientation == Configuration.ORIENTATION_PORTRAIT)  slideInVertically { it } else slideInHorizontally { it },
+            enter = if (orientation == Configuration.ORIENTATION_PORTRAIT) slideInVertically { it } else slideInHorizontally { it },
             exit = if (orientation == Configuration.ORIENTATION_PORTRAIT) slideOutVertically { it } else slideOutHorizontally { it }
         ) {
             ServerSettingsView(
@@ -459,7 +455,7 @@ fun ServerSettingsView(
                 }
 
                 AutoSizeText(
-                    text = UiTexts.StringResource(R.string.settings).asString(),
+                    text = UiTexts.StringResource(R.string.game_settings).asString(),
                     style = MaterialTheme.typography.titleLarge.copy(
                         textDecoration = TextDecoration.Underline,
                         fontWeight = FontWeight.ExtraBold,
@@ -713,7 +709,7 @@ private fun UpsertSettingsDialog (
                 contentAlignment = Alignment.Center
             ){
                 AutoSizeText(
-                    text = if(update) UiTexts.StringResource(R.string.settings_update).asString() else UiTexts.StringResource(R.string.settings_new).asString(),
+                    text = if(update) UiTexts.StringResource(R.string.game_settings_update).asString() else UiTexts.StringResource(R.string.game_settings_new).asString(),
                     style = MaterialTheme.typography.titleLarge,
                 )
             }

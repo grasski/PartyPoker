@@ -13,6 +13,8 @@
     <uses-permission android:minSdkVersion="31" android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:minSdkVersion="33" android:name="android.permission.NEARBY_WIFI_DEVICES" />
 
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:name=".di.MyApp"
         android:allowBackup="true"

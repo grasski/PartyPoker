@@ -70,6 +70,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -336,8 +337,8 @@ fun GameTable(
 @Composable
 fun CardBox(cardId: Int?, modifier: Modifier) {
     cardId?.let { id ->
-        Image(
-            painter = painterResource(id = id),
+        AsyncImage(
+            model = id,
             contentDescription = "card",
             modifier = modifier
                 .clip(RoundedCornerShape(3.dp))
@@ -543,7 +544,7 @@ fun PlayerBox(
                 if (playerState.holeCards.isNotEmpty()){
                     for (i in 0..1){
                         val card = playerState.holeCards.getOrNull(i)
-                        var cardID = R.drawable.gray_back
+                        var cardID = R.drawable.card_back_side
                         if (showCards){
                             card?.let {
                                 cardID = CardsUtils.cardIDs[card.type.name.lowercase() + "_" + card.value] ?: R.drawable.gray_back

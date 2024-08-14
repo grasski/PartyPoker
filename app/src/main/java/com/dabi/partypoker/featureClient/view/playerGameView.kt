@@ -199,6 +199,7 @@ fun PlayerView(
                 when(clientState.serverType){
                     ServerType.IS_TABLE -> {
                         val gameState by playerViewModel.gameState.collectAsStateWithLifecycle()
+
                         if (changeView){
                             PlayerGameView(
                                 playerState = playerState,
