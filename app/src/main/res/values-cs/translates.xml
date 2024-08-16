@@ -34,6 +34,19 @@
         <item>Vibrace</item>
         <item>Buďte upozorněni vibrací, když budete na tahu.</item>
     </string-array>
+    <string-array name="language">
+        <item>Jazyk</item>
+        <item>Změň jazyk hry.</item>
+    </string-array>
+    <string-array name="czech">
+        <item>cs</item>
+        <item>Čeština</item>
+    </string-array>
+    <string-array name="english">
+        <item>en</item>
+        <item>Angličtina</item>
+    </string-array>
+
 
     <string-array name="permissions">
         <item>Chceš vytvořit lokální server hry?</item>
@@ -93,4 +106,55 @@
     <string name="game_settings_player_timer_duration">Časový limit hráče (s)</string>
     <string name="save">Uložit</string>
 
+
+    <string name="settings_info">Informace</string>
+    
+    <string name="about_game">O hře</string>
+    <string name="info_about_content">
+        Vítejte u naší pokerové hry, která využívá NearbyConnectionAPI k propojení zařízení, která jsou v blízkosti sebe. Tato hra je ideální pro skupiny přátel, kteří chtějí zažít vzrušení z pokeru bez potřeby fyzických karet nebo kasino zařízení.
+        \n\nDíky této mobilní hře se můžete snadno připojit k ostatním hráčům ve vašem okolí a užít si zábavnou partii pokeru. Hra nevyžaduje žádné skutečné peníze ani připojení k serveru – veškerá interakce probíhá přímo mezi připojenými zařízeními, což zajišťuje rychlé a plynulé hraní.
+        \n\nTato hra byla vytvořena především pro zábavu a jako nástroj pro učení herních kombinací a strategií pokeru. Nezáleží na tom, zda jste začátečník nebo zkušený hráč – naše hra vám umožní vychutnat si poker v pohodlí vašeho mobilního zařízení.
+        \n\nDoufáme, že si hru užijete a že vám pomůže lépe pochopit pravidla a strategie pokeru. Přejeme vám hodně zábavy a úspěchů u stolu!
+    </string>
+
+    <string name="rules_title">Texas Hold\'em pravidla</string>
+    <string name="game_goal_title">Cíl hry:</string>
+    <string name="game_goal">Cílem hry je vyhrát bank (pot) tím, že vytvoříte nejlepší možnou kombinaci pěti karet, nebo donutíte ostatní hráče složit karty (fold).</string>
+    <string name="equipment_title">Herní vybavení:</string>
+    <string-array name="equipment_items">
+        <item>Balíček karet: Hraje se s balíčkem 52 karet (bez žolíků).</item>
+        <item>Žetony: Používají se žetony pro sázení.</item>
+    </string-array>
+    <string name="basic_terms_title">Základní pojmy:</string>
+    <string-array name="basic_terms">
+        <item>Dealer: Hráč, který rozdává karty. Pozice dealera se po každé hře posouvá.</item>
+        <item>Blindy: Před začátkem hry musí dva hráči vlevo od dealera vložit povinné sázky – malý blind a velký blind.</item>
+        <item>Společné karty: Pět karet, které jsou postupně rozdány lícem nahoru na stůl a které mohou všichni hráči využít ke složení své kombinace.</item>
+    </string-array>
+    <string name="game_flow_title">Průběh hry:</string>
+    <string-array name="game_flow">
+        <item>Rozdání karet: Každý hráč dostane dvě karty lícem dolů (hole cards), které jsou viditelné pouze pro něj.</item>
+        <item>První kolo sázek (Pre-Flop): Hráč nalevo od velkého blindu začíná první sázkové kolo. Hráči mohou vsadit (bet), dorovnat (call), navýšit (raise) nebo složit karty (fold).</item>
+        <item>Flop: Na stůl jsou rozdány tři společné karty lícem nahoru. Následuje druhé kolo sázek, začíná hráč nalevo od dealera.</item>
+        <item>Turn: Na stůl je přidána čtvrtá společná karta. Následuje třetí kolo sázek.</item>
+        <item>River: Na stůl je přidána pátá a poslední společná karta. Následuje poslední kolo sázek.</item>
+        <item>Showdown: Pokud po posledním kole sázek zůstává ve hře více než jeden hráč, následuje odhalení karet. Hráči vytvoří nejlepší možnou kombinaci pěti karet z dvou vlastních karet a pěti společných karet. Hráč s nejvyšší kombinací vyhrává bank. Pokud mají dva nebo více hráčů stejnou kombinaci, bank se mezi ně rovnoměrně rozdělí (split pot).</item>
+    </string-array>
+
+    <string name="glossary_title">Slovník pojmů</string>
+    <string-array name="glossary_terms">
+        <item>Sázka (Bet): Vložení žetonů do banku během sázení.</item>
+        <item>Dorovnání (Call): Zápasení sázky jiného hráče bez jejího zvýšení.</item>
+        <item>Navýšení (Raise): Zvýšení sázky, kterou vložil jiný hráč.</item>
+        <item>Složení karet (Fold): Vzdání se hry a ztráta možnosti vyhrát bank.</item>
+        <item>Zkontrolování (Check): Vzdání se možnosti vsadit a pokračování ve hře bez sázení.</item>
+        <item>Všechny žetony (All-In): Vložení všech zbývajících žetonů do banku.</item>
+        <item>Bank (Pot): Součet všech sázek v aktuální hře, který se pokoušíte vyhrát.</item>
+        <item>Blindy (Blinds): Povinné sázky umístěné před začátkem hry (malý blind a velký blind).</item>
+        <item>Dealer (Dealer): Hráč, který rozdává karty a jehož pozice se po každé hře posouvá.</item>
+        <item>Společné karty (Community Cards): Pět karet rozdávaných lícem nahoru, které jsou dostupné pro všechny hráče.</item>
+    </string-array>
+
+    <string name="resources_title">Použité zdroje</string>
+    <string name="resources_content">Většina grafických zdrojů, jako jsou obrázky, ikony a animace, byla získána z uvedených odkazů. V ostatních případech byly použity nástroje jako Figma nebo generativní AI.</string>
 </resources>

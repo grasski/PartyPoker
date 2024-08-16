@@ -33,6 +33,19 @@
         <item>Vibration</item>
         <item>Be alerted by vibration when you are on move.</item>
     </string-array>
+    <string-array name="language">
+        <item>Language</item>
+        <item>Change language of the game.</item>
+    </string-array>
+    <string-array name="czech">
+        <item>cs</item>
+        <item>Czech</item>
+    </string-array>
+    <string-array name="english">
+        <item>en</item>
+        <item>English</item>
+    </string-array>
+
 
     <string-array name="permissions">
         <item>Would you like to host a local game?</item>
@@ -89,4 +102,78 @@
     <string name="game_settings_big_blind_amount">Big blind amount</string>
     <string name="game_settings_player_timer_duration">Player timeout (s)</string>
     <string name="save">Save</string>
+
+
+    <string name="settings_info">Information</string>
+
+    <string name="about_game">About</string>
+    <string name="info_about_content">
+        Welcome to our poker game, which uses the NearbyConnectionAPI to connect nearby devices. This game is perfect for groups of friends who want to enjoy the excitement of poker without needing physical cards or casino equipment.
+        \n\nWith this mobile game, you can easily connect with other players in your vicinity and enjoy a fun game of poker. The game does not involve any real money or server connection – all interactions happen directly between connected devices, ensuring a fast and seamless gaming experience.
+        \n\nThis game was created primarily for entertainment and as a tool for learning poker hands and strategies. Whether you are a beginner or an experienced player, our game lets you enjoy poker right from the comfort of your mobile device.
+        \n\nWe hope you enjoy playing and that the game helps you better understand poker rules and strategies. Have fun and good luck at the table!
+    </string>
+
+    <string name="rules_title">Texas Hold\'em rules</string>
+    <string name="game_goal_title">Game Goal:</string>
+    <string name="game_goal">The goal of the game is to win the pot by making the best possible five-card hand or by forcing other players to fold.</string>
+    <string name="equipment_title">Game Equipment:</string>
+    <string-array name="equipment_items">
+        <item>Deck of Cards: The game is played with a standard 52-card deck (no jokers).</item>
+        <item>Chips: Chips are used for betting.</item>
+    </string-array>
+    <string name="basic_terms_title">Basic Terms:</string>
+    <string-array name="basic_terms">
+        <item>Dealer: The player who deals the cards. The dealer position rotates after each game.</item>
+        <item>Blinds: Before the game begins, the two players to the left of the dealer must post mandatory bets – the small blind and the big blind.</item>
+        <item>Community Cards: Five cards that are dealt face up in the center of the table, available for all players to use in making their hand.</item>
+    </string-array>
+    <string name="game_flow_title">Game Flow:</string>
+    <string-array name="game_flow">
+        <item>Dealing Cards: Each player receives two face-down cards (hole cards), visible only to them.</item>
+        <item>Pre-Flop Betting: The player to the left of the big blind starts the first betting round. Players can bet, call, raise, or fold.</item>
+        <item>Flop: Three community cards are dealt face up. The second betting round begins, starting with the player to the left of the dealer.</item>
+        <item>Turn: A fourth community card is dealt face up. The third betting round begins.</item>
+        <item>River: A fifth and final community card is dealt face up. The last betting round begins.</item>
+        <item>Showdown: If more than one player remains after the final betting round, the players reveal their cards. The player with the best five-card hand made from their hole cards and the community cards wins the pot. If two or more players have the same hand, the pot is evenly split between them (split pot).</item>
+    </string-array>
+
+    <string name="glossary_title">Glossary</string>
+    <string-array name="glossary_terms">
+        <item>Bet: Placing chips into the pot during betting.</item>
+        <item>Call: Matching the bet made by another player without raising.</item>
+        <item>Raise: Increasing the amount of the bet made by another player.</item>
+        <item>Fold: Giving up the hand and losing the chance to win the pot.</item>
+        <item>Check: Passing the opportunity to bet and continuing the game without placing a bet.</item>
+        <item>All-In: Putting all remaining chips into the pot.</item>
+        <item>Pot: The total of all bets placed in the current hand that you are trying to win.</item>
+        <item>Blinds: Mandatory bets placed before the hand begins (small blind and big blind).</item>
+        <item>Dealer: The player who deals the cards and whose position rotates after each hand.</item>
+        <item>Community Cards: Five cards dealt face up that are available for all players to use in making their hand.</item>
+    </string-array>
+
+    <string name="resources_title">Resources</string>
+    <string name="resources_content">Most graphic assets, such as images, icons, and animations, were sourced from the provided links. In other cases, tools like Figma or generative AI were used.</string>
+    <string-array name="resources_links">
+        <item>https://lottiefiles.com/free-animation/profile-avatar-of-young-woman-WIppZWULvi?from=search</item>
+        <item>https://lottiefiles.com/free-animation/female-05-4Mz17Snijt?from=search</item>
+        <item>https://lottiefiles.com/free-animation/avatar-female-vys3zMXt1F?from=search</item>
+        <item>https://lottiefiles.com/free-animation/woman-avatar-xF8u2MuJJV?from=search</item>
+        <item>https://lottiefiles.com/free-animation/avatar-woman-short-hair-ZbixzqM6fP?from=search</item>
+        <item>https://lottiefiles.com/free-animation/avatar-2K8fgWn5xp?from=search</item>
+        <item>https://lottiefiles.com/free-animation/avatar-animation-CcVadKDg5s?from=search</item>
+        <item>https://lottiefiles.com/free-animation/avatar-M96ZOrdG4C?from=search</item>
+        <item>https://lottiefiles.com/free-animation/avatar-beard-man-blink-wQ12gw4iUt?from=search</item>
+        <item>https://lottiefiles.com/free-animation/diver-avatar-3JjbOPJD6B?from=search</item>
+        <item>https://lottiefiles.com/free-animation/error-404-AQdcQKvXl1?from=search</item>
+        <item>https://lottiefiles.com/free-animation/access-location-Um17zCqVsH?from=search</item>
+        <item>https://lottiefiles.com/free-animation/error-occurred-iMz20W0ZOp?from=search</item>
+        <item>https://www.svgrepo.com/svg/399971/blackclubsuit</item>
+        <item>https://www.svgrepo.com/svg/479183/diamond-mark-3</item>
+        <item>https://www.svgrepo.com/svg/532473/heart</item>
+        <item>https://www.svgrepo.com/svg/479189/spade-1</item>
+        <item>https://www.figma.com</item>
+        <item>https://designer.microsoft.com/image-creator</item>
+    </string-array>
+
 </resources>

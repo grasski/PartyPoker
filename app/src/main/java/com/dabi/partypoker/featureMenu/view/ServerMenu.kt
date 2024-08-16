@@ -19,12 +19,15 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -431,16 +434,19 @@ fun ServerSettingsView(
         .padding(8.dp),
     ){
         item{
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.primary),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
             ){
                 IconButton(
                     onClick = {
                         showSettings(false)
                     },
                     modifier = Modifier
-                        .align(Alignment.CenterStart)
                         .border(
                             2.dp,
                             textColor,
@@ -450,18 +456,22 @@ fun ServerSettingsView(
                     Icon(
                         Icons.Filled.Close,
                         "close",
-                        tint = textColor
+                        tint = textColor,
                     )
                 }
 
-                AutoSizeText(
-                    text = UiTexts.StringResource(R.string.game_settings).asString(),
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        textDecoration = TextDecoration.Underline,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = textColor
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(0.7f)
+                        .weight(1f, false),
+                    contentAlignment = Alignment.Center
+                ){
+                    AutoSizeText(
+                        text = UiTexts.StringResource(R.string.game_settings).asString(),
+                        style = MaterialTheme.typography.headlineLarge
                     )
-                )
+                }
 
                 IconButton(
                     onClick = {
@@ -469,7 +479,6 @@ fun ServerSettingsView(
                         openSettings = true
                     },
                     modifier = Modifier
-                        .align(Alignment.CenterEnd)
                         .border(
                             2.dp,
                             textColor,

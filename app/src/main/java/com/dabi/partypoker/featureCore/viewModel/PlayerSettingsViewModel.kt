@@ -1,5 +1,6 @@
 package com.dabi.partypoker.featureCore.viewModel
 
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dabi.partypoker.featureCore.data.PlayerSettingsState
@@ -37,7 +38,7 @@ class PlayerSettingsViewModel @Inject constructor (
         }
     }
 
-    fun toggleVibration() {
+    private fun toggleVibration() {
         viewModelScope.launch {
             playerSettingsRepository.toggleVibration()
         }

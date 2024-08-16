@@ -547,7 +547,7 @@ fun PlayerBox(
                         var cardID = R.drawable.card_back_side
                         if (showCards){
                             card?.let {
-                                cardID = CardsUtils.cardIDs[card.type.name.lowercase() + "_" + card.value] ?: R.drawable.gray_back
+                                cardID = CardsUtils.cardIDs[card.type.name.lowercase() + "_" + card.value] ?: R.drawable.card_back_side
                             }
                         }
 
