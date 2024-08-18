@@ -7,6 +7,7 @@ import com.dabi.partypoker.R
 import com.dabi.partypoker.managers.GameEvents
 import com.dabi.partypoker.managers.GameManager
 import com.dabi.partypoker.featureClient.model.data.PlayerState
+import com.dabi.partypoker.featureCore.interfaces.PlayerCoreInterface
 import com.dabi.partypoker.featureServer.model.ServerBridge
 import com.dabi.partypoker.featureServer.model.ServerBridgeEvents
 import com.dabi.partypoker.featureServer.model.data.GameState
@@ -118,10 +119,33 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                         _gameOverTimerMillis.update { _gameState.value.gameSettings.gameOverTimerDurationMillis }
                     }
                 }
+
+                if (!gameState.gameOver){
+                    val allInCount = gameState.gameReadyPlayers.count { (playerId, _) ->
+                        val player = gameState.players[playerId]
+
+                        if (player == null){
+                            true
+                        } else{
+                            player.allIn || player.isFolded
+                        }
+//                        player?.allIn == true ?: true
+                    }
+                    if (gameState.activeRaise == null && gameState.gameReadyPlayers.count() - allInCount <= 1){
+                        // TODO: create something similar to autoCheck, but now it will just show rest of the cards without anyone able to play (playingNow = null)
+                        //  and still have some delay
+
+                        autoCheck()
+                        delay(700)
+                        return@collect
+                    }
+                    if (gameState.players[gameState.playingNow]?.allIn == true){
+                        autoCheck()
+                        return@collect
+                    }
+                }
             }
         }
-
-        Log.e("", "GAME: " + _gameState.value)
     }
 
     fun onGameEvent(event: GameEvents) {
@@ -321,17 +345,21 @@ open class ServerOwnerViewModel @AssistedInject constructor(
 
                         val player = _gameState.value.players[clientID]
                         player?.let { p ->
-                            _gameState.value.activeRaise?.let {
-                                val amount = it.second.minus(p.called)
-                                if (p.called > it.second || amount > p.money){ return }
+                            _gameState.value.activeRaise?.let { (raiserId, raiseValue) ->
+                                var amount = raiseValue.minus(p.called)
+                                if (p.called > raiseValue){ return }
+
+                                if (amount >= p.money){ // All-IN
+                                    amount = p.money
+                                }
                                 timerJob?.cancel()
 
                                 var tempGameState = _gameState.value.copy()
-
                                 tempGameState.players.forEach { (_, player) ->
                                     if (player.id == _gameState.value.playingNow){
                                         player.money -= amount
                                         player.called += amount
+                                        player.allIn = amount == p.money
                                     }
                                 }
 //                                tempGameState.bank += amount
@@ -345,7 +373,7 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                     ClientPayloadType.ACTION_RAISE -> {
                         if (_gameState.value.playingNow != clientID){ return }
 
-                        val amount = Gson().fromJson(data.toString(), Int::class.java)
+                        var amount = Gson().fromJson(data.toString(), Int::class.java)
                         val player = _gameState.value.players[clientID]
                         player?.let { p ->
                             var tempGameState = _gameState.value.copy()
@@ -353,26 +381,33 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                             tempGameState.activeRaise?.let { (raiserId, activeRaisedAmount) ->
                                 val callAmount = activeRaisedAmount.minus(p.called) // Amount which player had to call if chose CALL option
                                 val raisedAmount = amount - callAmount
-                                Log.e("", "AMOUNT: " + amount + " RAISED: " + raisedAmount + " CALL: " + callAmount)
-                                if (amount < callAmount || amount > p.money){ return }
+                                Log.e("", "AMOUNT: " + amount + " RAISED: " + raisedAmount + " CALL: " + callAmount + " MONEY: " + p.money)
+                                if (amount < callAmount){ return }
+                                if (amount >= p.money){ // All-IN
+                                    amount = p.money
+                                }
                                 timerJob?.cancel()
 
                                 tempGameState.players.forEach { (_, player) ->
                                     if (player.id == _gameState.value.playingNow){
                                         player.money -= (callAmount + raisedAmount)
                                         player.called += (callAmount + raisedAmount)
+                                        player.allIn = amount == p.money
                                     }
                                 }
 //                                tempGameState.bank += (callAmount + raisedAmount)
                                 tempGameState.activeRaise = Pair(clientID, (activeRaisedAmount + raisedAmount))
                             }?: run {
-                                if (amount > p.money){ return }
+                                if (amount >= p.money){ // All-IN
+                                    amount = p.money
+                                }
                                 timerJob?.cancel()
 
                                 tempGameState.players.forEach { (_, player) ->
                                     if (player.id == _gameState.value.playingNow){
                                         player.money -= amount
                                         player.called += amount
+                                        player.allIn = amount == p.money
                                     }
                                 }
 //                                tempGameState.bank += amount

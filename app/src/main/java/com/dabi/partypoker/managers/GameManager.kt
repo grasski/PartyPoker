@@ -1,7 +1,6 @@
 package com.dabi.partypoker.managers
 
 import android.util.Log
-import androidx.compose.ui.util.fastJoinToString
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.MessageData
@@ -10,7 +9,6 @@ import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.evaluateGame
 import com.dabi.partypoker.utils.generateDeck
 import com.dabi.partypoker.utils.getCards
-import kotlinx.coroutines.Job
 
 
 sealed class GameEvents{
@@ -33,13 +31,14 @@ class GameManager {
                 player.isFolded = false
                 player.holeCards = emptyList()
                 player.called = 0
+                player.allIn = false
                 player.isPlayingNow = false
                 player.isDealer = false
                 player.isBigBlind = false
                 player.isSmallBlind = false
             }
 
-            val readyPlayers = gameState.players.filter { it.value.isReadyToPlay }
+            val readyPlayers = gameState.players.filter { it.value.isReadyToPlay && it.value.money >= gameState.gameSettings.bigBlindAmount }
             gameState.gameReadyPlayers = emptyMap()
             readyPlayers.forEach { (id, _) ->
                 val position = gameState.seatPositions[id]

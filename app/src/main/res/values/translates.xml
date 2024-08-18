@@ -83,8 +83,10 @@
     <string name="action_ready">Get ready for the game!</string>
     <string name="action_check">CHECK</string>
     <string name="action_call">CALL</string>
+    <string name="action_bet">BET</string>
     <string name="action_raise">RAISE</string>
     <string name="action_fold">FOLD</string>
+    <string name="all_in">All-in</string>
 
     <string name="message_center">Message center</string>
 
@@ -140,6 +142,7 @@
 
     <string name="glossary_title">Glossary</string>
     <string-array name="glossary_terms">
+        <item>Check: Passing the opportunity to bet to another player. Possible only in the case that no one else has bet.</item>
         <item>Bet: Placing chips into the pot during betting.</item>
         <item>Call: Matching the bet made by another player without raising.</item>
         <item>Raise: Increasing the amount of the bet made by another player.</item>

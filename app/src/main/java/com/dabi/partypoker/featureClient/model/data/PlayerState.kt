@@ -1,6 +1,5 @@
 package com.dabi.partypoker.featureClient.model.data
 
-import androidx.annotation.Keep
 import androidx.annotation.RawRes
 import com.dabi.partypoker.utils.Card
 
@@ -24,5 +23,6 @@ data class PlayerState(
 
     var money: Int = 0,
     var holeCards: List<Card> = emptyList(),
-    var called: Int = 0
+    var called: Int = 0,
+    var allIn: Boolean = false,
 )

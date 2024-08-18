@@ -85,8 +85,10 @@
     <string name="action_ready">Připrav se ke hře!</string>
     <string name="action_check">CHECK</string>
     <string name="action_call">Dorovnat</string>
+    <string name="action_bet">Vsadit</string>
     <string name="action_raise">Navýšit</string>
     <string name="action_fold">Složit</string>
+    <string name="all_in">All-in</string>
 
     <string name="message_center">Centrum zpráv</string>
 
@@ -143,8 +145,9 @@
 
     <string name="glossary_title">Slovník pojmů</string>
     <string-array name="glossary_terms">
-        <item>Sázka (Bet): Vložení žetonů do banku během sázení.</item>
-        <item>Dorovnání (Call): Zápasení sázky jiného hráče bez jejího zvýšení.</item>
+        <item>Check: Pokračování ve hře bez sázení. Možné pouze v případě, že nikdo nevsadil.</item>
+        <item>Vsadit (Bet): Vložení žetonů do banku během sázení.</item>
+        <item>Dorovnání (Call): Dorovnání sázky jiného hráče bez jejího zvýšení.</item>
         <item>Navýšení (Raise): Zvýšení sázky, kterou vložil jiný hráč.</item>
         <item>Složení karet (Fold): Vzdání se hry a ztráta možnosti vyhrát bank.</item>
         <item>Zkontrolování (Check): Vzdání se možnosti vsadit a pokračování ve hře bez sázení.</item>

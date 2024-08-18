@@ -22,7 +22,11 @@ interface PlayerCoreInterface {
             return 0
         }
         getGameState().activeRaise?.let { (_, amount) ->
-            return amount - getPlayerState().called
+            val toCall = amount - getPlayerState().called
+            if (toCall >= getPlayerState().money){
+                return getPlayerState().money
+            }
+            return toCall
         }
         return 0
     }

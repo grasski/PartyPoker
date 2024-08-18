@@ -43,6 +43,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -194,7 +195,9 @@ fun GameTable(
                 Row(
                     modifier = Modifier
                         .width(playerBoxSize.width - playerBoxSize.width / 3)
-                        .fillMaxHeight(),
+                        .fillMaxHeight()
+                        .background(Color.Black, RoundedCornerShape(8.dp))
+                        .padding(2.dp),
                     horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -206,8 +209,7 @@ fun GameTable(
                     )
                     Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black, RoundedCornerShape(8.dp)),
+                            .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ){
                         ShowMoneyAnimated(
@@ -227,16 +229,23 @@ fun GameTable(
                     }
                 }
 
+                var showMessages by remember { mutableStateOf(false) }
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
                         .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color.Black.copy(0.35f)),
+                        .background(Color.Black.copy(0.35f))
+                        .clickable(
+                            onClick = {
+                                showMessages = true
+                            },
+                            interactionSource = null,
+                            indication = null
+                        ),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ){
-                    var showMessages by remember { mutableStateOf(false) }
                     if (showMessages){
                         MessagesView(
                             onDismissRequest = { showMessages = false },
@@ -259,11 +268,6 @@ fun GameTable(
                     Icon(
                         Icons.Default.MoreVert,
                         contentDescription = "",
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .clickable(onClick = {
-                                showMessages = true
-                            }),
                         tint = Color.White
                     )
                 }
@@ -398,7 +402,7 @@ fun PlayerBox(
                         .width(size.width * 65 / 100)
                         .align(Alignment.CenterEnd)
                         .offset(x = size.width * 65 / 100 - 5.dp)
-                        .height((size.height / 3).times(2)),
+                        .height((size.height / 3).times(3)),  // (size.height / 3).times(2)
                     fontSize = fontSize,
                     isLeft = true
                 )
@@ -421,7 +425,7 @@ fun PlayerBox(
                         .width(size.width * 65 / 100)
                         .align(Alignment.CenterStart)
                         .offset(x = -(size.width * 65 / 100 - 5.dp))
-                        .height((size.height / 3).times(2)),
+                        .height((size.height / 3).times(3)),  // (size.height / 3).times(2)
                     fontSize = fontSize,
                     isLeft = false
                 )
@@ -771,38 +775,40 @@ private fun VerticalPlayerItems(
         Row(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxWidth(),
+                .padding(horizontal = 5.dp, vertical = 2.dp)
+                .fillMaxSize(),
             horizontalArrangement = Arrangement.spacedBy(
                 5.dp,
                 if (isLeft) Alignment.Start else Alignment.End
-            )
+            ),
+            verticalAlignment = Alignment.CenterVertically
         ){
             if(playerState.isDealer){
                 Image(
                     painter = painterResource(id = R.drawable.dealer_button),
                     contentDescription = "dealer_button",
-//                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxHeight(0.85f)
                 )
             }
             if(playerState.isSmallBlind){
                 Image(
                     painter = painterResource(id = R.drawable.small_blind_button),
                     contentDescription = "dealer_button",
-//                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxHeight(0.85f)
                 )
             }
             if(playerState.isBigBlind){
                 Image(
                     painter = painterResource(id = R.drawable.big_blind_button),
                     contentDescription = "dealer_button",
-//                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxHeight(0.85f)
                 )
             }
         }
 
         Row(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(horizontal = 5.dp)
                 .background(
                     if (playerState.called != 0) textColor else Color.Transparent,
@@ -817,6 +823,7 @@ private fun VerticalPlayerItems(
                 Image(
                     painter = painterResource(id = R.drawable.money_chip),
                     contentDescription = "money_chip",
+                    modifier = Modifier.fillMaxHeight(0.7f)
                 )
                 Text(
                     text = playerState.called.formatNumberToString(),
@@ -831,6 +838,29 @@ private fun VerticalPlayerItems(
                 )
             }
         }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 5.dp, vertical = 2.dp)
+                .background(
+                    if (playerState.allIn) textColor else Color.Transparent,
+                    RoundedCornerShape(10.dp)
+                )
+                .weight(1f),
+            contentAlignment = Alignment.Center
+        ){
+            if (playerState.allIn){
+                AutoSizeText(
+                    text = UiTexts.StringResource(R.string.all_in).asString(),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        platformStyle = PlatformTextStyle(includeFontPadding = false),
+                        color = Color.Black,
+                        fontSize = fontSize
+                    )
+                )
+            }
+        }
     }
 }
 
@@ -842,63 +872,85 @@ private fun HorizontalPlayerItems(
     fontSize: TextUnit
 ){
     Row(
-        modifier = modifier
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
     ){
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(0.35f),
-            horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
-        ){
-            if(playerState.isDealer){
-                Image(
-                    painter = painterResource(id = R.drawable.dealer_button),
-                    contentDescription = "dealer_button",
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            if(playerState.isSmallBlind){
-                Image(
-                    painter = painterResource(id = R.drawable.small_blind_button),
-                    contentDescription = "dealer_button",
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            if(playerState.isBigBlind){
-                Image(
-                    painter = painterResource(id = R.drawable.big_blind_button),
-                    contentDescription = "dealer_button",
-                    modifier = Modifier.weight(1f)
-                )
-            }
+        if(playerState.isDealer){
+            Image(
+                painter = painterResource(id = R.drawable.dealer_button),
+                contentDescription = "dealer_button",
+                modifier = Modifier.fillMaxHeight(0.85f)
+            )
+        }
+        if(playerState.isSmallBlind){
+            Image(
+                painter = painterResource(id = R.drawable.small_blind_button),
+                contentDescription = "dealer_button",
+                modifier = Modifier.fillMaxHeight(0.85f)
+            )
+        }
+        if(playerState.isBigBlind){
+            Image(
+                painter = painterResource(id = R.drawable.big_blind_button),
+                contentDescription = "dealer_button",
+                modifier = Modifier.fillMaxHeight(0.85f)
+            )
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 5.dp)
-                .background(
-                    if (playerState.called != 0) textColor else Color.Transparent,
-                    RoundedCornerShape(10.dp)
-                )
-                .padding(horizontal = 2.dp)
-                .weight(1f),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ){
-            if (playerState.called != 0){
+        if (playerState.called != 0){
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 1.dp)
+                    .background(
+                        if (playerState.called != 0) textColor else Color.Transparent,
+                        RoundedCornerShape(10.dp)
+                    )
+                    .padding(horizontal = 2.dp)
+                    .weight(1f),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+
                 Image(
                     painter = painterResource(id = R.drawable.money_chip),
                     contentDescription = "money_chip",
+                    modifier = Modifier.fillMaxHeight(0.7f)
                 )
-                Text(
-                    text = playerState.called.formatNumberToString(),
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = fontSize,
-                    style = TextStyle(
-                        platformStyle = PlatformTextStyle(
-                            includeFontPadding = false
+                Box(
+                    modifier = Modifier.weight(1f).fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ){
+                    AutoSizeText(
+                        text = playerState.called.formatNumberToString(),
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            platformStyle = PlatformTextStyle(includeFontPadding = false),
+                            color = Color.Black,
+                            fontSize = fontSize,
+                            fontWeight = FontWeight.Bold,
                         )
+                    )
+                }
+            }
+        }
+        if (playerState.allIn){
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        textColor,
+                        RoundedCornerShape(10.dp)
+                    )
+                    .padding(2.dp)
+                    .weight(0.8f),
+                contentAlignment = Alignment.Center
+            ){
+                AutoSizeText(
+                    text = UiTexts.StringResource(R.string.all_in).asString(),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        platformStyle = PlatformTextStyle(includeFontPadding = false),
+                        color = Color.Black,
+                        fontSize = fontSize
                     )
                 )
             }

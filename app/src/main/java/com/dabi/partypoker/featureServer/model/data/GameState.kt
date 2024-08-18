@@ -190,4 +190,22 @@ data class GameState(
             null
         }
     }
+
+    fun copy(): GameState {
+        val copiedPlayers = players.mapValues { (_, player) -> player.copy() }
+        val copiedGameReadyPlayers = gameReadyPlayers.toMap()
+        val copiedSeatPositions = seatPositions.toMap()
+        val copiedCardsDeck = cardsDeck.toList()
+        val copiedCardsTable = cardsTable.toList()
+        val copiedMessages = messages.toList()
+
+        return this.copy(
+            players = copiedPlayers,
+            gameReadyPlayers = copiedGameReadyPlayers,
+            seatPositions = copiedSeatPositions,
+            cardsDeck = copiedCardsDeck,
+            cardsTable = copiedCardsTable,
+            messages = copiedMessages
+        )
+    }
 }

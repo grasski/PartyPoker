@@ -31,7 +31,6 @@ fun <T> toServerPayload(payloadType: ServerPayloadType, data: T): Payload {
         .create()
 
     val json = gson.toJson(Pair(payloadType, data))
-    Log.e("", "LALA server: " + json)
     return Payload.fromBytes(json.toByteArray(Charsets.UTF_8))
 }
 fun <T> fromServerPayload(payload: Payload): Pair<ServerPayloadType, T>{
@@ -39,7 +38,6 @@ fun <T> fromServerPayload(payload: Payload): Pair<ServerPayloadType, T>{
         .registerTypeAdapter(UiTexts::class.java, UiTextsAdapter())
         .create()
     val rawData = String(payload.asBytes()!!, Charsets.UTF_8)
-    Log.e("", "LALA: " + rawData)
     return gson.fromJson(rawData, object : TypeToken<Pair<ServerPayloadType, T>>(){}.type)
 }
 
