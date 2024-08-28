@@ -85,6 +85,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.zIndex
 import androidx.core.app.LocaleManagerCompat
 import androidx.core.os.LocaleListCompat
@@ -95,6 +96,7 @@ import com.dabi.partypoker.featureCore.data.myColors
 import com.dabi.partypoker.featureCore.viewModel.PlayerSettingsEvent
 import com.dabi.partypoker.featureCore.viewModel.PlayerSettingsViewModel
 import com.dabi.partypoker.ui.theme.textColor
+import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.UiTexts
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -105,6 +107,7 @@ enum class ExpandedSettings{
     NONE,
     ABOUT,
     RULES,
+    COMBINATIONS,
     GLOSSARY,
     RESOURCES
 }
@@ -152,7 +155,8 @@ fun PlayerSettings(
                     color = MaterialTheme.colorScheme.tertiary,
                     textDecoration = TextDecoration.Underline
                 ),
-                modifier = Modifier.clickable {
+                modifier = Modifier
+                    .clickable {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(linkString))
                         context.startActivity(intent)
                     }
@@ -572,6 +576,99 @@ fun PlayerSettings(
                         }
                     }
 
+                    HorizontalDivider()
+                }
+
+                item {
+                    Row (
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                            .clickable(
+                                interactionSource = null,
+                                indication = null,
+                                onClick = {
+                                    expandedSettings =
+                                        if (expandedSettings != ExpandedSettings.COMBINATIONS) {
+                                            ExpandedSettings.COMBINATIONS
+                                        } else {
+                                            ExpandedSettings.NONE
+                                        }
+                                }
+                            ),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ){
+                        Box(modifier = Modifier.weight(1f, false)){
+                            AutoSizeText(
+                                text = UiTexts.StringResource(R.string.hand_rank_title).asString(),
+                                style = MaterialTheme.typography.headlineLarge
+                            )
+                        }
+                        Icon(
+                            imageVector = if (expandedSettings == ExpandedSettings.COMBINATIONS) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = "btn"
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        visible = expandedSettings == ExpandedSettings.COMBINATIONS,
+                        enter = expandVertically { -it },
+                        exit = shrinkVertically { -it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp)
+                    ) {
+                        val texts = UiTexts.ArrayResource(R.array.cards_tooltip).asArray().toMutableList()
+                        texts.removeAt(0)
+                        val combinations = CardsUtils.handCombinations
+
+                        Column {
+                            Text(
+                                text = UiTexts.StringResource(R.string.hand_rank_content).asString(),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+
+                            texts.forEachIndexed { index, text ->
+                                val textRow = text.split(": ")
+                                HorizontalDivider(modifier = Modifier.padding(8.dp))
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                ) {
+                                    AutoSizeText(
+                                        text = (index+1).toString() + ". " + textRow[0] + ": ",
+                                        style = MaterialTheme.typography.titleLarge.copy(
+                                            fontWeight = FontWeight.ExtraBold
+                                        )
+                                    )
+
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(5.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
+                                    ) {
+                                        combinations.getOrNull(index)?.let {
+                                            for (pair in it){
+                                                val card = pair.first
+
+                                                CardBox(cardId = card.toImageId(), modifier = Modifier
+                                                    .weight(1f, false)
+                                                    .alpha(if (pair.second) 1f else 0.5f)
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    Text(
+                                        text = textRow[1],
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                }
+                            }
+                        }
+                    }
                     HorizontalDivider()
                 }
 

@@ -15,7 +15,7 @@
           <targets>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\jirka\.android\avd\Small_Phone_API_VanillaIceCream.avd" />
+                <DeviceId pluginId="Default" identifier="serial=192.168.1.234:41039;connection=71016c39" />
               </handle>
             </Target>
             <Target type="DEFAULT_BOOT">
@@ -25,7 +25,7 @@
             </Target>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="Default" identifier="serial=192.168.1.216:41497;connection=98574798" />
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\jirka\.android\avd\Small_Phone_API_VanillaIceCream.avd" />
               </handle>
             </Target>
           </targets>

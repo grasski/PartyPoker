@@ -144,4 +144,77 @@ object CardsUtils{
         "spade_14" to R.drawable.spades_ace,
         "spade_1" to R.drawable.spades_ace,
     )
+
+    val handCombinations = listOf(
+        listOf(
+            Pair(Card(CardType.CLUB, 14), true),
+            Pair(Card(CardType.CLUB, 13), true),
+            Pair(Card(CardType.CLUB, 12), true),
+            Pair(Card(CardType.CLUB, 11), true),
+            Pair(Card(CardType.CLUB, 10), true),
+        ),
+        listOf(
+            Pair(Card(CardType.DIAMOND, 8), true),
+            Pair(Card(CardType.DIAMOND, 7), true),
+            Pair(Card(CardType.DIAMOND, 6), true),
+            Pair(Card(CardType.DIAMOND, 5), true),
+            Pair(Card(CardType.DIAMOND, 4), true),
+        ),
+        listOf(
+            Pair(Card(CardType.DIAMOND, 3), true),
+            Pair(Card(CardType.CLUB, 3), true),
+            Pair(Card(CardType.HEART, 3), true),
+            Pair(Card(CardType.SPADE, 3), true),
+            Pair(Card(CardType.DIAMOND, 10), false),
+        ),
+        listOf(
+            Pair(Card(CardType.DIAMOND, 2), true),
+            Pair(Card(CardType.CLUB, 2), true),
+            Pair(Card(CardType.HEART, 7), true),
+            Pair(Card(CardType.SPADE, 7), true),
+            Pair(Card(CardType.DIAMOND, 7), true),
+        ),
+        listOf(
+            Pair(Card(CardType.CLUB, 10), true),
+            Pair(Card(CardType.CLUB, 7), true),
+            Pair(Card(CardType.CLUB, 12), true),
+            Pair(Card(CardType.CLUB, 3), true),
+            Pair(Card(CardType.CLUB, 4), true),
+        ),
+        listOf(
+            Pair(Card(CardType.CLUB, 8), true),
+            Pair(Card(CardType.DIAMOND, 7), true),
+            Pair(Card(CardType.HEART, 6), true),
+            Pair(Card(CardType.SPADE, 5), true),
+            Pair(Card(CardType.DIAMOND, 4), true),
+        ),
+        listOf(
+            Pair(Card(CardType.SPADE, 11), true),
+            Pair(Card(CardType.HEART, 11), true),
+            Pair(Card(CardType.DIAMOND, 11), true),
+            Pair(Card(CardType.DIAMOND, 5), false),
+            Pair(Card(CardType.CLUB, 12), false),
+        ),
+        listOf(
+            Pair(Card(CardType.SPADE, 11), true),
+            Pair(Card(CardType.HEART, 11), true),
+            Pair(Card(CardType.DIAMOND, 12), true),
+            Pair(Card(CardType.CLUB, 12), true),
+            Pair(Card(CardType.CLUB, 5), false),
+        ),
+        listOf(
+            Pair(Card(CardType.SPADE, 14), true),
+            Pair(Card(CardType.HEART, 14), true),
+            Pair(Card(CardType.DIAMOND, 5), false),
+            Pair(Card(CardType.CLUB, 7), false),
+            Pair(Card(CardType.CLUB, 9), false),
+        ),
+        listOf(
+            Pair(Card(CardType.SPADE, 14), true),
+            Pair(Card(CardType.HEART, 2), false),
+            Pair(Card(CardType.DIAMOND, 5), false),
+            Pair(Card(CardType.CLUB, 7), false),
+            Pair(Card(CardType.CLUB, 9), false),
+        ),
+    )
 }

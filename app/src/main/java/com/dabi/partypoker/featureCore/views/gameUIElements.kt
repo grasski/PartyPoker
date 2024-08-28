@@ -229,48 +229,15 @@ fun GameTable(
                     }
                 }
 
-                var showMessages by remember { mutableStateOf(false) }
-                Row(
+                MessageRow(
                     modifier = Modifier
                         .fillMaxSize()
                         .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color.Black.copy(0.35f))
-                        .clickable(
-                            onClick = {
-                                showMessages = true
-                            },
-                            interactionSource = null,
-                            indication = null
-                        ),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ){
-                    if (showMessages){
-                        MessagesView(
-                            onDismissRequest = { showMessages = false },
-                            messages = gameState.messages
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 5.dp)
-                    ){
-                        gameState.messages.lastOrNull()?.ShowMessage(
-                            maxLines = 1,
-                            fontSize = fontSize,
-                            textColor = Color.White
-                        )
-                    }
-
-                    Icon(
-                        Icons.Default.MoreVert,
-                        contentDescription = "",
-                        tint = Color.White
-                    )
-                }
+                        .background(Color.Black.copy(0.35f)),
+                    messages = gameState.messages,
+                    fontSize = fontSize
+                )
             }
         } else{
             Column(
@@ -291,49 +258,64 @@ fun GameTable(
                     )
                 }
 
-                Row(
+                MessageRow(
                     modifier = Modifier
                         .fillMaxWidth(0.6f)
                         .height(playerBoxSize.height / 2)
                         .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
                         .clip(RoundedCornerShape(8.dp))
                         .background(Color.Black.copy(0.35f)),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ){
-                    var showMessages by remember { mutableStateOf(false) }
-                    if (showMessages){
-                        MessagesView(
-                            onDismissRequest = { showMessages = false },
-                            messages = gameState.messages
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 5.dp)
-                    ){
-                        gameState.messages.lastOrNull()?.ShowMessage(
-                            maxLines = 1,
-                            fontSize = fontSize,
-                            textColor = Color.White
-                        )
-                    }
-
-                    Icon(
-                        Icons.Default.MoreVert,
-                        contentDescription = "",
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .clickable(onClick = {
-                                showMessages = true
-                            }),
-                        tint = Color.White
-                    )
-                }
+                    messages = gameState.messages,
+                    fontSize = fontSize
+                )
             }
         }
+    }
+}
+
+@Composable
+fun MessageRow(
+    modifier: Modifier = Modifier,
+    messages: List<MessageData>,
+    fontSize: TextUnit
+) {
+    var showMessages by remember { mutableStateOf(false) }
+    Row(
+        modifier = modifier
+            .clickable(
+                onClick = {
+                    showMessages = true
+                },
+                interactionSource = null,
+                indication = null
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ){
+        if (showMessages){
+            MessagesView(
+                onDismissRequest = { showMessages = false },
+                messages = messages
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 5.dp)
+        ){
+            messages.lastOrNull()?.ShowMessage(
+                maxLines = 1,
+                fontSize = fontSize,
+                textColor = Color.White
+            )
+        }
+
+        Icon(
+            Icons.Default.MoreVert,
+            contentDescription = "",
+            tint = Color.White
+        )
     }
 }
 
@@ -414,7 +396,7 @@ fun PlayerBox(
                         .width(size.width)
                         .height(size.height / 3)
                         .align(Alignment.BottomCenter)
-                        .offset(y = size.height / 3),
+                        .offset(y = size.height / 3 + 1.dp),
                     fontSize = fontSize
                 )
             }
@@ -816,7 +798,7 @@ private fun VerticalPlayerItems(
                 )
                 .padding(horizontal = 2.dp)
                 .weight(1f),
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically
         ){
             if (playerState.called != 0){
@@ -908,7 +890,7 @@ private fun HorizontalPlayerItems(
                     )
                     .padding(horizontal = 2.dp)
                     .weight(1f),
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically
             ){
 
@@ -918,7 +900,9 @@ private fun HorizontalPlayerItems(
                     modifier = Modifier.fillMaxHeight(0.7f)
                 )
                 Box(
-                    modifier = Modifier.weight(1f).fillMaxSize(),
+                    modifier = Modifier
+                        .weight(1f, false)
+                        .fillMaxHeight(),
                     contentAlignment = Alignment.Center
                 ){
                     AutoSizeText(
@@ -937,6 +921,7 @@ private fun HorizontalPlayerItems(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(horizontal = 1.dp)
                     .background(
                         textColor,
                         RoundedCornerShape(10.dp)

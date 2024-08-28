@@ -430,7 +430,12 @@ fun PlayerDrawItself(
                                             )
                                         )
                                         Text(
-                                            text = if (raiseAmount >= player.money && raiseEnabled) UiTexts.StringResource(R.string.all_in).asString().uppercase() else if (gameState.activeRaise == null) UiTexts.StringResource(R.string.action_bet).asString().uppercase() else UiTexts.StringResource(R.string.action_raise).asString().uppercase(),
+                                            text =
+                                                if (raiseAmount >= player.money && raiseEnabled)
+                                                    UiTexts.StringResource(R.string.all_in).asString().uppercase()
+                                                else if (gameState.activeRaise == null)
+                                                    UiTexts.StringResource(R.string.action_bet).asString().uppercase()
+                                                else UiTexts.StringResource(R.string.action_raise).asString().uppercase(),
                                             style = textStyle
                                         )
                                         if (raiseEnabled){
@@ -655,6 +660,7 @@ fun HandStrengthIndicator(
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HandInfoPopUp(
@@ -674,78 +680,7 @@ fun HandInfoPopUp(
             )
         ){
             val texts = UiTexts.ArrayResource(R.array.cards_tooltip).asArray()
-            val combinations = listOf(
-                listOf(
-                    Pair(Card(CardType.CLUB, 14), true),
-                    Pair(Card(CardType.CLUB, 13), true),
-                    Pair(Card(CardType.CLUB, 12), true),
-                    Pair(Card(CardType.CLUB, 11), true),
-                    Pair(Card(CardType.CLUB, 10), true),
-                ),
-                listOf(
-                    Pair(Card(CardType.DIAMOND, 8), true),
-                    Pair(Card(CardType.DIAMOND, 7), true),
-                    Pair(Card(CardType.DIAMOND, 6), true),
-                    Pair(Card(CardType.DIAMOND, 5), true),
-                    Pair(Card(CardType.DIAMOND, 4), true),
-                ),
-                listOf(
-                    Pair(Card(CardType.DIAMOND, 3), true),
-                    Pair(Card(CardType.CLUB, 3), true),
-                    Pair(Card(CardType.HEART, 3), true),
-                    Pair(Card(CardType.SPADE, 3), true),
-                    Pair(Card(CardType.DIAMOND, 10), false),
-                ),
-                listOf(
-                    Pair(Card(CardType.DIAMOND, 2), true),
-                    Pair(Card(CardType.CLUB, 2), true),
-                    Pair(Card(CardType.HEART, 7), true),
-                    Pair(Card(CardType.SPADE, 7), true),
-                    Pair(Card(CardType.DIAMOND, 7), true),
-                ),
-                listOf(
-                    Pair(Card(CardType.CLUB, 10), true),
-                    Pair(Card(CardType.CLUB, 7), true),
-                    Pair(Card(CardType.CLUB, 12), true),
-                    Pair(Card(CardType.CLUB, 3), true),
-                    Pair(Card(CardType.CLUB, 4), true),
-                ),
-                listOf(
-                    Pair(Card(CardType.CLUB, 8), true),
-                    Pair(Card(CardType.DIAMOND, 7), true),
-                    Pair(Card(CardType.HEART, 6), true),
-                    Pair(Card(CardType.SPADE, 5), true),
-                    Pair(Card(CardType.DIAMOND, 4), true),
-                ),
-                listOf(
-                    Pair(Card(CardType.SPADE, 11), true),
-                    Pair(Card(CardType.HEART, 11), true),
-                    Pair(Card(CardType.DIAMOND, 11), true),
-                    Pair(Card(CardType.DIAMOND, 5), false),
-                    Pair(Card(CardType.CLUB, 12), false),
-                ),
-                listOf(
-                    Pair(Card(CardType.SPADE, 11), true),
-                    Pair(Card(CardType.HEART, 11), true),
-                    Pair(Card(CardType.DIAMOND, 12), true),
-                    Pair(Card(CardType.CLUB, 12), true),
-                    Pair(Card(CardType.CLUB, 5), false),
-                ),
-                listOf(
-                    Pair(Card(CardType.SPADE, 14), true),
-                    Pair(Card(CardType.HEART, 14), true),
-                    Pair(Card(CardType.DIAMOND, 5), false),
-                    Pair(Card(CardType.CLUB, 7), false),
-                    Pair(Card(CardType.CLUB, 9), false),
-                ),
-                listOf(
-                    Pair(Card(CardType.SPADE, 14), true),
-                    Pair(Card(CardType.HEART, 2), false),
-                    Pair(Card(CardType.DIAMOND, 5), false),
-                    Pair(Card(CardType.CLUB, 7), false),
-                    Pair(Card(CardType.CLUB, 9), false),
-                ),
-            )
+            val combinations = CardsUtils.handCombinations
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()

@@ -143,6 +143,9 @@
         <item>Showdown: Pokud po posledním kole sázek zůstává ve hře více než jeden hráč, následuje odhalení karet. Hráči vytvoří nejlepší možnou kombinaci pěti karet z dvou vlastních karet a pěti společných karet. Hráč s nejvyšší kombinací vyhrává bank. Pokud mají dva nebo více hráčů stejnou kombinaci, bank se mezi ně rovnoměrně rozdělí (split pot).</item>
     </string-array>
 
+    <string name="hand_rank_title">Kombinace karet</string>
+    <string name="hand_rank_content">Síla vaší kombinace je určena nejlepší kombinací 5 karet.</string>
+
     <string name="glossary_title">Slovník pojmů</string>
     <string-array name="glossary_terms">
         <item>Check: Pokračování ve hře bez sázení. Možné pouze v případě, že nikdo nevsadil.</item>
@@ -154,7 +157,7 @@
         <item>Všechny žetony (All-In): Vložení všech zbývajících žetonů do banku.</item>
         <item>Bank (Pot): Součet všech sázek v aktuální hře, který se pokoušíte vyhrát.</item>
         <item>Blindy (Blinds): Povinné sázky umístěné před začátkem hry (malý blind a velký blind).</item>
-        <item>Dealer (Dealer): Hráč, který rozdává karty a jehož pozice se po každé hře posouvá.</item>
+        <item>Dealer: Hráč, který rozdává karty a jehož pozice se po každé hře posouvá.</item>
         <item>Společné karty (Community Cards): Pět karet rozdávaných lícem nahoru, které jsou dostupné pro všechny hráče.</item>
     </string-array>
 

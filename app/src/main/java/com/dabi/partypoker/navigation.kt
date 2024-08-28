@@ -51,15 +51,15 @@ fun Navigation() {
 //                        Card(CardType.CLUB, 14),
 //                        Card(CardType.HEART, 14)
 //                    ),
-//                    allIn = true
+//                    allIn = false, called = 58
 //                ),
 //                playerActionsState = PlayerActionsState(canCheck = false, callAmount = 5, raiseAmount = 50),
 //                onPlayerEvent = {},
 //                gameState = GameState(
 //                    players = mapOf(
-//                        "1" to PlayerState("1", allIn = true),
+//                        "1" to PlayerState("1", allIn = false, called = 58),
 //                        "2" to PlayerState("2", called = 4),
-//                        "3" to PlayerState("3", isSmallBlind = true),
+//                        "3" to PlayerState("3", isSmallBlind = true, called = 156),
 //                        "4" to PlayerState("4", allIn = true),
 //                        "5" to PlayerState("5", allIn = true, called = 4516),
 //                        "6" to PlayerState("6", allIn = true, called = 156, isDealer = true),
@@ -80,6 +80,7 @@ fun Navigation() {
 //                    )
 //                )
 //            )
+
 //            PlayerViewPrivate(
 //                playerState = PlayerState(
 //                    nickname = "nickname",
@@ -96,6 +97,7 @@ fun Navigation() {
 //                onPlayerEvent = {},
 //                playerActionsState = PlayerActionsState(canCheck = false, callAmount = 5, raiseAmount = 50)
 //            )
+
             PlayerView(
                 navController,
                 it.toRoute<PlayerScreen>().nickname,

@@ -88,6 +88,8 @@ import com.dabi.partypoker.managers.GameEvents
 import com.dabi.partypoker.managers.ServerStatusEnum
 import com.dabi.partypoker.managers.ServerType
 import com.dabi.partypoker.ui.theme.textColor
+import com.dabi.partypoker.utils.Card
+import com.dabi.partypoker.utils.CardType
 import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.formatNumberToString
 

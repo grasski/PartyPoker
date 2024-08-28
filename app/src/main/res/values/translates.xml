@@ -140,6 +140,9 @@
         <item>Showdown: If more than one player remains after the final betting round, the players reveal their cards. The player with the best five-card hand made from their hole cards and the community cards wins the pot. If two or more players have the same hand, the pot is evenly split between them (split pot).</item>
     </string-array>
 
+    <string name="hand_rank_title">Cards combination</string>
+    <string name="hand_rank_content">Rank of your hand is represented by the best combination of 5 cards.</string>
+
     <string name="glossary_title">Glossary</string>
     <string-array name="glossary_terms">
         <item>Check: Passing the opportunity to bet to another player. Possible only in the case that no one else has bet.</item>
@@ -158,6 +161,10 @@
     <string name="resources_title">Resources</string>
     <string name="resources_content">Most graphic assets, such as images, icons, and animations, were sourced from the provided links. In other cases, tools like Figma or generative AI were used.</string>
     <string-array name="resources_links">
+        <item>https://www.freepik.com/free-vector/green-casino-poker-table-texture-game-background_48197468.htm</item>
+        <item>https://www.freepik.com/free-vector/green-geometric-background-patricks-day-colors_5685390.htm</item>
+        <item>https://www.freepik.com/free-photo/aluminium-suitcase-with-casino-chips-green-background_2900729.htm</item>
+
         <item>https://lottiefiles.com/free-animation/profile-avatar-of-young-woman-WIppZWULvi?from=search</item>
         <item>https://lottiefiles.com/free-animation/female-05-4Mz17Snijt?from=search</item>
         <item>https://lottiefiles.com/free-animation/avatar-female-vys3zMXt1F?from=search</item>
@@ -171,6 +178,7 @@
         <item>https://lottiefiles.com/free-animation/error-404-AQdcQKvXl1?from=search</item>
         <item>https://lottiefiles.com/free-animation/access-location-Um17zCqVsH?from=search</item>
         <item>https://lottiefiles.com/free-animation/error-occurred-iMz20W0ZOp?from=search</item>
+
         <item>https://www.svgrepo.com/svg/399971/blackclubsuit</item>
         <item>https://www.svgrepo.com/svg/479183/diamond-mark-3</item>
         <item>https://www.svgrepo.com/svg/532473/heart</item>
