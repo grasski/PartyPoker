@@ -15,12 +15,10 @@ import com.dabi.partypoker.utils.UiTextsAdapter
 import com.dabi.partypoker.utils.fromServerPayload
 import com.google.android.gms.nearby.connection.ConnectionsClient
 import com.google.android.gms.nearby.connection.Payload
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import javax.inject.Inject
 
 
 sealed class ClientBridgeEvents{
@@ -93,20 +91,16 @@ class ClientBridge (
                             .registerTypeAdapter(UiTexts::class.java, UiTextsAdapter())
                             .create()
 
-                        Log.e("", "TADYYY 1")
                         val playerState = gson.fromJson(gson.toJson(data), PlayerState::class.java)
                         bridgeEvent(ClientBridgeEvents.UpdateClient(playerState))
-                        Log.e("", "TADYYY 2")
                     }
                     ServerPayloadType.UPDATE_GAME_STATE -> {
                         val gson = GsonBuilder()
                             .registerTypeAdapter(UiTexts::class.java, UiTextsAdapter())
                             .create()
 
-                        Log.e("", "TADYYY 3")
                         val gameState = gson.fromJson(gson.toJson(data), GameState::class.java)
                         bridgeEvent(ClientBridgeEvents.UpdateGameState(gameState))
-                        Log.e("", "TADYYY 4")
                     }
                 }
             }

@@ -99,6 +99,13 @@
         <item quantity="other">%1$s vyhráli $%2$s s</item>
     </plurals>
 
+    <string name="show_more">Zobraz víc</string>
+    <string name="show_less">Zobraz míň</string>
+    <string name="game_number_finished">%1$s. herní kolo skončilo.</string>
+    <string name="round_info">Historie kola:</string>
+    <string name="table_cards">Karty na stole:</string>
+    <string name="folded">KARTY SLOŽENY</string>
+
 
     <string name="default_settings">Výchozí</string>
     <string name="game_settings_title">Název</string>

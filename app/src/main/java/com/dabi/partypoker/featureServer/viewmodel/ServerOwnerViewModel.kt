@@ -7,7 +7,6 @@ import com.dabi.partypoker.R
 import com.dabi.partypoker.managers.GameEvents
 import com.dabi.partypoker.managers.GameManager
 import com.dabi.partypoker.featureClient.model.data.PlayerState
-import com.dabi.partypoker.featureCore.interfaces.PlayerCoreInterface
 import com.dabi.partypoker.featureServer.model.ServerBridge
 import com.dabi.partypoker.featureServer.model.ServerBridgeEvents
 import com.dabi.partypoker.featureServer.model.data.GameState
@@ -34,11 +33,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 
 @HiltViewModel(assistedFactory = ServerOwnerViewModel.ServerOwnerViewModelFactory::class)

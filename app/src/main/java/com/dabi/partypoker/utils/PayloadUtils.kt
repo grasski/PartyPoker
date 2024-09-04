@@ -1,6 +1,5 @@
 package com.dabi.partypoker.utils
 
-import android.util.Log
 import com.google.android.gms.nearby.connection.Payload
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken

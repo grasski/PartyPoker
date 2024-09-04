@@ -97,6 +97,14 @@
         <item quantity="other">%1$s won $%2$s each with</item>
     </plurals>
 
+    <string name="show_more">Show more</string>
+    <string name="show_less">Show less</string>
+    <string name="game_number_finished">Game round %1$s is over.</string>
+    <string name="round_info">Round history:</string>
+    <string name="table_cards">Table cards:</string>
+    <string name="folded">FOLDED</string>
+
+
     <string name="default_settings">Default</string>
     <string name="game_settings_title">Title</string>
     <string name="game_settings_player_money">Player money</string>

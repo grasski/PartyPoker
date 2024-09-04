@@ -2,11 +2,14 @@ package com.dabi.partypoker.managers
 
 import android.util.Log
 import com.dabi.partypoker.R
+import com.dabi.partypoker.featureServer.model.data.GameHistoryState
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.MessageData
+import com.dabi.partypoker.featureServer.model.data.PlayerHistory
 import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.evaluateGame
+import com.dabi.partypoker.utils.evaluatePlayerCards
 import com.dabi.partypoker.utils.generateDeck
 import com.dabi.partypoker.utils.getCards
 
@@ -350,12 +353,25 @@ class GameManager {
                     }
                 }
 
+                val allRoundPlayers = gameState.players.filter { it.key in gameState.gameReadyPlayers.keys }.values.toList()
+                val playersHistory = allRoundPlayers.map {
+                    PlayerHistory(
+                        it.nickname,
+                        if (it.isFolded) null else it.holeCards,
+                        if (it.isFolded) null else evaluatePlayerCards(gameState.cardsTable, it.holeCards).first
+                    )
+                }
                 gameState.messages += MessageData(
                     messages = listOf(
                         UiTexts.PluralResource(R.plurals.winner_public, winnerPlayers.size, winnerPlayers.joinToString { it.nickname }, playerEarning),
                         UiTexts.StringResource(CardsUtils.combinationsTranslationID[evaluation.second.first]!!)
                     ),
-                    cards = evaluation.second.second.first()
+                    cards = evaluation.second.second.first(),
+                    history = GameHistoryState(
+                        gameNumber = gameState.games,
+                        tableCards = gameState.cardsTable,
+                        players = playersHistory,
+                    )
                 )
                 gameState.bank = restBank
                 gameState.playingNow = null

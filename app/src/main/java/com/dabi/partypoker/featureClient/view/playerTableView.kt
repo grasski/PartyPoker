@@ -94,7 +94,7 @@ fun PlayerGameView(
                 .fillMaxWidth(0.8f)
                 .padding(vertical = 50.dp)
                 .padding(horizontal = 16.dp),
-            gameState = gameState.copy(),
+            gameState = gameState,
 
             isServer = playerState.isServer,
             onGameEvent = onGameEvent,
@@ -106,7 +106,7 @@ fun PlayerGameView(
         )
 
         val calculatePlayersPosition = calculatePlayersPosition(
-            gameState = gameState.copy(),
+            gameState = gameState,
             currentPlayerId = playerState.id
         )
         if (calculatePlayersPosition.first != null && calculatePlayersPosition.second.isNotEmpty()){

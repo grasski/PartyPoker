@@ -112,10 +112,10 @@ class PlayerViewModel @Inject constructor(
             }
 
             is ClientBridgeEvents.UpdateClient -> {
-                _playerState.update { event.playerState }
+                _playerState.update { event.playerState.copy() }
             }
             is ClientBridgeEvents.UpdateGameState -> {
-                _gameState.update { event.gameState }
+                _gameState.update { event.gameState.copy() }
             }
         }
 

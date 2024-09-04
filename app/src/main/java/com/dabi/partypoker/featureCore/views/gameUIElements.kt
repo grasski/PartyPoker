@@ -1,5 +1,6 @@
 package com.dabi.partypoker.featureCore.views
 
+
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,6 +31,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -62,6 +64,8 @@ import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
@@ -81,17 +85,22 @@ import com.dabi.partypoker.R
 import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
 import com.dabi.partypoker.featureMenu.view.ViewPosition
+import com.dabi.partypoker.featureServer.model.data.GameHistoryState
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.MessageData
 import com.dabi.partypoker.managers.GameEvents
 import com.dabi.partypoker.managers.ServerType
+import com.dabi.partypoker.ui.theme.PartyPokerTheme
 import com.dabi.partypoker.ui.theme.errorContainerDark
 import com.dabi.partypoker.ui.theme.inversePrimaryDark
 import com.dabi.partypoker.ui.theme.primaryDark
 import com.dabi.partypoker.ui.theme.textColor
+import com.dabi.partypoker.utils.CardType
+import com.dabi.partypoker.utils.CardsCombination
 import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.formatNumberToString
+import dagger.Provides
 
 
 @Composable
@@ -379,7 +388,7 @@ fun PlayerBox(
         when(layoutDirection){
             PlayerLayoutDirection.LEFT -> {
                 VerticalPlayerItems(
-                    playerState = playerState.copy(),
+                    playerState = playerState,
                     modifier = Modifier
                         .width(size.width * 65 / 100)
                         .align(Alignment.CenterEnd)
@@ -391,7 +400,7 @@ fun PlayerBox(
             }
             PlayerLayoutDirection.TOP -> {
                 HorizontalPlayerItems(
-                    playerState = playerState.copy(),
+                    playerState = playerState,
                     modifier = Modifier
                         .width(size.width)
                         .height(size.height / 3)
@@ -402,7 +411,7 @@ fun PlayerBox(
             }
             PlayerLayoutDirection.RIGHT -> {
                 VerticalPlayerItems(
-                    playerState = playerState.copy(),
+                    playerState = playerState,
                     modifier = Modifier
                         .width(size.width * 65 / 100)
                         .align(Alignment.CenterStart)
@@ -414,7 +423,7 @@ fun PlayerBox(
             }
             PlayerLayoutDirection.BOTTOM -> {
                 HorizontalPlayerItems(
-                    playerState = playerState.copy(),
+                    playerState = playerState,
                     modifier = Modifier
                         .width(size.width)
                         .height(size.height / 3)
@@ -1175,3 +1184,81 @@ fun MessagesView(
         }
     }
 }
+
+
+//@Preview(wallpaper = Wallpapers.NONE, device = "spec:parent=pixel_5,orientation=landscape",
+//    showBackground = true
+//)
+//@Composable
+//fun MessageViewPreview(modifier: Modifier = Modifier) {
+//    val messages = listOf(
+//        MessageData(
+//            sender = null,
+//            messages = listOf(
+//                UiTexts.PluralResource(R.plurals.winner_public, 1, "PLAYER 1", 512),
+//                UiTexts.StringResource(CardsUtils.combinationsTranslationID[CardsCombination.POKER]!!)
+//            ),
+//            cards = listOf(
+//                com.dabi.partypoker.utils.Card(CardType.CLUB, 14),
+//                com.dabi.partypoker.utils.Card(CardType.CLUB, 14),
+//                com.dabi.partypoker.utils.Card(CardType.CLUB, 14),
+//                com.dabi.partypoker.utils.Card(CardType.CLUB, 14),
+//                com.dabi.partypoker.utils.Card(CardType.CLUB, 14),
+//            )
+//        ),
+//
+//        MessageData(
+//            sender = null,
+//            messages = listOf(
+//                UiTexts.PluralResource(R.plurals.winner_public, 1, "PLAYER 1", 512),
+//                UiTexts.StringResource(CardsUtils.combinationsTranslationID[CardsCombination.POKER]!!)
+//            ),
+//            cards = listOf(
+//                com.dabi.partypoker.utils.Card(CardType.CLUB, 14),
+//                com.dabi.partypoker.utils.Card(CardType.CLUB, 14),
+//                com.dabi.partypoker.utils.Card(CardType.CLUB, 14),
+//                com.dabi.partypoker.utils.Card(CardType.CLUB, 14),
+//                com.dabi.partypoker.utils.Card(CardType.CLUB, 14),
+//            ),
+//            history = GameHistoryState(
+//                gameNumber = 1,
+//                tableCards = listOf(
+//                    com.dabi.partypoker.utils.Card(CardType.CLUB, 10),
+//                    com.dabi.partypoker.utils.Card(CardType.CLUB, 10),
+//                    com.dabi.partypoker.utils.Card(CardType.CLUB, 10),
+//                    com.dabi.partypoker.utils.Card(CardType.CLUB, 10),
+//                    com.dabi.partypoker.utils.Card(CardType.CLUB, 10)
+//                ),
+//                players = mapOf(
+//                    "player 1" to mapOf(CardsCombination.POKER to listOf(
+//                        com.dabi.partypoker.utils.Card(CardType.SPADE, 4),
+//                        com.dabi.partypoker.utils.Card(CardType.HEART, 11)
+//                    )),
+//                    "player 2" to null
+//                )
+//            )
+//        ),
+//
+//        MessageData(
+//            sender = null,
+//            messages = listOf(
+//                UiTexts.PluralResource(R.plurals.winner_public, 1, "PLAYER 1", 512),
+//                UiTexts.StringResource(CardsUtils.combinationsTranslationID[CardsCombination.POKER]!!)
+//            ),
+//            cards = listOf(
+//                com.dabi.partypoker.utils.Card(CardType.CLUB, 14),
+//                com.dabi.partypoker.utils.Card(CardType.CLUB, 14),
+//                com.dabi.partypoker.utils.Card(CardType.CLUB, 14),
+//                com.dabi.partypoker.utils.Card(CardType.CLUB, 14),
+//                com.dabi.partypoker.utils.Card(CardType.CLUB, 14),
+//            )
+//        )
+//    )
+//
+//    PartyPokerTheme {
+//        MessagesView(
+//            onDismissRequest = {  },
+//            messages = messages
+//        )
+//    }
+//}
