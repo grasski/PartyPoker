@@ -347,7 +347,7 @@ fun PlayerDrawItself(
                                         }
                                         raiseEnabled = false
                                     },
-                                    enabled = player.isPlayingNow,
+                                    enabled = player.isPlayingNow && !gameState.completeAllIn,
                                     modifier = Modifier
                                         .weight(1f)
                                         .fillMaxHeight(),
@@ -398,7 +398,7 @@ fun PlayerDrawItself(
                                             }
                                         } else{ raiseEnabled = false }
                                     },
-                                    enabled = player.isPlayingNow && playerActionsState.raiseAmount <= player.money,
+                                    enabled = (player.isPlayingNow && playerActionsState.raiseAmount <= player.money) && !gameState.completeAllIn,
                                     modifier = Modifier
                                         .weight(1f)
                                         .fillMaxHeight()
@@ -454,7 +454,7 @@ fun PlayerDrawItself(
                                         onPlayerEvent(PlayerEvents.Fold)
                                         raiseEnabled = false
                                     },
-                                    enabled = player.isPlayingNow,
+                                    enabled = player.isPlayingNow && !gameState.completeAllIn,
                                     modifier = Modifier
                                         .weight(1f)
                                         .fillMaxHeight(),
@@ -485,7 +485,6 @@ fun PlayerDrawItself(
                             }
                         }
                     }
-
                 } else{
                     Button(
                         onClick = {

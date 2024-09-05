@@ -471,7 +471,7 @@ fun PlayerViewPrivate(
                                 }
                                 raiseEnabled = false
                             },
-                            enabled = playerState.isPlayingNow,
+                            enabled = playerState.isPlayingNow && !gameState.completeAllIn,
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight(),
@@ -521,7 +521,7 @@ fun PlayerViewPrivate(
                                     }
                                 } else{ raiseEnabled = false }
                             },
-                            enabled = playerState.isPlayingNow && playerActionsState.raiseAmount <= playerState.money,
+                            enabled = (playerState.isPlayingNow && playerActionsState.raiseAmount <= playerState.money) && !gameState.completeAllIn,
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
@@ -577,7 +577,7 @@ fun PlayerViewPrivate(
                                 onPlayerEvent(PlayerEvents.Fold)
                                 raiseEnabled = false
                             },
-                            enabled = playerState.isPlayingNow,
+                            enabled = playerState.isPlayingNow && !gameState.completeAllIn,
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight(),

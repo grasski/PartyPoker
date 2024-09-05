@@ -307,6 +307,8 @@ data class GameState(
     var roundStartedId: endpointID? = null,
     var playingNow: endpointID? = null,
 
+    var completeAllIn: Boolean = false,
+
     var messages: List<MessageData> = emptyList(),
 
     var round: Int = 0,

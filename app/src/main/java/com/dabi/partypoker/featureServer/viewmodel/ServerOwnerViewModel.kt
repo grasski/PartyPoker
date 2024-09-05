@@ -31,10 +31,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 
@@ -68,6 +70,7 @@ open class ServerOwnerViewModel @AssistedInject constructor(
     }
     init {
         viewModelScope.launch {
+            ensureActive()
             val gameSettings = db.dao.getSettingById(gameSettingsId)
             gameSettings.firstOrNull()?.let { settings ->
                 _gameState.update {
@@ -89,6 +92,8 @@ open class ServerOwnerViewModel @AssistedInject constructor(
             _playerMoveTimerMillis.update { _gameState.value.gameSettings.playerTimerDurationMillis }
 
             _gameState.collect { gameState ->
+                ensureActive()
+
                 if ((gameState.playingNow != null && gameState.playingNow !in gameState.players.keys) || gameState.players[gameState.playingNow]?.isFolded == true){
                     autoFold()
                     return@collect
@@ -117,29 +122,40 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                     }
                 }
 
-                if (!gameState.gameOver){
-                    val allInCount = gameState.gameReadyPlayers.count { (playerId, _) ->
-                        val player = gameState.players[playerId]
+                if (!gameState.gameOver && gameState.started){
+                    if (gameState.completeAllIn){
+                        Log.e("", "ALL IN")
+                        timerJob?.cancel()
 
-                        if (player == null){
-                            true
-                        } else{
-                            player.allIn || player.isFolded
+                        delay(2000)
+                        _gameState.update { GameManager.movePlayedCheckRound(_gameState.value).copy() }
+                        return@collect
+                    } else{
+                        val allInCount = gameState.gameReadyPlayers.count { (playerId, _) ->
+                            val player = gameState.players[playerId]
+
+                            if (player == null){
+                                true
+                            } else{
+                                player.allIn || player.isFolded
+                            }
                         }
-//                        player?.allIn == true ?: true
-                    }
-                    if (gameState.activeRaise == null && gameState.gameReadyPlayers.count() - allInCount <= 1){
-                        // TODO: create something similar to autoCheck, but now it will just show rest of the cards without anyone able to play (playingNow = null)
-                        //  and still have some delay
 
-                        autoCheck()
-                        delay(700)
-                        return@collect
+                        if (gameState.activeRaise == null && gameState.gameReadyPlayers.count() - allInCount <= 1){
+                            // AUTOCOMPLETE of AllIn - Player's do not play anymore, so only show rest of the table cards and evaluate game
+                            Log.e("", "ALL IN DRUHY")
+                            timerJob?.cancel()
+
+                            delay(2000)
+                            _gameState.update { GameManager.movePlayedCheckRound(_gameState.value.copy(completeAllIn = true)).copy() }
+                            return@collect
+                        }
+                        if (gameState.players[gameState.playingNow]?.allIn == true){
+                            autoCheck()
+                            return@collect
+                        }
                     }
-                    if (gameState.players[gameState.playingNow]?.allIn == true){
-                        autoCheck()
-                        return@collect
-                    }
+
                 }
             }
         }

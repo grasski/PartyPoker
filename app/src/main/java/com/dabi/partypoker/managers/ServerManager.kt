@@ -97,11 +97,11 @@ class ServerManager(
     private val payloadCallback: PayloadCallback = object : PayloadCallback() {
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
             events(ServerEvents.PayloadReceived(endpointId, payload))
-            Log.e("", "SERVER onPayloadReceived")
+//            Log.e("", "SERVER onPayloadReceived")
         }
 
         override fun onPayloadTransferUpdate(endpointId: String, update: PayloadTransferUpdate) {
-            Log.e("", "SERVER onPayloadTransferUpdate")
+//            Log.e("", "SERVER onPayloadTransferUpdate")
         }
     }
 }

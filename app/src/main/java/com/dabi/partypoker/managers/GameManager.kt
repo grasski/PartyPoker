@@ -24,7 +24,6 @@ class GameManager {
     companion object{
         fun startGame(
             gameStateO: GameState,
-//            bank: Int = 0
         ): GameState{
             Log.e("", "GAME START!!")
             var gameState = gameStateO.copy()
@@ -56,7 +55,8 @@ class GameManager {
                     seatPositions = gameState.seatPositions,
                     messages = gameState.messages,
                     bank = gameState.bank,
-                    gameSettings = gameState.gameSettings
+                    gameSettings = gameState.gameSettings,
+                    completeAllIn = false
                 )
             }
 //            // To count correct dealer, smallBlind and bigBlind in new game rounds
@@ -74,7 +74,8 @@ class GameManager {
                     seatPositions = gameState.seatPositions,
                     messages = gameState.messages,
                     bank = gameState.bank,
-                    gameSettings = gameState.gameSettings
+                    gameSettings = gameState.gameSettings,
+                    completeAllIn = false
                 )
             }
 
@@ -99,6 +100,8 @@ class GameManager {
                 roundStartedId = smallBlind,
                 round = 0,
                 bigBlindRaised = false,
+
+                completeAllIn = false,
 
                 gameSettings = gameState.gameSettings,
                 gameOver = false,
@@ -162,8 +165,8 @@ class GameManager {
             val movePlayedBy = gameState.playingNow
 
             fun newRound(): GameState{
-                val playingFirstAfterDealerId = getPlayingNow(1, gameState, true)
-                if (playingFirstAfterDealerId == null){
+                val playingFirstAfterDealerId = if (gameState.completeAllIn) null else getPlayingNow(1, gameState, true)
+                if (playingFirstAfterDealerId == null && !gameState.completeAllIn){
                     return gameOver(gameState)
                 }
 
@@ -191,13 +194,17 @@ class GameManager {
                     gameState.cardsDeck = gameState.cardsDeck.toMutableList().apply { removeAll(tableCards) }
                     gameState.cardsTable += tableCards
                 }
-                if (gameState.round == 5){
+                if (gameState.round == 5 || (gameState.round == 4 && gameState.completeAllIn)){
                     return gameOver(gameState)
                 }
 
                 return gameState
             }
 
+
+            if (gameState.completeAllIn){
+                return newRound()
+            }
 
             val playingNextId = getPlayingNow(1, gameState)
             if (playingNextId == null){
