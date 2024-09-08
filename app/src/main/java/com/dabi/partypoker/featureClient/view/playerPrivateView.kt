@@ -3,14 +3,11 @@ package com.dabi.partypoker.featureClient.view
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.ActivityInfo
-import android.util.Log
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +27,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -44,16 +40,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.clipPath
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -69,7 +60,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
@@ -79,9 +69,13 @@ import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureCore.data.PlayerActionsState
 import com.dabi.partypoker.featureCore.views.AutoSizeText
+import com.dabi.partypoker.featureCore.views.CheckCallButton
+import com.dabi.partypoker.featureCore.views.FoldButton
 import com.dabi.partypoker.featureCore.views.GamePopUpMenu
+import com.dabi.partypoker.featureCore.views.GetReadyButton
 import com.dabi.partypoker.featureCore.views.HandInfoPopUp
 import com.dabi.partypoker.featureCore.views.HandStrengthIndicator
+import com.dabi.partypoker.featureCore.views.RaiseButton
 import com.dabi.partypoker.featureCore.views.RaiseSlider
 import com.dabi.partypoker.featureCore.views.ShowMoneyAnimated
 import com.dabi.partypoker.featureCore.views.animatedBorder
@@ -92,7 +86,6 @@ import com.dabi.partypoker.utils.CardsCombination
 import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.evaluatePlayerCards
-import com.dabi.partypoker.utils.formatNumberToString
 
 
 @SuppressLint("SourceLockedOrientationActivity")
@@ -372,12 +365,12 @@ fun PlayerViewPrivate(
         var raiseButtonPos by remember { mutableStateOf(Offset.Zero) }
         var raiseButtonSize by remember { mutableStateOf(IntSize.Zero) }
         var raiseAmount by remember { mutableStateOf(playerActionsState.raiseAmount) }
-        var raiseEnabled by remember { mutableStateOf(false) }
+        var raiserEnabled by remember { mutableStateOf(false) }
         LaunchedEffect(playerState.isPlayingNow){
-            raiseEnabled = false
+            raiserEnabled = false
         }
         Crossfade(
-            targetState = raiseEnabled,
+            targetState = raiserEnabled,
             modifier = Modifier
                 .height(40.dp)
         ) { enabled ->
@@ -406,7 +399,7 @@ fun PlayerViewPrivate(
 
                         Button(
                             onClick = {
-                                raiseEnabled = false
+                                raiserEnabled = false
                             },
                             modifier = Modifier
                                 .fillMaxWidth(0.2f),
@@ -433,7 +426,6 @@ fun PlayerViewPrivate(
                 .padding(6.dp),
         ) { ready ->
             if(ready || gameState.gameReadyPlayers.containsKey(playerState.id)){
-
                 if (playerState.allIn){
                     Box(
                         modifier = Modifier
@@ -462,66 +454,19 @@ fun PlayerViewPrivate(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
                     ){
-                        Button(
-                            onClick = {
-                                if (playerActionsState.canCheck){
-                                    onPlayerEvent(PlayerEvents.Check)
-                                } else{
-                                    onPlayerEvent(PlayerEvents.Call(playerActionsState.callAmount))
-                                }
-                                raiseEnabled = false
-                            },
-                            enabled = playerState.isPlayingNow && !gameState.completeAllIn,
+                        CheckCallButton(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight(),
-                            shape = RoundedCornerShape(5.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = textColor,
-                            ),
-                            border = BorderStroke(
-                                1.dp,
-                                textColor.copy(alpha = 0.5f)
-                            ),
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            AutoSizeText(
-                                text =
-                                if (playerActionsState.canCheck){
-                                    UiTexts.StringResource(R.string.action_check).asString().uppercase()
-                                } else{
-                                    (if (playerActionsState.callAmount >= playerState.money){
-                                        UiTexts.StringResource(R.string.all_in).asString()
-                                            .uppercase()
-                                    } else{
-                                        UiTexts.StringResource(R.string.action_call)
-                                            .asString().uppercase()
-                                    }) + "\n" + playerActionsState.callAmount.formatNumberToString()
-                                },
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = FontWeight.ExtraBold,
-                                    textAlign = TextAlign.Center,
-                                    color = textColor,
-                                    platformStyle = PlatformTextStyle(
-                                        includeFontPadding = false
-                                    )
-                                )
-                            )
-                        }
+                            gameState = gameState,
+                            playerState = playerState,
+                            playerActionsState = playerActionsState,
+                            fontSize = fontSize,
+                            onPlayerEvent = onPlayerEvent,
+                            clicked = { raiserEnabled = false }
+                        )
 
-                        Button(
-                            onClick = {
-                                if (playerActionsState.raiseAmount <= playerState.money){
-                                    if (raiseEnabled){
-                                        onPlayerEvent(PlayerEvents.Raise(raiseAmount))
-                                        raiseEnabled = false
-                                    } else{
-                                        raiseEnabled = true
-                                    }
-                                } else{ raiseEnabled = false }
-                            },
-                            enabled = (playerState.isPlayingNow && playerActionsState.raiseAmount <= playerState.money) && !gameState.completeAllIn,
+                        RaiseButton(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
@@ -529,110 +474,35 @@ fun PlayerViewPrivate(
                                     raiseButtonPos = it.positionInRoot()
                                     raiseButtonSize = it.size
                                 },
-                            shape = RoundedCornerShape(5.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = textColor,
-                            ),
-                            border = BorderStroke(
-                                1.dp,
-                                textColor.copy(alpha = 0.5f)
-                            ),
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                            ){
-                                val textStyle = TextStyle(
-                                    fontSize = 15.sp * 1.2f,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    textAlign = TextAlign.Center,
-                                    color = textColor,
-                                    platformStyle = PlatformTextStyle(
-                                        includeFontPadding = false
-                                    )
-                                )
-                                Text(
-                                    text =
-                                    if (raiseAmount >= playerState.money && raiseEnabled)
-                                        UiTexts.StringResource(R.string.all_in).asString().uppercase()
-                                    else if (gameState.activeRaise == null)
-                                        UiTexts.StringResource(R.string.action_bet).asString().uppercase()
-                                    else UiTexts.StringResource(R.string.action_raise).asString().uppercase(),
-                                    style = textStyle
-                                )
-                                if (raiseEnabled){
-                                    ShowMoneyAnimated(
-                                        raiseAmount,
-                                        false,
-                                        0,
-                                        textStyle = textStyle
-                                    )
-                                }
-                            }
-                        }
+                            gameState = gameState,
+                            playerState = playerState,
+                            playerActionsState = playerActionsState,
+                            fontSize = fontSize,
+                            onPlayerEvent = onPlayerEvent,
+                            raiseAmount = raiseAmount,
+                            raiserEnabled = raiserEnabled,
+                            onClick = { raiserEnabled = it }
+                        )
 
-                        Button(
-                            onClick = {
-                                onPlayerEvent(PlayerEvents.Fold)
-                                raiseEnabled = false
-                            },
-                            enabled = playerState.isPlayingNow && !gameState.completeAllIn,
+                        FoldButton(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight(),
-                            shape = RoundedCornerShape(5.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = textColor,
-                            ),
-                            border = BorderStroke(
-                                1.dp,
-                                textColor.copy(alpha = 0.5f)
-                            ),
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            AutoSizeText(
-                                text = UiTexts.StringResource(R.string.action_fold).asString().uppercase(),
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = FontWeight.ExtraBold,
-                                    textAlign = TextAlign.Center,
-                                    color = textColor,
-                                    platformStyle = PlatformTextStyle(
-                                        includeFontPadding = false
-                                    )
-                                )
-                            )
-                        }
+                            player = playerState,
+                            gameState = gameState,
+                            fontSize = fontSize,
+                            onPlayerEvent = onPlayerEvent,
+                            onClick = { raiserEnabled = false }
+                        )
                     }
                 }
             } else{
-                Button(
-                    onClick = {
-                        onPlayerEvent(PlayerEvents.Ready)
-                    },
+                GetReadyButton(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(10.dp),
-                    shape = RoundedCornerShape(5.dp),
-                    border = BorderStroke(
-                        1.dp,
-                        textColor.copy(alpha = 0.5f)
-                    ),
-                    contentPadding = PaddingValues(5.dp)
-                ) {
-                    AutoSizeText(
-                        text = UiTexts.StringResource(R.string.action_ready).asString().uppercase(),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.ExtraBold,
-                            textAlign = TextAlign.Center,
-                            color = textColor,
-                            platformStyle = PlatformTextStyle(
-                                includeFontPadding = false
-                            )
-                        )
-                    )
-                }
+                    onPlayerEvent = onPlayerEvent
+                )
             }
         }
     }

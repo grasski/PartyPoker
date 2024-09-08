@@ -127,7 +127,7 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                         Log.e("", "ALL IN")
                         timerJob?.cancel()
 
-                        delay(2000)
+                        delay(1000)
                         _gameState.update { GameManager.movePlayedCheckRound(_gameState.value).copy() }
                         return@collect
                     } else{
@@ -146,7 +146,7 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                             Log.e("", "ALL IN DRUHY")
                             timerJob?.cancel()
 
-                            delay(2000)
+                            delay(1000)
                             _gameState.update { GameManager.movePlayedCheckRound(_gameState.value.copy(completeAllIn = true)).copy() }
                             return@collect
                         }

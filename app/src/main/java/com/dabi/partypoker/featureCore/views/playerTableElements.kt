@@ -1,7 +1,6 @@
 package com.dabi.partypoker.featureCore.views
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,12 +25,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,11 +33,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipDefaults.rememberPlainTooltipPositionProvider
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -81,12 +72,10 @@ import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.Card
-import com.dabi.partypoker.utils.CardType
 import com.dabi.partypoker.utils.CardsCombination
 import com.dabi.partypoker.utils.CardsUtils
 import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.evaluatePlayerCards
-import com.dabi.partypoker.utils.formatNumberToString
 import com.dabi.partypoker.utils.handStrength
 
 
@@ -141,11 +130,11 @@ fun PlayerDrawItself(
         var raiseButtonPos by remember { mutableStateOf(Offset.Zero) }
         var raiseButtonSize by remember { mutableStateOf(IntSize.Zero) }
         var raiseAmount by remember { mutableStateOf(playerActionsState.raiseAmount) }
-        var raiseEnabled by remember { mutableStateOf(false) }
+        var raiserEnabled by remember { mutableStateOf(false) }
         LaunchedEffect(player.isPlayingNow){
-            raiseEnabled = false
+            raiserEnabled = false
         }
-        if (raiseEnabled){
+        if (raiserEnabled){
             Column(
                 modifier = Modifier
                     .offset {
@@ -189,7 +178,7 @@ fun PlayerDrawItself(
 
                     Button(
                         onClick = {
-                            raiseEnabled = false
+                            raiserEnabled = false
                         },
                         modifier = Modifier
                             .fillMaxWidth(0.2f),
@@ -338,67 +327,19 @@ fun PlayerDrawItself(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
                             ){
-                                Button(
-                                    onClick = {
-                                        if (playerActionsState.canCheck){
-                                            onPlayerEvent(PlayerEvents.Check)
-                                        } else{
-                                            onPlayerEvent(PlayerEvents.Call(playerActionsState.callAmount))
-                                        }
-                                        raiseEnabled = false
-                                    },
-                                    enabled = player.isPlayingNow && !gameState.completeAllIn,
+                                CheckCallButton(
                                     modifier = Modifier
                                         .weight(1f)
                                         .fillMaxHeight(),
-                                    shape = RoundedCornerShape(5.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        contentColor = textColor,
-                                    ),
-                                    border = BorderStroke(
-                                        1.dp,
-                                        textColor.copy(alpha = 0.5f)
-                                    ),
-                                    contentPadding = PaddingValues(0.dp)
-                                ) {
-                                    Text(
-                                        text =
-                                            if (playerActionsState.canCheck){
-                                                UiTexts.StringResource(R.string.action_check).asString().uppercase()
-                                            } else{
-                                                (if (playerActionsState.callAmount >= player.money){
-                                                    UiTexts.StringResource(R.string.all_in).asString()
-                                                        .uppercase()
-                                                } else{
-                                                    UiTexts.StringResource(R.string.action_call)
-                                                        .asString().uppercase()
-                                                }) + "\n" + playerActionsState.callAmount.formatNumberToString()
-                                            },
-                                        fontSize = fontSize * 1.2f,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        textAlign = TextAlign.Center,
-                                        color = textColor,
-                                        style = TextStyle(
-                                            platformStyle = PlatformTextStyle(
-                                                includeFontPadding = false
-                                            )
-                                        ),
-                                    )
-                                }
+                                    gameState = gameState,
+                                    playerState = player,
+                                    playerActionsState = playerActionsState,
+                                    fontSize = fontSize,
+                                    onPlayerEvent = onPlayerEvent,
+                                    clicked = { raiserEnabled = false }
+                                )
 
-                                Button(
-                                    onClick = {
-                                        if (playerActionsState.raiseAmount <= player.money){
-                                            if (raiseEnabled){
-                                                onPlayerEvent(PlayerEvents.Raise(raiseAmount))
-                                                raiseEnabled = false
-                                            } else{
-                                                raiseEnabled = true
-                                            }
-                                        } else{ raiseEnabled = false }
-                                    },
-                                    enabled = (player.isPlayingNow && playerActionsState.raiseAmount <= player.money) && !gameState.completeAllIn,
+                                RaiseButton(
                                     modifier = Modifier
                                         .weight(1f)
                                         .fillMaxHeight()
@@ -406,207 +347,39 @@ fun PlayerDrawItself(
                                             raiseButtonPos = it.positionInRoot()
                                             raiseButtonSize = it.size
                                         },
-                                    shape = RoundedCornerShape(5.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        contentColor = textColor,
-                                    ),
-                                    border = BorderStroke(
-                                        1.dp,
-                                        textColor.copy(alpha = 0.5f)
-                                    ),
-                                    contentPadding = PaddingValues(0.dp)
-                                ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                    ){
-                                        val textStyle = TextStyle(
-                                            fontSize = fontSize * 1.2f,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            textAlign = TextAlign.Center,
-                                            color = textColor,
-                                            platformStyle = PlatformTextStyle(
-                                                includeFontPadding = false
-                                            )
-                                        )
-                                        Text(
-                                            text =
-                                                if (raiseAmount >= player.money && raiseEnabled)
-                                                    UiTexts.StringResource(R.string.all_in).asString().uppercase()
-                                                else if (gameState.activeRaise == null)
-                                                    UiTexts.StringResource(R.string.action_bet).asString().uppercase()
-                                                else UiTexts.StringResource(R.string.action_raise).asString().uppercase(),
-                                            style = textStyle
-                                        )
-                                        if (raiseEnabled){
-                                            ShowMoneyAnimated(
-                                                raiseAmount,
-                                                false,
-                                                0,
-                                                textStyle = textStyle
-                                            )
-                                        }
-                                    }
-                                }
+                                    gameState = gameState,
+                                    playerState = player,
+                                    playerActionsState = playerActionsState,
+                                    fontSize = fontSize,
+                                    onPlayerEvent = onPlayerEvent,
+                                    raiseAmount = raiseAmount,
+                                    raiserEnabled = raiserEnabled,
+                                    onClick = { raiserEnabled = it }
+                                )
 
-                                Button(
-                                    onClick = {
-                                        onPlayerEvent(PlayerEvents.Fold)
-                                        raiseEnabled = false
-                                    },
-                                    enabled = player.isPlayingNow && !gameState.completeAllIn,
+                                FoldButton(
                                     modifier = Modifier
                                         .weight(1f)
                                         .fillMaxHeight(),
-                                    shape = RoundedCornerShape(5.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        contentColor = textColor,
-                                    ),
-                                    border = BorderStroke(
-                                        1.dp,
-                                        textColor.copy(alpha = 0.5f)
-                                    ),
-                                    contentPadding = PaddingValues(0.dp)
-                                ) {
-                                    Text(
-                                        text = UiTexts.StringResource(R.string.action_fold).asString().uppercase(),
-                                        fontSize = fontSize * 1.2f,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        textAlign = TextAlign.Center,
-                                        color = textColor,
-                                        style = TextStyle(
-                                            platformStyle = PlatformTextStyle(
-                                                includeFontPadding = false
-                                            )
-                                        )
-                                    )
-                                }
+                                    player = player,
+                                    gameState = gameState,
+                                    fontSize = fontSize,
+                                    onPlayerEvent = onPlayerEvent,
+                                    onClick = { raiserEnabled = false }
+                                )
                             }
                         }
                     }
                 } else{
-                    Button(
-                        onClick = {
-                            onPlayerEvent(PlayerEvents.Ready)
-                        },
+                    GetReadyButton(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(10.dp),
-                        shape = RoundedCornerShape(5.dp),
-                        border = BorderStroke(
-                            1.dp,
-                            textColor.copy(alpha = 0.5f)
-                        ),
-                        contentPadding = PaddingValues(5.dp)
-                    ) {
-                        Text(
-                            text = UiTexts.StringResource(R.string.action_ready).asString().uppercase(),
-                            fontSize = fontSize * 1.5f,
-                            fontWeight = FontWeight.ExtraBold,
-                            textAlign = TextAlign.Center,
-                            color = textColor,
-                            style = TextStyle(
-                                platformStyle = PlatformTextStyle(
-                                    includeFontPadding = false
-                                )
-                            )
-                        )
-                    }
+                        onPlayerEvent = onPlayerEvent
+                    )
                 }
             }
         }
-    }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun RaiseSlider(
-    modifier: Modifier = Modifier,
-    valueRange: ClosedFloatingPointRange<Float>,
-    bigBlindAmount: Int,
-    valueF: (Int) -> Unit
-) {
-    val sliderState by remember { mutableStateOf(
-        SliderState(
-            valueRange = valueRange,
-            value = valueRange.start
-        )
-    ) }
-    valueF(sliderState.value.toInt())
-
-    var sliderSize by remember { mutableStateOf(IntSize.Zero) }
-    Row(
-        modifier = modifier
-            .onGloballyPositioned { sliderSize = it.size },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally)
-    ){
-        Icon(
-            Icons.Filled.Remove,
-            "",
-            modifier = Modifier
-                .border(1.dp, Color.White, RoundedCornerShape(8.dp))
-                .clickable(
-                    indication = null,
-                    interactionSource = null,
-                    onClick = {
-                        sliderState.value =
-                            (Math.round((sliderState.value - bigBlindAmount) / 10) * 10).toFloat()
-                    }
-                ),
-            tint = textColor
-        )
-
-        Slider(
-            state = sliderState,
-            modifier = Modifier.weight(1f),
-            thumb = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxHeight(0.8f)
-                        .border(2.dp, Color.White, RoundedCornerShape(20.dp))
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(textColor),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ){
-                    Icon(
-                        Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                        "",
-                        tint = Color.White
-                    )
-                    Icon(
-                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        "",
-                        tint = Color.White
-                    )
-                }
-            },
-            track = {
-                HorizontalDivider(
-                    modifier = Modifier
-                        .background(Color.Yellow)
-                )
-            }
-        )
-
-        Icon(
-            Icons.Filled.Add,
-            "",
-            modifier = Modifier
-                .border(1.dp, Color.White, RoundedCornerShape(8.dp))
-                .clickable(
-                    indication = null,
-                    interactionSource = null,
-                    onClick = {
-                        sliderState.value =
-                            (Math.round((sliderState.value + bigBlindAmount) / 10) * 10).toFloat()
-                    }
-                ),
-            tint = textColor
-        )
     }
 }
 

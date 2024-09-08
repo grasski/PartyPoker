@@ -2,29 +2,14 @@ package com.dabi.partypoker
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RawRes
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.dabi.partypoker.featureClient.model.data.PlayerState
-import com.dabi.partypoker.featureClient.view.PlayerGameView
 import com.dabi.partypoker.featureClient.view.PlayerView
-import com.dabi.partypoker.featureClient.view.PlayerViewPrivate
-import com.dabi.partypoker.featureCore.data.PlayerActionsState
-import com.dabi.partypoker.featureCore.views.HandInfoPopUp
 import com.dabi.partypoker.featureMenu.view.MenuView
-import com.dabi.partypoker.featureServer.model.data.GameState
-import com.dabi.partypoker.featureServer.model.data.SeatPosition
 import com.dabi.partypoker.featureServer.view.ServerView
-import com.dabi.partypoker.utils.Card
-import com.dabi.partypoker.utils.CardType
 import kotlinx.serialization.Serializable
 
 
