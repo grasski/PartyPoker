@@ -75,13 +75,13 @@ import androidx.compose.ui.zIndex
 import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureCore.data.myColors
 import com.dabi.partypoker.featureCore.viewModel.PlayerSettingsEvent
 import com.dabi.partypoker.featureCore.viewModel.PlayerSettingsViewModel
 import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.CardsUtils
-import com.dabi.partypoker.utils.UiTexts
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Locale

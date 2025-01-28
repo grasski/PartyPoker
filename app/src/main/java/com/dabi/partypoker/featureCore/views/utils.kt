@@ -1,5 +1,7 @@
 package com.dabi.partypoker.featureCore.views
 
+import android.annotation.SuppressLint
+import androidx.annotation.RawRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.Animatable
@@ -16,8 +18,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -26,6 +30,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
@@ -55,6 +60,7 @@ import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
@@ -71,18 +77,16 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.dabi.easylocalgame.serverSide.data.ServerState
+import com.dabi.easylocalgame.serverSide.data.ServerStatusEnum
+import com.dabi.easylocalgame.serverSide.data.ServerType
+import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.R
-import com.dabi.partypoker.featureClient.model.data.PlayerState
-import com.dabi.partypoker.featureClient.model.data.endpointID
-import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
+import com.dabi.partypoker.featurePlayer.model.data.PlayerState
+import com.dabi.partypoker.featurePlayer.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureServer.model.data.GameState
-import com.dabi.partypoker.featureServer.model.data.ServerState
 import com.dabi.partypoker.managers.GameEvents
-import com.dabi.partypoker.managers.ServerStatusEnum
-import com.dabi.partypoker.managers.ServerType
 import com.dabi.partypoker.ui.theme.textColor
-import com.dabi.partypoker.utils.UiTexts
-import com.dabi.partypoker.utils.formatNumberToString
 
 
 @Composable
@@ -116,7 +120,7 @@ fun CalculatePlayerBoxSize(
 
 fun calculatePlayersPosition(
     gameState: GameState,
-    currentPlayerId: endpointID
+    currentPlayerId: String
 ): Pair<Int?, Map<Int, PlayerState?>> {
     val sortedPlayers = gameState.seatPositions.toList().sortedBy { it.second.position }.toMap()
     val meIndex = sortedPlayers.keys.indexOf(currentPlayerId)
@@ -135,62 +139,202 @@ fun calculatePlayersPosition(
 
 
 @Composable
-fun LoadingAnimation(
+fun BackMenuButton(
     modifier: Modifier,
-    text: String,
-    onCancelRequest: () -> Unit
-) {
-    val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.loading_animation))
-    val progress by animateLottieCompositionAsState(
-        composition = composition,
-        iterations = LottieConstants.IterateForever
-    )
-
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    onClick: () -> Unit
+){
+    Button(
+        onClick = {
+            onClick()
+        },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent,
+            contentColor = textColor
+        ),
+        contentPadding = PaddingValues(5.dp, vertical = 0.dp),
+        modifier = modifier
     ) {
-        LottieAnimation(
-            composition = composition,
-            progress = { progress },
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                "back"
+            )
+            Text(UiTexts.StringResource(R.string.menu).asString())
+        }
+    }
+}
+
+@Composable
+fun StateContent(
+    text: String,
+    @RawRes animationID: Int,
+    isPortrait: Boolean,
+    onClickTry: () -> Unit,
+    onClickBack: () -> Unit,
+    tryIsCancel: Boolean = false
+){
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        BackMenuButton(
             modifier = Modifier
-                .fillMaxHeight(0.4f)
+                .padding(16.dp)
+                .border(2.dp, textColor, RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainer.copy(0.8f))
+                .align(Alignment.TopStart),
+            onClick = onClickBack
         )
 
-        Column(
-            modifier = Modifier
-                .padding(10.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .border(
-                    2.dp,
-                    textColor,
-                    RoundedCornerShape(10.dp)
-                )
-                .background(MaterialTheme.colorScheme.surfaceContainer.copy(0.8f))
-                .padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ){
-            AutoSizeText(
-                text = text,
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                )
-            )
-
-            Button(
-                onClick = {
-                    onCancelRequest()
-                },
+        if (isPortrait){
+            Column(
                 modifier = Modifier
-                    .padding(top = 10.dp),
-                shape = RoundedCornerShape(10.dp)
-            ){
-                AutoSizeText(
-                    text = UiTexts.StringResource(R.string.cancel).asString(),
-                    style = MaterialTheme.typography.titleLarge
-                )
+                    .fillMaxSize(0.9f),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(animationID))
+                    val progress by animateLottieCompositionAsState(
+                        composition = composition,
+                        iterations = LottieConstants.IterateForever
+                    )
+                    LottieAnimation(
+                        composition = composition,
+                        progress = { progress },
+                        modifier = Modifier.fillMaxSize(0.6f),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .border(
+                                2.dp,
+                                textColor,
+                                RoundedCornerShape(10.dp)
+                            )
+                            .background(MaterialTheme.colorScheme.surfaceContainer.copy(0.8f))
+                            .padding(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        Text(
+                            text = text,
+                            style = TextStyle(
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                                color = Color.White,
+                                textAlign = TextAlign.Center,
+                            )
+                        )
+
+                        Button(
+                            onClick = {
+                                onClickTry()
+                            },
+                            modifier = Modifier
+                                .padding(top = 10.dp),
+                            shape = RoundedCornerShape(10.dp),
+                        ){
+                            AutoSizeText(
+                                text = if (tryIsCancel) {
+                                    UiTexts.StringResource(R.string.cancel).asString()
+                                } else{
+                                    UiTexts.StringResource(R.string.try_again).asString()
+                                },
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+            }
+        } else{
+            Row(
+                modifier = Modifier
+                    .fillMaxSize(0.9f),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .padding(10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(animationID))
+                    val progress by animateLottieCompositionAsState(
+                        composition = composition,
+                        iterations = LottieConstants.IterateForever
+                    )
+                    LottieAnimation(
+                        composition = composition,
+                        progress = { progress },
+                        modifier = Modifier.fillMaxSize(0.6f),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .padding(10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .border(
+                                2.dp,
+                                textColor,
+                                RoundedCornerShape(10.dp)
+                            )
+                            .background(MaterialTheme.colorScheme.surfaceContainer.copy(0.8f))
+                            .padding(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ){
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            color = Color.White,
+                        )
+
+                        Button(
+                            onClick = {
+                                onClickTry()
+                            },
+                            modifier = Modifier
+                                .padding(top = 10.dp),
+                            shape = RoundedCornerShape(10.dp)
+                        ){
+                            AutoSizeText(
+                                text = if (tryIsCancel) {
+                                    UiTexts.StringResource(R.string.cancel).asString()
+                                } else{
+                                    UiTexts.StringResource(R.string.try_again).asString()
+                                },
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -646,4 +790,14 @@ fun AutoSizeText(
             }
         }
     )
+}
+
+
+@SuppressLint("DefaultLocale")
+fun Int.formatNumberToString(): String {
+    return when {
+        this >= 1000000 -> "$" + String.format("%.1fM", this / 1000000.0).replace(".0", "")
+        this >= 1000 -> "$" + String.format("%.1fK", this / 1000.0).replace(".0", "")
+        else -> "$$this"
+    }
 }

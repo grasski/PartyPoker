@@ -6,18 +6,14 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.dabi.partypoker.featureCore.repository.PlayerSettingsRepository
-import com.dabi.partypoker.featureServer.viewmodel.ServerOwnerViewModel
-import com.dabi.partypoker.featureServer.viewmodel.ServerPlayerViewModel
 import com.dabi.partypoker.repository.gameSettings.GameSettingsDatabase
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.ConnectionsClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Inject
 import javax.inject.Singleton
 
 
@@ -52,7 +48,7 @@ class AppModule2 {
     @Singleton
     fun providePlayerSettingsRepository(
         @ApplicationContext context: Context
-    ): PlayerSettingsRepository{
+    ): PlayerSettingsRepository {
         return PlayerSettingsRepository(
             context.dataStore
         )
@@ -104,36 +100,36 @@ class AppModule2 {
 //}
 
 
-@Module
-@InstallIn(ActivityComponent::class)
-object ViewModelModule {
-
-    @Provides
-    fun provideServerOwnerViewModelFactory(
-        factory: ServerOwnerViewModel.ServerOwnerViewModelFactory
-    ): ServerOwnerViewModelFactoryProvider {
-        return ServerOwnerViewModelFactoryProvider(factory)
-    }
-
-    @Provides
-    fun provideServerPlayerViewModelFactory(
-        factory: ServerPlayerViewModel.ServerPlayerViewModelFactory
-    ): ServerPlayerViewModelFactoryProvider {
-        return ServerPlayerViewModelFactoryProvider(factory)
-    }
-}
-
-class ServerOwnerViewModelFactoryProvider @Inject constructor(
-    private val factory: ServerOwnerViewModel.ServerOwnerViewModelFactory
-) {
-    fun create(gameSettingsId: Long): ServerOwnerViewModel {
-        return factory.create(gameSettingsId)
-    }
-}
-class ServerPlayerViewModelFactoryProvider @Inject constructor(
-    private val factory: ServerPlayerViewModel.ServerPlayerViewModelFactory
-) {
-    fun create(gameSettingsId: Long): ServerPlayerViewModel {
-        return factory.create(gameSettingsId)
-    }
-}
+//@Module
+//@InstallIn(ActivityComponent::class)
+//object ViewModelModule {
+//
+//    @Provides
+//    fun provideServerOwnerViewModelFactory(
+//        factory: ServerOwnerViewModel.ServerOwnerViewModelFactory
+//    ): ServerOwnerViewModelFactoryProvider {
+//        return ServerOwnerViewModelFactoryProvider(factory)
+//    }
+//
+//    @Provides
+//    fun provideServerPlayerViewModelFactory(
+//        factory: ServerPlayerViewModel.ServerPlayerViewModelFactory
+//    ): ServerPlayerViewModelFactoryProvider {
+//        return ServerPlayerViewModelFactoryProvider(factory)
+//    }
+//}
+//
+//class ServerOwnerViewModelFactoryProvider @Inject constructor(
+//    private val factory: ServerOwnerViewModel.ServerOwnerViewModelFactory
+//) {
+//    fun create(gameSettingsId: Long): ServerOwnerViewModel {
+//        return factory.create(gameSettingsId)
+//    }
+//}
+//class ServerPlayerViewModelFactoryProvider @Inject constructor(
+//    private val factory: ServerPlayerViewModel.ServerPlayerViewModelFactory
+//) {
+//    fun create(gameSettingsId: Long): ServerPlayerViewModel {
+//        return factory.create(gameSettingsId)
+//    }
+//}

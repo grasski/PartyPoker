@@ -1,7 +1,6 @@
 package com.dabi.partypoker.featureServer.model.data
 
 import android.content.Context
-import android.util.Log
 import androidx.annotation.IntRange
 import androidx.annotation.Keep
 import androidx.compose.animation.AnimatedContent
@@ -44,15 +43,14 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import com.dabi.easylocalgame.serverSide.data.IGameState
+import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.R
-import com.dabi.partypoker.featureClient.model.data.PlayerState
-import com.dabi.partypoker.featureClient.model.data.endpointID
+import com.dabi.partypoker.featurePlayer.model.data.PlayerState
 import com.dabi.partypoker.repository.gameSettings.GameSettings
 import com.dabi.partypoker.utils.Card
-import com.dabi.partypoker.utils.CardType
 import com.dabi.partypoker.utils.CardsCombination
 import com.dabi.partypoker.utils.CardsUtils
-import com.dabi.partypoker.utils.UiTexts
 
 
 @Keep
@@ -63,7 +61,7 @@ data class MessageData(
     val cards: List<Card>? = null,
     val history: GameHistoryState? = null
 ){
-    private fun toString(context: Context): String {
+    fun toString(context: Context): String {
         var string = sender?.let { "$it: " } ?: ""
         messages.forEach{
             string += " " + it.asString(context)
@@ -284,10 +282,10 @@ data class SeatPosition(@IntRange(from = 0, to = 9) val position: Int) {
     }
 }
 
-data class GameState(
-    var players: Map<endpointID, PlayerState> = mapOf(),
-    var gameReadyPlayers: Map<endpointID, SeatPosition> = emptyMap(),
-    var seatPositions: Map<endpointID, SeatPosition> = emptyMap(), // playerId, seatPosition
+data class GameState (
+    override val players: Map<String, PlayerState> = mapOf(),
+    var gameReadyPlayers: Map<String, SeatPosition> = emptyMap(),
+    var seatPositions: Map<String, SeatPosition> = emptyMap(), // playerId, seatPosition
 
     var gameSettings: GameSettings = GameSettings(),
 
@@ -297,15 +295,15 @@ data class GameState(
     var cardsDeck: List<Card> = emptyList(),
     var cardsTable: List<Card> = emptyList(),
 
-    var activeRaise: Pair<endpointID, Int>? = null,   // playerId, amount
+    var activeRaise: Pair<String, Int>? = null,   // playerId, amount
     var bigBlindRaised: Boolean = false,    // BB raised in round 1
     var bank: Int = 0,
 
-    var dealerId: endpointID? = null,
-    var smallBlindId: endpointID? = null,
-    var bigBlindId: endpointID? = null,
-    var roundStartedId: endpointID? = null,
-    var playingNow: endpointID? = null,
+    var dealerId: String? = null,
+    var smallBlindId: String? = null,
+    var bigBlindId: String? = null,
+    var roundStartedId: String? = null,
+    var playingNow: String? = null,
 
     var completeAllIn: Boolean = false,
 
@@ -315,7 +313,7 @@ data class GameState(
     var games: Int = 0,
     var gameOver: Boolean = false,
     var winningCards: Set<Card> = emptySet(),
-){
+): IGameState{
     fun getAvailableRandomPosition(): Int? {
         val takenPositions = seatPositions.values.map { it.position }.toSet()
         val availablePositions = (0..9).filter { it !in takenPositions }

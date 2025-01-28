@@ -32,12 +32,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.MenuScreen
 import com.dabi.partypoker.PlayerScreen
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureCore.data.myColors
 import com.dabi.partypoker.ui.theme.textColor
-import com.dabi.partypoker.utils.UiTexts
 
 
 @Composable

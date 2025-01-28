@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -36,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -44,14 +41,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.R
-import com.dabi.partypoker.featureClient.model.data.PlayerState
-import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureCore.data.PlayerActionsState
+import com.dabi.partypoker.featurePlayer.model.data.PlayerState
+import com.dabi.partypoker.featurePlayer.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.ui.theme.textColor
-import com.dabi.partypoker.utils.UiTexts
-import com.dabi.partypoker.utils.formatNumberToString
 
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -2,15 +2,16 @@ package com.dabi.partypoker.featureServer.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import com.dabi.partypoker.featureClient.model.data.PlayerState
-import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
+import com.dabi.easylocalgame.payloadUtils.toClientPayload
+import com.dabi.easylocalgame.serverSide.ClientAction
 import com.dabi.partypoker.featureCore.data.PlayerActionsState
 import com.dabi.partypoker.featureCore.interfaces.PlayerCoreInterface
-import com.dabi.partypoker.featureServer.model.ServerBridgeEvents
+import com.dabi.partypoker.featurePlayer.model.data.PlayerState
+import com.dabi.partypoker.featurePlayer.viewmodel.MyClientPayloadType
+import com.dabi.partypoker.featurePlayer.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.SeatPosition
 import com.dabi.partypoker.repository.gameSettings.GameSettingsDatabase
-import com.dabi.partypoker.utils.ClientPayloadType
 import com.google.android.gms.nearby.connection.ConnectionsClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -20,10 +21,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 
 @HiltViewModel(assistedFactory = ServerPlayerViewModel.ServerPlayerViewModelFactory::class)
@@ -31,21 +30,19 @@ class ServerPlayerViewModel @AssistedInject constructor(
     private val connectionsClient: ConnectionsClient,
     private val db: GameSettingsDatabase,
     @Assisted private val gameSettingsId: Long
-): ServerOwnerViewModel(connectionsClient, db, gameSettingsId), PlayerCoreInterface{
-
+): ServerOwnerViewModel(connectionsClient, db, gameSettingsId), PlayerCoreInterface {
     private val _playerState: MutableStateFlow<PlayerState> = MutableStateFlow(PlayerState())
     val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
-
-    private val _playerActionsState: MutableStateFlow<PlayerActionsState> = MutableStateFlow(
-        PlayerActionsState()
-    )
-    val playerActionsState = _playerActionsState.asStateFlow()
-
 
     @AssistedFactory
     interface ServerPlayerViewModelFactory {
         fun create(gameSettingsId: Long): ServerPlayerViewModel
     }
+
+    private val _playerActionsState: MutableStateFlow<PlayerActionsState> = MutableStateFlow(
+        PlayerActionsState()
+    )
+    val playerActionsState = _playerActionsState.asStateFlow()
 
     override fun onCleared() {
         super.onCleared()
@@ -53,19 +50,6 @@ class ServerPlayerViewModel @AssistedInject constructor(
     }
 
     init {
-//        val player = PlayerState(
-//            nickname = "ServerPlayer",
-//            id = "ServerPlayer",
-//            isServer = true,
-//            money = _gameState.value.gameSettings.playerMoney,
-//        )
-//        _playerState.update { player }
-//        _gameState.update { it.copy(
-//            players = it.players + ("ServerPlayer" to player),
-//            seatPositions = it.seatPositions + (player.id to SeatPosition(0))
-//        ) }
-
-
         viewModelScope.launch {
             val gameSettings = db.dao.getSettingById(gameSettingsId)
             gameSettings.firstOrNull()?.let { settings ->
@@ -87,7 +71,6 @@ class ServerPlayerViewModel @AssistedInject constructor(
                 players = it.players + ("ServerPlayer" to player),
                 seatPositions = it.seatPositions + (player.id to SeatPosition(0))
             ) }
-
 
             _gameState.collect{ gs ->
                 val playerUpdate = gs.players[_playerState.value.id]!!
@@ -117,30 +100,30 @@ class ServerPlayerViewModel @AssistedInject constructor(
         ) }
     }
 
-    override fun onPlayerEvent(event: PlayerEvents){
+    override fun onPlayerEvent(event: PlayerEvents) {
         when(event){
             PlayerEvents.Leave -> {
-                serverBridge.leave()
+                serverManager.closeServer()
             }
             PlayerEvents.ChangeView -> {
                 // Not for server
             }
 
             PlayerEvents.Ready -> {
-                onServerBridgeEvent(ServerBridgeEvents.ClientAction(_playerState.value.id, ClientPayloadType.ACTION_READY, null))
+                clientAction(ClientAction.PayloadAction(_playerState.value.id, toClientPayload(MyClientPayloadType.ACTION_READY.toString(), null)))
             }
 
             PlayerEvents.Check -> {
-                onServerBridgeEvent(ServerBridgeEvents.ClientAction(_playerState.value.id, ClientPayloadType.ACTION_CHECK, null))
+                clientAction(ClientAction.PayloadAction(_playerState.value.id, toClientPayload(MyClientPayloadType.ACTION_CHECK.toString(), null)))
             }
             is PlayerEvents.Call -> {
-                onServerBridgeEvent(ServerBridgeEvents.ClientAction(_playerState.value.id, ClientPayloadType.ACTION_CALL, event.amount))
+                clientAction(ClientAction.PayloadAction(_playerState.value.id, toClientPayload(MyClientPayloadType.ACTION_CALL.toString(), event.amount)))
             }
             is PlayerEvents.Raise -> {
-                onServerBridgeEvent(ServerBridgeEvents.ClientAction(_playerState.value.id, ClientPayloadType.ACTION_RAISE, event.amount))
+                clientAction(ClientAction.PayloadAction(_playerState.value.id, toClientPayload(MyClientPayloadType.ACTION_RAISE.toString(), event.amount)))
             }
             PlayerEvents.Fold -> {
-                onServerBridgeEvent(ServerBridgeEvents.ClientAction(_playerState.value.id, ClientPayloadType.ACTION_FOLD, null))
+                clientAction(ClientAction.PayloadAction(_playerState.value.id, toClientPayload(MyClientPayloadType.ACTION_FOLD.toString(), null)))
             }
         }
     }
@@ -152,4 +135,5 @@ class ServerPlayerViewModel @AssistedInject constructor(
     override fun getGameState(): GameState {
         return _gameState.value
     }
+
 }

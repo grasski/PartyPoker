@@ -1,9 +1,6 @@
 package com.dabi.partypoker.utils
 
-import android.util.Log
-import com.dabi.partypoker.featureClient.model.data.PlayerState
-import com.dabi.partypoker.featureClient.model.data.endpointID
-import kotlin.math.pow
+import com.dabi.partypoker.featurePlayer.model.data.PlayerState
 
 
 fun checkEpicFlush(cards: List<Card>): Pair<Boolean, List<Card>> {

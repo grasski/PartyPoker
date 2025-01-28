@@ -2,13 +2,18 @@ package com.dabi.partypoker
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RawRes
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.dabi.partypoker.featureClient.view.PlayerView
+import com.dabi.easylocalgame.serverSide.data.ServerType
+import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.featureMenu.view.MenuView
+import com.dabi.partypoker.featurePlayer.view.PlayerView
 import com.dabi.partypoker.featureServer.view.ServerView
 import kotlinx.serialization.Serializable
 
@@ -19,7 +24,21 @@ fun Navigation() {
 
     NavHost(navController = navController, startDestination = MenuScreen) {
         composable<MenuScreen> {
-            MenuView(navController = navController)
+            MenuView(navController)
+
+//            Column {
+//                Button(
+//                    onClick = { navController.navigate(ServerScreen(ServerType.IS_TABLE.toString(), "serverName", 0, 0)) }
+//                ) {
+//                    Text("SERVER")
+//                }
+//
+//                Button(
+//                    onClick = { navController.navigate(PlayerScreen("nickname", 0)) }
+//                ) {
+//                    Text("PLAYER")
+//                }
+//            }
         }
 
         composable<PlayerScreen> {

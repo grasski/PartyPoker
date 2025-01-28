@@ -67,11 +67,11 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureCore.views.AutoSizeText
 import com.dabi.partypoker.featureCore.views.PlayerSettings
 import com.dabi.partypoker.ui.theme.textColor
-import com.dabi.partypoker.utils.UiTexts
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -239,16 +239,16 @@ fun AvatarsSelectionView(
 ) {
     val density = LocalDensity.current
     val listOfAvatars = listOf(
-        R.raw.avatar_female_5,
-        R.raw.avatar_female_1,
-        R.raw.avatar_female_2,
-        R.raw.avatar_female_3,
-        R.raw.avatar_female_4,
-        R.raw.avatar_male_1,
-        R.raw.avatar_male_2,
-        R.raw.avatar_male_3,
-        R.raw.avatar_male_4,
-        R.raw.avatar_male_5,
+        R.raw.avatar_female5,
+        R.raw.avatar_female1,
+        R.raw.avatar_female2,
+        R.raw.avatar_female3,
+        R.raw.avatar_female4,
+        R.raw.avatar_male1,
+        R.raw.avatar_male2,
+        R.raw.avatar_male3,
+        R.raw.avatar_male4,
+        R.raw.avatar_male5,
     )
     var selectedAvatar by rememberSaveable { mutableIntStateOf(listOfAvatars.first()) }
     LaunchedEffect(selectedAvatar) {

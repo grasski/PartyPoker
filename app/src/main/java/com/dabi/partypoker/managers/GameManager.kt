@@ -1,13 +1,13 @@
 package com.dabi.partypoker.managers
 
 import android.util.Log
+import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureServer.model.data.GameHistoryState
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.MessageData
 import com.dabi.partypoker.featureServer.model.data.PlayerHistory
 import com.dabi.partypoker.utils.CardsUtils
-import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.evaluateGame
 import com.dabi.partypoker.utils.evaluatePlayerCards
 import com.dabi.partypoker.utils.generateDeck
@@ -48,6 +48,7 @@ class GameManager {
                     gameState.gameReadyPlayers += id to position
                 }
             }
+
             if (gameState.gameReadyPlayers.size < 2){
                 Log.e("", "TADY KONEC START")
                 return GameState(
@@ -61,8 +62,6 @@ class GameManager {
             }
 //            // To count correct dealer, smallBlind and bigBlind in new game rounds
             gameState.playingNow = gameState.gameReadyPlayers.toList().sortedBy { it.second.position }.toMap().keys.firstOrNull()
-//            gameState.playingNow = gameState.gameReadyPlayers.firstOrNull()
-
 
             val dealerId = getPlayingNow(games, gameState)
             val smallBlind = getPlayingNow(games + 1, gameState)
@@ -312,7 +311,7 @@ class GameManager {
         }
 
 
-        fun gameOver(gameState: GameState): GameState{
+        private fun gameOver(gameState: GameState): GameState{
             if (gameState.gameOver || !gameState.started){
                 return gameState
             }

@@ -54,6 +54,7 @@
     </string-array>
 
     <string name="fail_connect">Failed to connect to the server! This most likely happen due to missing Location service enabled. Turn on your Location and try it again.</string>
+    <string name="reject_connect">Connection to the server was rejected! Most likely because the game room is full.</string>
     <string name="fail_start">Failed to start the game server! Please try it again.</string>
     <string name="try_again">Try again</string>
     <string name="cancel">Cancel</string>

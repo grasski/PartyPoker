@@ -1,17 +1,16 @@
-package com.dabi.partypoker.featureClient.model.data
+package com.dabi.partypoker.featurePlayer.model.data
 
 import androidx.annotation.RawRes
+import com.dabi.easylocalgame.clientSide.data.IPlayerState
 import com.dabi.partypoker.utils.Card
-
-typealias endpointID = String
 
 
 data class PlayerState(
-    var nickname: String = "",
-    var id: endpointID = "",
-    @RawRes var avatarId: Int? = null,
+    override var nickname: String = "",
+    override var id: String = "",
+    @RawRes override var avatarId: Int? = null,
 
-    var isServer: Boolean = false,
+    override var isServer: Boolean = false,
 
     var isReadyToPlay: Boolean = false,
     var isFolded: Boolean = false,
@@ -25,4 +24,4 @@ data class PlayerState(
     var holeCards: List<Card> = emptyList(),
     var called: Int = 0,
     var allIn: Boolean = false,
-)
+): IPlayerState

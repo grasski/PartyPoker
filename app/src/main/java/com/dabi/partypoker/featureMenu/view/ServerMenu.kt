@@ -79,7 +79,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
@@ -90,21 +89,21 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.dabi.easylocalgame.serverSide.data.ServerType
+import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.MenuScreen
 import com.dabi.partypoker.R
 import com.dabi.partypoker.ServerScreen
 import com.dabi.partypoker.featureCore.data.myColors
 import com.dabi.partypoker.featureCore.data.myColorsSettings
 import com.dabi.partypoker.featureCore.views.AutoSizeText
+import com.dabi.partypoker.featureCore.views.formatNumberToString
 import com.dabi.partypoker.featureMenu.viewModel.MenuGameSettingsEvent
 import com.dabi.partypoker.featureMenu.viewModel.MenuViewModel
 import com.dabi.partypoker.featureMenu.viewModel.NewSettingsEvent
 import com.dabi.partypoker.featureMenu.viewModel.SettingsError
-import com.dabi.partypoker.managers.ServerType
 import com.dabi.partypoker.repository.gameSettings.GameSettings
 import com.dabi.partypoker.ui.theme.textColor
-import com.dabi.partypoker.utils.UiTexts
-import com.dabi.partypoker.utils.formatNumberToString
 import kotlin.math.roundToInt
 
 

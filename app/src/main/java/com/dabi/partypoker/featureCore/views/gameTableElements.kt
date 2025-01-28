@@ -61,15 +61,15 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.rememberAsyncImagePainter
+import com.dabi.easylocalgame.serverSide.data.ServerType
+import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.R
-import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
+import com.dabi.partypoker.featurePlayer.model.data.PlayerState
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.MessageData
 import com.dabi.partypoker.managers.GameEvents
-import com.dabi.partypoker.managers.ServerType
 import com.dabi.partypoker.utils.CardsUtils
-import com.dabi.partypoker.utils.UiTexts
 
 
 @Composable

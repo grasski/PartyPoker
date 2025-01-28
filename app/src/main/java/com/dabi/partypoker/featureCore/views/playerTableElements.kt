@@ -64,17 +64,17 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.R
-import com.dabi.partypoker.featureClient.model.data.PlayerState
-import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureCore.data.PlayerActionsState
 import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
+import com.dabi.partypoker.featurePlayer.model.data.PlayerState
+import com.dabi.partypoker.featurePlayer.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.Card
 import com.dabi.partypoker.utils.CardsCombination
 import com.dabi.partypoker.utils.CardsUtils
-import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.evaluatePlayerCards
 import com.dabi.partypoker.utils.handStrength
 

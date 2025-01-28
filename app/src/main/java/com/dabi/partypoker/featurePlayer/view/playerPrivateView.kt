@@ -1,4 +1,4 @@
-package com.dabi.partypoker.featureClient.view
+package com.dabi.partypoker.featurePlayer.view
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -64,9 +64,8 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.R
-import com.dabi.partypoker.featureClient.model.data.PlayerState
-import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureCore.data.PlayerActionsState
 import com.dabi.partypoker.featureCore.views.AutoSizeText
 import com.dabi.partypoker.featureCore.views.CheckCallButton
@@ -80,11 +79,12 @@ import com.dabi.partypoker.featureCore.views.RaiseSlider
 import com.dabi.partypoker.featureCore.views.ShowMoneyAnimated
 import com.dabi.partypoker.featureCore.views.animatedBorder
 import com.dabi.partypoker.featureCore.views.glowItem
+import com.dabi.partypoker.featurePlayer.model.data.PlayerState
+import com.dabi.partypoker.featurePlayer.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.CardsCombination
 import com.dabi.partypoker.utils.CardsUtils
-import com.dabi.partypoker.utils.UiTexts
 import com.dabi.partypoker.utils.evaluatePlayerCards
 
 

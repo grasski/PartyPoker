@@ -1,28 +1,26 @@
 package com.dabi.partypoker.featureServer.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dabi.easylocalgame.clientSide.data.PlayerConnectionState
+import com.dabi.easylocalgame.payloadUtils.convertFromJsonToType
+import com.dabi.easylocalgame.payloadUtils.data.ClientPayloadType
+import com.dabi.easylocalgame.payloadUtils.data.ServerPayloadType
+import com.dabi.easylocalgame.payloadUtils.fromClientPayload
+import com.dabi.easylocalgame.payloadUtils.toServerPayload
+import com.dabi.easylocalgame.serverSide.ClientAction
+import com.dabi.easylocalgame.serverSide.ServerViewmodelTemplate
+import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.R
-import com.dabi.partypoker.managers.GameEvents
-import com.dabi.partypoker.managers.GameManager
-import com.dabi.partypoker.featureClient.model.data.PlayerState
-import com.dabi.partypoker.featureServer.model.ServerBridge
-import com.dabi.partypoker.featureServer.model.ServerBridgeEvents
+import com.dabi.partypoker.featurePlayer.model.data.PlayerState
+import com.dabi.partypoker.featurePlayer.viewmodel.MyClientPayloadType
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.featureServer.model.data.MessageData
 import com.dabi.partypoker.featureServer.model.data.SeatPosition
-import com.dabi.partypoker.managers.ServerEvents
+import com.dabi.partypoker.managers.GameEvents
+import com.dabi.partypoker.managers.GameManager
 import com.dabi.partypoker.repository.gameSettings.GameSettingsDatabase
-import com.dabi.partypoker.utils.ClientPayloadType
-import com.dabi.partypoker.utils.ServerPayloadType
-import com.dabi.partypoker.utils.UiTexts
-import com.dabi.partypoker.utils.UiTextsAdapter
-import com.dabi.partypoker.utils.toServerPayload
 import com.google.android.gms.nearby.connection.ConnectionsClient
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -36,8 +34,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonElement
 
 
 @HiltViewModel(assistedFactory = ServerOwnerViewModel.ServerOwnerViewModelFactory::class)
@@ -45,8 +43,8 @@ open class ServerOwnerViewModel @AssistedInject constructor(
     private val connectionsClient: ConnectionsClient,
     private val db: GameSettingsDatabase,
     @Assisted private val gameSettingsId: Long
-) : ViewModel() {
-    protected val _gameState = MutableStateFlow(GameState())
+) : ServerViewmodelTemplate(connectionsClient) {
+    protected val _gameState: MutableStateFlow<GameState> = MutableStateFlow(GameState())
     val gameState = _gameState.asStateFlow()
 
     private val _playerMoveTimerMillis = MutableStateFlow(_gameState.value.gameSettings.playerTimerDurationMillis)
@@ -54,8 +52,6 @@ open class ServerOwnerViewModel @AssistedInject constructor(
     private val _gameOverTimerMillis = MutableStateFlow(_gameState.value.gameSettings.gameOverTimerDurationMillis)
     val gameOverTimerMillis = _gameOverTimerMillis.asStateFlow()
     private var timerJob: Job? = null
-
-    val serverBridge = ServerBridge(connectionsClient, this::onServerBridgeEvent)
 
     @AssistedFactory
     interface ServerOwnerViewModelFactory {
@@ -65,9 +61,31 @@ open class ServerOwnerViewModel @AssistedInject constructor(
     override fun onCleared() {
         super.onCleared()
         Log.e("", "SERVER KILLED")
-        serverBridge.killServer()
+        serverManager.closeServer()
         timerJob?.cancel()
     }
+
+    fun onGameEvent(event: GameEvents) {
+        when(event) {
+            is GameEvents.StartGame -> {
+                _gameState.update { GameManager.startGame(_gameState.value).copy() }
+                if (!_gameState.value.started) {
+                    Log.e("ServerOwnerViewModel", "Game not started, few players")
+                    return
+                }
+                handlePlayingPlayer()
+            }
+
+            is GameEvents.CloseGame -> {
+                serverManager.closeServer()
+            }
+
+            is GameEvents.StopAdvertising -> {
+                serverManager.stopAdvertising()
+            }
+        }
+    }
+
     init {
         viewModelScope.launch {
             ensureActive()
@@ -101,11 +119,11 @@ open class ServerOwnerViewModel @AssistedInject constructor(
 
                 gameState.players.forEach { (index, player) ->
                     Log.e("ServerOwnerViewModel", "SENDING TO Player: $player")
-                    val serverPayloadType = toServerPayload(ServerPayloadType.UPDATE_CLIENT, player)
-                    serverBridge.sendPayload(index, serverPayloadType)
+                    val serverPayloadType = toServerPayload(ServerPayloadType.UPDATE_PLAYER_STATE, player)
+                    serverManager.sendPayload(index, serverPayloadType)
                 }
                 val serverPayload = toServerPayload(ServerPayloadType.UPDATE_GAME_STATE, gameState)
-                serverBridge.sendPayload(serverPayload)
+                serverManager.sendPayload(serverPayload)
 
                 if (gameState.gameOver && _gameOverTimerMillis.value >= gameState.gameSettings.gameOverTimerDurationMillis){
                     timerJob?.cancel()
@@ -141,6 +159,15 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                             }
                         }
 
+                        // In case of 2 playing players, if one is playing now and the other left, the current one is winner
+                        val playersStillReady = gameState.gameReadyPlayers.count { (playerId, _) ->
+                            playerId in gameState.players.keys
+                        }
+                        if (playersStillReady == 1){
+                            autoCheck()
+                            return@collect
+                        }
+
                         if (gameState.activeRaise == null && gameState.gameReadyPlayers.count() - allInCount <= 1){
                             // AUTOCOMPLETE of AllIn - Player's do not play anymore, so only show rest of the table cards and evaluate game
                             Log.e("", "ALL IN DRUHY")
@@ -155,29 +182,7 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                             return@collect
                         }
                     }
-
                 }
-            }
-        }
-    }
-
-    fun onGameEvent(event: GameEvents) {
-        when (event){
-            GameEvents.StartGame -> {
-                _gameState.update { GameManager.startGame(_gameState.value).copy() }
-                if (!_gameState.value.started) {
-                    Log.e("ServerOwnerViewModel", "Game not started, few players")
-                    return
-                }
-                handlePlayingPlayer()
-            }
-
-            GameEvents.CloseGame -> {
-                serverBridge.leave()
-            }
-
-            GameEvents.StopAdvertising -> {
-                serverBridge.stopAdvertising()
             }
         }
     }
@@ -236,89 +241,17 @@ open class ServerOwnerViewModel @AssistedInject constructor(
         handlePlayingPlayer()
     }
 
-    protected fun onServerBridgeEvent(event: ServerBridgeEvents){
-        when(event){
-            is ServerBridgeEvents.ClientDisconnected -> {
-                val clientID = event.endpointID
 
-                _gameState.update { gameState ->
-                    val nick = gameState.players[clientID]?.nickname
-                    gameState.copy(
-                        bank = gameState.bank + (gameState.players[clientID]?.called ?: 0),
-                        players = gameState.players.filter { it.key != clientID },
-                        seatPositions = gameState.seatPositions.filter { it.key != clientID },
+    override fun clientAction(clientAction: ClientAction) {
+        when(clientAction){
+            is ClientAction.PayloadAction -> {
+                val clientID = clientAction.endpointID
 
-                        messages = gameState.messages.plus(
-                            MessageData(
-                                messages = listOf(UiTexts.StringResource(R.string.client_disconnected, nick ?: ""))
-                            )
-                        )
-                    )
-                }
-
-                val foldedCount = _gameState.value.gameReadyPlayers.count { (playerId, _) ->
-                    val player = _gameState.value.players[playerId]
-                    player?.isFolded ?: true
-                }
-
-                if ((foldedCount + 1) >= _gameState.value.gameReadyPlayers.size){
-                    _gameState.update {
-                        GameManager.gameOver(it).copy()
-                    }
-                    handlePlayingPlayer()
-                }
-            }
-
-            is ServerBridgeEvents.ClientAction -> {
-                val clientID = event.endpointID
-                val action = event.action
-                val data = event.data
-
-                when(action){
-                    ClientPayloadType.CONNECTED -> {
-                        val gson = GsonBuilder()
-                            .registerTypeAdapter(UiTexts::class.java, UiTextsAdapter())
-                            .create()
-                        val pairType = object : TypeToken<Pair<String, Int>>() {}.type
-                        val pair: Pair<String, Int> = gson.fromJson(gson.toJson(data), pairType)
-
-                        val player = PlayerState(
-                            nickname = pair.first,
-                            avatarId = pair.second,
-                            id = clientID,
-                            money = _gameState.value.gameSettings.playerMoney
-                        )
-
-                        if (_gameState.value.players.size >= 10){
-                            Log.e("", "Too many players")
-                            // TODO: Remove player from game
-                            return
-                        }
-                        
-                        val position: Int? = _gameState.value.getAvailableRandomPosition()
-
-                        position?.let {
-                            _gameState.update { gameState ->
-                                gameState.copy(
-                                    players = gameState.players + (clientID to player),
-                                    seatPositions = gameState.seatPositions + (clientID to SeatPosition(position)),
-                                    messages = gameState.messages.plus(
-                                        MessageData(
-                                            messages = listOf(UiTexts.StringResource(R.string.client_connected, player.nickname))
-                                        )
-                                    )
-                                )
-                            }
-                        } ?: run {
-                            Log.e("", "PROBLEM WITH GETTING PLAYER'S SEAT POSITION")
-                            // TODO: Remove player from game
-                        }
-                    }
-                    ClientPayloadType.ACTION_DISCONNECTED -> {
-                        serverBridge.onServerEvent(ServerEvents.ClientDisconnected(clientID))
-                    }
-
-                    ClientPayloadType.ACTION_READY -> {
+                val result = fromClientPayload<MyClientPayloadType, Any>(clientAction.payload, null)
+                val clientPayloadType = result.first
+                val data = result.second
+                when(clientPayloadType){
+                    MyClientPayloadType.ACTION_READY -> {
                         val player = _gameState.value.players[clientID]
                         player?.let {
                             val updatedPlayer = it.copy(isReadyToPlay = !it.isReadyToPlay)
@@ -345,15 +278,14 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                             }
                         }
                     }
-
-                    ClientPayloadType.ACTION_CHECK -> {
+                    MyClientPayloadType.ACTION_CHECK -> {
                         if (_gameState.value.playingNow != clientID){ return }
                         timerJob?.cancel()
 
                         _gameState.update { GameManager.movePlayedCheckRound(_gameState.value).copy() }
                         handlePlayingPlayer()
                     }
-                    ClientPayloadType.ACTION_CALL -> {
+                    MyClientPayloadType.ACTION_CALL -> {
                         if (_gameState.value.playingNow != clientID){ return }
 
                         val player = _gameState.value.players[clientID]
@@ -383,10 +315,10 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                             }
                         } ?: run { timerJob?.cancel() }
                     }
-                    ClientPayloadType.ACTION_RAISE -> {
+                    MyClientPayloadType.ACTION_RAISE -> {
                         if (_gameState.value.playingNow != clientID){ return }
 
-                        var amount = Gson().fromJson(data.toString(), Int::class.java)
+                        var amount = data!!.convertFromJsonToType(Int::class.java)
                         val player = _gameState.value.players[clientID]
                         player?.let { p ->
                             var tempGameState = _gameState.value.copy()
@@ -432,7 +364,7 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                             handlePlayingPlayer()
                         } ?: run { timerJob?.cancel() }
                     }
-                    ClientPayloadType.ACTION_FOLD -> {
+                    MyClientPayloadType.ACTION_FOLD -> {
                         if (_gameState.value.playingNow != clientID){ return }
                         timerJob?.cancel()
 
@@ -450,6 +382,52 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                             handlePlayingPlayer()
                         }
                     }
+                }
+            }
+            is ClientAction.EstablishConnection -> {
+                val clientID = clientAction.endpointID
+
+                val result: Pair<ClientPayloadType, PlayerConnectionState?> = fromClientPayload(clientAction.payload, null)
+                result.second?.let {
+                    val player = PlayerState(
+                        nickname = it.nickname,
+                        avatarId = it.avatarId,
+                        id = clientID,
+                        money = _gameState.value.gameSettings.playerMoney
+                    )
+
+                    val position: Int? = _gameState.value.getAvailableRandomPosition()
+                    position?.let {
+                        _gameState.update { gameState ->
+                            gameState.copy(
+                                players = gameState.players + (clientID to player),
+                                seatPositions = gameState.seatPositions + (clientID to SeatPosition(position)),
+                                messages = gameState.messages.plus(
+                                    MessageData(
+                                        messages = listOf(UiTexts.StringResource(R.string.client_connected, player.nickname))
+                                    )
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+            is ClientAction.Disconnect -> {
+                val clientID = clientAction.endpointID
+
+                _gameState.update { gameState ->
+                    val nick = gameState.players[clientID]?.nickname
+                    gameState.copy(
+                        bank = gameState.bank + (gameState.players[clientID]?.called ?: 0),
+                        players = gameState.players.filter { it.key != clientID },
+                        seatPositions = gameState.seatPositions.filter { it.key != clientID },
+
+                        messages = gameState.messages.plus(
+                            MessageData(
+                                messages = listOf(UiTexts.StringResource(R.string.client_disconnected, nick ?: ""))
+                            )
+                        )
+                    )
                 }
             }
         }

@@ -1,11 +1,9 @@
 package com.dabi.partypoker.featureCore.interfaces
 
-import com.dabi.partypoker.featureClient.model.data.PlayerState
-import com.dabi.partypoker.featureClient.viewmodel.PlayerEvents
-import com.dabi.partypoker.featureCore.data.PlayerActionsState
+import com.dabi.partypoker.featurePlayer.model.data.PlayerState
+import com.dabi.partypoker.featurePlayer.viewmodel.PlayerEvents
 import com.dabi.partypoker.featureServer.model.data.GameState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+
 
 interface PlayerCoreInterface {
     fun onPlayerEvent(event: PlayerEvents)

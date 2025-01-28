@@ -55,6 +55,7 @@
     </string-array>
 
     <string name="fail_connect">Chyba při připojování k serveru! Pravděpodobně nemáte zaplou službu určování polohy. Zapněte ji a zkuste se připojit znovu.</string>
+    <string name="reject_connect">Připojení k serveru bylo odmítnuto! Pravděpodobně je herní místnost plná.</string>
     <string name="fail_start">Chyba při zapínání herního serveru! Prosím, zkuste to znovu.</string>
     <string name="try_again">Zkusit znovu</string>
     <string name="cancel">Zrušit</string>

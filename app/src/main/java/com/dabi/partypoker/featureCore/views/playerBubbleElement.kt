@@ -56,16 +56,15 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.R
-import com.dabi.partypoker.featureClient.model.data.PlayerState
 import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
+import com.dabi.partypoker.featurePlayer.model.data.PlayerState
 import com.dabi.partypoker.featureServer.model.data.GameState
 import com.dabi.partypoker.ui.theme.inversePrimaryDark
 import com.dabi.partypoker.ui.theme.primaryDark
 import com.dabi.partypoker.ui.theme.textColor
 import com.dabi.partypoker.utils.CardsUtils
-import com.dabi.partypoker.utils.UiTexts
-import com.dabi.partypoker.utils.formatNumberToString
 
 
 @Composable

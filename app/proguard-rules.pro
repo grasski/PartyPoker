@@ -102,9 +102,7 @@
 }
 
 -keep class com.dabi.partypoker.featureServer.model.data.** { *; }
--keep class com.dabi.partypoker.featureClient.model.data.** { *; }
--keep class com.dabi.partypoker.utils.ClientPayloadType { *; }
--keep class com.dabi.partypoker.utils.ServerPayloadType { *; }
+-keep class com.dabi.partypoker.featurePlayer.model.data.** { *; }
 -keep class com.dabi.partypoker.utils.CardsUtilsKt { *; }
 -keep class com.dabi.partypoker.repository.** { *; }
 
