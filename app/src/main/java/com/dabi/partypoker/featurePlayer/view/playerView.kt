@@ -109,6 +109,17 @@ fun PlayerView(
                 )
             }
             ConnectionStatusEnum.ENDPOINT_LOST -> {
+                StateContent(
+                    text = UiTexts.StringResource(R.string.lost_connection).asString(),
+                    animationID = R.raw.rejected_animation,
+                    isPortrait = isPortrait,
+                    onClickTry = {
+                        playerViewModel.clientManager.connect(context.packageName, PlayerConnectionState(nickname, avatarId))
+                    },
+                    onClickBack = {
+                        playerViewModel.onPlayerEvent(PlayerEvents.Leave)
+                    }
+                )
             }
             ConnectionStatusEnum.CONNECTED, ConnectionStatusEnum.CONNECTION_ESTABLISHED -> {
                 when(clientState.serverType){
