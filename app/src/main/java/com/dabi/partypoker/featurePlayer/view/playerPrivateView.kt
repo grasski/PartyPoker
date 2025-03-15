@@ -2,7 +2,12 @@ package com.dabi.partypoker.featurePlayer.view
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.pm.ActivityInfo
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -60,6 +65,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
@@ -67,6 +74,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureCore.data.PlayerActionsState
+import com.dabi.partypoker.featureCore.viewModel.PlayerSettingsViewModel
 import com.dabi.partypoker.featureCore.views.AutoSizeText
 import com.dabi.partypoker.featureCore.views.CheckCallButton
 import com.dabi.partypoker.featureCore.views.FoldButton
@@ -74,6 +82,7 @@ import com.dabi.partypoker.featureCore.views.GamePopUpMenu
 import com.dabi.partypoker.featureCore.views.GetReadyButton
 import com.dabi.partypoker.featureCore.views.HandInfoPopUp
 import com.dabi.partypoker.featureCore.views.HandStrengthIndicator
+import com.dabi.partypoker.featureCore.views.MessageRow
 import com.dabi.partypoker.featureCore.views.RaiseButton
 import com.dabi.partypoker.featureCore.views.RaiseSlider
 import com.dabi.partypoker.featureCore.views.ShowMoneyAnimated
@@ -101,6 +110,29 @@ fun PlayerViewPrivate(
     LaunchedEffect(Unit) {
         (context as Activity).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
     }
+
+
+    val vibrator = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+    }
+    val playerSettingsVM = hiltViewModel<PlayerSettingsViewModel>()
+    val playerSettingsState by playerSettingsVM.playerSettingsState.collectAsStateWithLifecycle()
+    LaunchedEffect(key1 = playerState.isPlayingNow) {
+        if (playerSettingsState.vibration && playerState.isPlayingNow){
+            if (vibrator.hasVibrator()){
+                vibrator.vibrate(
+                    VibrationEffect.createOneShot(70L, VibrationEffect.DEFAULT_AMPLITUDE)
+                )
+            }
+        }
+    }
+
 
     GamePopUpMenu(
         isPlayer = true,
@@ -229,11 +261,20 @@ fun PlayerViewPrivate(
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(40.dp))
-        Spacer(modifier = Modifier.weight(1f))
-
         val fontSize = with(density) { 17.dp.toSp() }
+
+        MessageRow(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .fillMaxWidth()
+                .height(40.dp)
+                .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color.Black.copy(0.35f)),
+            messages = gameState.messages,
+            fontSize = fontSize
+        )
+
         Column(
             modifier = Modifier
                 .fillMaxSize()

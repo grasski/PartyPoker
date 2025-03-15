@@ -32,15 +32,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.dabi.easylocalgame.serverSide.data.IGameState
@@ -70,17 +73,19 @@ data class MessageData(
     }
 
     private fun textWithCards(
-        text: String,
+        textBefore: String,
         cards: List<Card>? = null,
-        cardSize: TextUnit
+        cardSize: TextUnit,
+        textAfter: String = ""
     ): Pair<AnnotatedString, Map<String, InlineTextContent>?> {
         val annotatedString = buildAnnotatedString {
-            append(text)
+            append(textBefore)
             cards?.let {
                 it.forEach { card ->
                     appendInlineContent(id = card.type.name+card.value)
                 }
             }
+            append(textAfter)
         }
         val inlineContentMap = cards?.associate { card ->
             card.type.name+card.value to InlineTextContent(
@@ -146,17 +151,28 @@ data class MessageData(
             } else{
                 history?.let { his ->
                     Row {
-                        Text(
-                            text = UiTexts.StringResource(R.string.game_number_finished, his.gameNumber).asString(),
-                            fontSize = fontSize * 0.85f
-                        )
+                        val annotatedString = buildAnnotatedString {
+                            append(UiTexts.StringResource(R.string.game_number_finished, his.gameNumber).asString())
 
+                            append(" ")
+
+                            if (his.tableCards.isNotEmpty()) {
+                                withStyle(
+                                    SpanStyle(
+                                        shadow = Shadow(textColor, blurRadius = 10f)
+                                    )
+                                ){
+                                    append(
+                                        if (expanded)
+                                            UiTexts.StringResource(R.string.show_less).asString()
+                                        else
+                                            UiTexts.StringResource(R.string.show_more).asString()
+                                    )
+                                }
+                            }
+                        }
                         Text(
-                            text =
-                            if (expanded)
-                                UiTexts.StringResource(R.string.show_less).asString()
-                            else
-                                UiTexts.StringResource(R.string.show_more).asString(),
+                            text = annotatedString,
                             fontSize = fontSize * 0.85f,
                             modifier = Modifier
                                 .padding(start = 8.dp)
@@ -167,7 +183,6 @@ data class MessageData(
                                         expanded = !expanded
                                     }
                                 )
-                                .shadow(12.dp, RoundedCornerShape(8.dp))
                         )
                     }
                 }
@@ -187,74 +202,78 @@ data class MessageData(
 
 
                 history?.let { his ->
-                    if (expanded){
-                        Box(
-                            contentAlignment = Alignment.Center
-                        ){
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
-                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
-                            )
+                    if (his.tableCards.isNotEmpty()){
+                        if (expanded){
+                            Box(
+                                contentAlignment = Alignment.Center
+                            ){
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+                                )
+                                Text(
+                                    text = UiTexts.StringResource(R.string.round_info).asString(),
+                                    fontSize = fontSize * 0.85f,
+                                    modifier = Modifier
+                                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                                        .padding(horizontal = 6.dp)
+                                )
+                            }
+
+                            val (annotatedStringTable, inlineContentMapTable) = textWithCards(
+                                UiTexts.StringResource(R.string.table_cards).asString() + " ",
+                                his.tableCards, fontSize)
                             Text(
-                                text = UiTexts.StringResource(R.string.round_info).asString(),
-                                fontSize = fontSize * 0.85f,
-                                modifier = Modifier
-                                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                                    .padding(horizontal = 6.dp)
+                                text = annotatedStringTable,
+                                maxLines = maxLines,
+                                fontSize = fontSize,
+                                color = textColor,
+                                overflow = TextOverflow.Ellipsis,
+                                style = TextStyle(
+                                    platformStyle = PlatformTextStyle(
+                                        includeFontPadding = false
+                                    )
+                                ),
+                                inlineContent = inlineContentMapTable ?: emptyMap(),
+                                modifier = Modifier.padding(vertical = 5.dp, horizontal = 16.dp)
                             )
-                        }
 
-                        val (annotatedStringTable, inlineContentMapTable) = textWithCards(
-                            UiTexts.StringResource(R.string.table_cards).asString() + " ",
-                            his.tableCards, fontSize)
-                        Text(
-                            text = annotatedStringTable,
-                            maxLines = maxLines,
-                            fontSize = fontSize,
-                            color = textColor,
-                            overflow = TextOverflow.Ellipsis,
-                            style = TextStyle(
-                                platformStyle = PlatformTextStyle(
-                                    includeFontPadding = false
-                                )
-                            ),
-                            inlineContent = inlineContentMapTable ?: emptyMap(),
-                        )
-
-                        his.players.forEach { (nick, cards, cardsComb) ->
-                            if (!cards.isNullOrEmpty()) {
-                                val (annotatedStringPlayer, inlineContentMapPlayer) = textWithCards(
-                                    "$nick: " + UiTexts.StringResource(CardsUtils.combinationsTranslationID.getValue(cardsComb!!)).asString() + ": ",
-                                    cards, fontSize
-                                )
-                                Text(
-                                    text = annotatedStringPlayer,
-                                    maxLines = maxLines,
-                                    fontSize = fontSize,
-                                    color = textColor,
-                                    overflow = TextOverflow.Ellipsis,
-                                    style = TextStyle(
-                                        platformStyle = PlatformTextStyle(
-                                            includeFontPadding = false
-                                        )
-                                    ),
-                                    inlineContent = inlineContentMapPlayer ?: emptyMap(),
-                                    modifier = Modifier.padding(vertical = 5.dp)
-                                )
-                            } else {
-                                Text(
-                                    text = "$nick : " + UiTexts.StringResource(R.string.folded).asString().uppercase(),
-                                    maxLines = maxLines,
-                                    fontSize = fontSize,
-                                    color = textColor,
-                                    overflow = TextOverflow.Ellipsis,
-                                    style = TextStyle(
-                                        platformStyle = PlatformTextStyle(
-                                            includeFontPadding = false
-                                        )
-                                    ),
-                                    modifier = Modifier.padding(vertical = 5.dp)
-                                )
+                            his.players.forEach { (nick, cards, cardsComb) ->
+                                if (!cards.isNullOrEmpty()) {
+                                    val (annotatedStringPlayer, inlineContentMapPlayer) = textWithCards(
+                                        "$nick: ",
+                                        cards, fontSize,
+                                        textAfter = "(" + UiTexts.StringResource(CardsUtils.combinationsTranslationID.getValue(cardsComb!!)).asString() + ")"
+                                    )
+                                    Text(
+                                        text = annotatedStringPlayer,
+                                        maxLines = maxLines,
+                                        fontSize = fontSize,
+                                        color = textColor,
+                                        overflow = TextOverflow.Ellipsis,
+                                        style = TextStyle(
+                                            platformStyle = PlatformTextStyle(
+                                                includeFontPadding = false
+                                            )
+                                        ),
+                                        inlineContent = inlineContentMapPlayer ?: emptyMap(),
+                                        modifier = Modifier.padding(vertical = 5.dp, horizontal = 16.dp)
+                                    )
+                                } else {
+                                    Text(
+                                        text = "$nick : " + UiTexts.StringResource(R.string.folded).asString().uppercase(),
+                                        maxLines = maxLines,
+                                        fontSize = fontSize,
+                                        color = textColor,
+                                        overflow = TextOverflow.Ellipsis,
+                                        style = TextStyle(
+                                            platformStyle = PlatformTextStyle(
+                                                includeFontPadding = false
+                                            )
+                                        ),
+                                        modifier = Modifier.padding(vertical = 5.dp, horizontal = 16.dp)
+                                    )
+                                }
                             }
                         }
                     }

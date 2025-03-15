@@ -69,6 +69,7 @@
     <string name="leave_game">Opustit hru</string>
     <string name="continue_game">Pokračovat</string>
 
+    <string name="game_start">Hra byla zapnuta.</string>
     <string name="game_wait">Počkej na začátek hry.</string>
     <string-array name="cards_tooltip">
         <item>Nejlepší kombinace 5 karet.</item>
@@ -79,7 +80,7 @@
         <item>BARVA: 5 karet stejné barvy.</item>
         <item>POSTUPKA: 5 karet v řadě.</item>
         <item>TROJICE: 3 karty stejné hodnoty.</item>
-        <item>DVOJICE: 2 karty stejné hodnoty + 2 karty stejné hodnoty.</item>
+        <item>2 PÁRY: 2 karty stejné hodnoty + 2 karty stejné hodnoty.</item>
         <item>PÁR: 2 karty stejné hodnoty.</item>
         <item>VYSOKÁ KARTA: Nejvyšší karta z 5 karet, které nespadají do žádné z uvedených kombinací.</item>
     </string-array>

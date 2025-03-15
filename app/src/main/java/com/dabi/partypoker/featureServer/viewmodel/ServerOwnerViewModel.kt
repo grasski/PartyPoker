@@ -73,6 +73,13 @@ open class ServerOwnerViewModel @AssistedInject constructor(
                     Log.e("ServerOwnerViewModel", "Game not started, few players")
                     return
                 }
+                _gameState.update {
+                    it.copy(
+                        messages = it.messages + MessageData(
+                            messages = listOf(UiTexts.StringResource(R.string.game_start))
+                        )
+                    )
+                }
                 handlePlayingPlayer()
             }
 

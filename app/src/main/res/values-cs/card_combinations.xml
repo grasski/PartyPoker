@@ -3,7 +3,7 @@
     <string name="noneComb">Žádná kombinace</string>
     <string name="card">Vysoká karta</string>
     <string name="pair">Pár</string>
-    <string name="two_pairs">Dvojice</string>
+    <string name="two_pairs">2 páry</string>
     <string name="trips">Trojice</string>
     <string name="straight">Postupka</string>
     <string name="flush">Barva</string>

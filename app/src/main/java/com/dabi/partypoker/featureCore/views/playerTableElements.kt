@@ -33,6 +33,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipDefaults.rememberPlainTooltipPositionProvider
 import androidx.compose.runtime.Composable
@@ -48,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
@@ -399,6 +401,9 @@ fun HandStrengthIndicator(
         }
         LinearProgressIndicator(
             progress = { strength },
+            drawStopIndicator = {},
+            gapSize = -(15).dp,
+            strokeCap = StrokeCap.Round,
             color = animatedColor,
             trackColor = MaterialTheme.colorScheme.surfaceBright,
             modifier = Modifier
@@ -425,9 +430,8 @@ fun HandStrengthIndicator(
                 .border(
                     1.dp,
                     textColor,
-                    RoundedCornerShape(5.dp)
+                    RoundedCornerShape(15.dp)
                 )
-                .clip(RoundedCornerShape(5.dp))
         )
     }
 }

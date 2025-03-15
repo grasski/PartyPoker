@@ -49,7 +49,6 @@ fun PlayerView(
         playerViewModel.clientManager.connect(context.packageName, PlayerConnectionState(nickname, avatarId))
     }
 
-
     val mappedState = when (clientState.connectionStatus) {
         ConnectionStatusEnum.NONE, ConnectionStatusEnum.CONNECTING -> ConnectionStatusEnum.CONNECTING
         ConnectionStatusEnum.CONNECTING_FAILED -> ConnectionStatusEnum.CONNECTING_FAILED

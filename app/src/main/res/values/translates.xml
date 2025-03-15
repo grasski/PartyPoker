@@ -67,6 +67,7 @@
     <string name="leave_game">Leave</string>
     <string name="continue_game">Continue</string>
 
+    <string name="game_start">Game was started.</string>
     <string name="game_wait">Wait for start of the game.</string>
     <string-array name="cards_tooltip">
         <item>Best combination of 5 cards.</item>

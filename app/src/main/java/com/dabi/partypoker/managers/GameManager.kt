@@ -335,7 +335,12 @@ class GameManager {
                         player.money += gameState.bank
 
                         gameState.messages += MessageData(
-                            messages = listOf(UiTexts.StringResource(R.string.winner_private, player.nickname, gameState.bank))
+                            messages = listOf(UiTexts.StringResource(R.string.winner_private, player.nickname, gameState.bank)),
+                            history = GameHistoryState(
+                                gameNumber = gameState.games,
+                                tableCards = gameState.cardsTable,
+                                players = emptyList(),
+                            )
                         )
                     }
                 }

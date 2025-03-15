@@ -3,7 +3,7 @@ package com.dabi.partypoker.featurePlayer.view
 import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
-import android.os.CombinedVibration
+import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -55,19 +55,6 @@ fun PlayerGameView(
         (context as Activity).requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
     }
 
-    val playerSettingsVM = hiltViewModel<PlayerSettingsViewModel>()
-    val playerSettingsState by playerSettingsVM.playerSettingsState.collectAsStateWithLifecycle()
-    if (playerSettingsState.vibration){
-        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        LaunchedEffect(key1 = playerState.isPlayingNow) {
-            if (playerState.isPlayingNow){
-                vibrator.vibrate(
-                    VibrationEffect.createOneShot(70L, VibrationEffect.DEFAULT_AMPLITUDE)
-                )
-            }
-        }
-    }
-
     GamePopUpMenu(
         isPlayer = !playerState.isServer,
         onPlayerEvent = onPlayerEvent,
@@ -75,6 +62,28 @@ fun PlayerGameView(
         onGameEvent = onGameEvent,
         serverStatus = serverState
     )
+
+
+    val vibrator = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+    }
+    val playerSettingsVM = hiltViewModel<PlayerSettingsViewModel>()
+    val playerSettingsState by playerSettingsVM.playerSettingsState.collectAsStateWithLifecycle()
+    LaunchedEffect(key1 = playerState.isPlayingNow) {
+        if (playerSettingsState.vibration && playerState.isPlayingNow){
+            if (vibrator.hasVibrator()){
+                vibrator.vibrate(
+                    VibrationEffect.createOneShot(70L, VibrationEffect.DEFAULT_AMPLITUDE)
+                )
+            }
+        }
+    }
 
 
     Box(
