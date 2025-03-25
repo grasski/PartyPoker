@@ -90,7 +90,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.dabi.easylocalgame.serverSide.data.ServerType
-import com.dabi.easylocalgame.textUtils.UiTexts
+import com.dabi.easylocalgame.composeUtils.UiTexts
 import com.dabi.partypoker.MenuScreen
 import com.dabi.partypoker.R
 import com.dabi.partypoker.ServerScreen

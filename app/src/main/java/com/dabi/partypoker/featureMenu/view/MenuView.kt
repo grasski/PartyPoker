@@ -67,7 +67,8 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.dabi.easylocalgame.textUtils.UiTexts
+import com.dabi.easylocalgame.composeUtils.CheckPermissions
+import com.dabi.easylocalgame.composeUtils.UiTexts
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureCore.views.AutoSizeText
 import com.dabi.partypoker.featureCore.views.PlayerSettings
@@ -344,52 +345,6 @@ fun AvatarsSelectionView(
             }
         }
     }
-}
-
-
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun CheckPermissions(
-    permissionsState: (MultiplePermissionsState) -> Unit
-) {
-    val permissionsList = mutableListOf(
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_WIFI_STATE,
-        Manifest.permission.CHANGE_WIFI_STATE,
-    )
-    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R){
-        permissionsList.add(Manifest.permission.BLUETOOTH)
-        permissionsList.add(Manifest.permission.BLUETOOTH_ADMIN)
-    }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
-        permissionsList.add(Manifest.permission.BLUETOOTH_ADVERTISE)
-        permissionsList.add(Manifest.permission.BLUETOOTH_CONNECT)
-        permissionsList.add(Manifest.permission.BLUETOOTH_SCAN)
-    }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-        permissionsList.add(Manifest.permission.NEARBY_WIFI_DEVICES)
-    }
-
-    val permissions = rememberMultiplePermissionsState(permissions = permissionsList)
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(
-        key1 = lifecycleOwner,
-        effect = {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_START) {
-                    permissions.launchMultiplePermissionRequest()
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
-        }
-    )
-
-    permissionsState(permissions)
 }
 
 

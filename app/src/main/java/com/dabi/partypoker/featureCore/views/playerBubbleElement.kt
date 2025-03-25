@@ -56,7 +56,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.dabi.easylocalgame.textUtils.UiTexts
+import com.dabi.easylocalgame.composeUtils.UiTexts
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
 import com.dabi.partypoker.featurePlayer.model.data.PlayerState

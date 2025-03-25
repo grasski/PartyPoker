@@ -62,7 +62,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.rememberAsyncImagePainter
 import com.dabi.easylocalgame.serverSide.data.ServerType
-import com.dabi.easylocalgame.textUtils.UiTexts
+import com.dabi.easylocalgame.composeUtils.UiTexts
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureCore.data.PlayerLayoutDirection
 import com.dabi.partypoker.featurePlayer.model.data.PlayerState

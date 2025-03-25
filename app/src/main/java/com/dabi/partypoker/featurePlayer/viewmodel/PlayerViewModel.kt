@@ -4,8 +4,8 @@ import androidx.annotation.Keep
 import com.dabi.easylocalgame.clientSide.PlayerViewmodelTemplate
 import com.dabi.easylocalgame.clientSide.ServerAction
 import com.dabi.easylocalgame.payloadUtils.data.ServerPayloadType
-import com.dabi.easylocalgame.payloadUtils.fromServerPayload
-import com.dabi.easylocalgame.payloadUtils.toClientPayload
+import com.dabi.easylocalgame.payloadUtils.fromPayload
+import com.dabi.easylocalgame.payloadUtils.toPayload
 import com.dabi.partypoker.featureCore.data.PlayerActionsState
 import com.dabi.partypoker.featureCore.interfaces.PlayerCoreInterface
 import com.dabi.partypoker.featurePlayer.model.data.PlayerState
@@ -65,14 +65,14 @@ class PlayerViewModel @Inject constructor(
     override fun serverAction(serverAction: ServerAction) {
         when(serverAction){
             is ServerAction.UpdateGameState -> {
-                val result: Pair<ServerPayloadType, GameState?> = fromServerPayload(serverAction.payload, null)
+                val result: Pair<ServerPayloadType, GameState?> = fromPayload(serverAction.payload, null)
 
                 result.second?.let { gs ->
                     _gameState.update { gs.copy() }
                 }
             }
             is ServerAction.UpdatePlayerState -> {
-                val result: Pair<ServerPayloadType, PlayerState?> = fromServerPayload(serverAction.payload, null)
+                val result: Pair<ServerPayloadType, PlayerState?> = fromPayload(serverAction.payload, null)
 
                 result.second?.let { ps ->
                     _playerState.update { ps.copy() }
@@ -102,7 +102,7 @@ class PlayerViewModel @Inject constructor(
     override fun onPlayerEvent(event: PlayerEvents){
         when(event){
             PlayerEvents.Ready -> {
-                val clientPayload = toClientPayload(MyClientPayloadType.ACTION_READY.toString(), null as String?)
+                val clientPayload = toPayload(MyClientPayloadType.ACTION_READY.toString(), null as String?)
                 clientManager.sendPayload(clientPayload)
             }
             PlayerEvents.ChangeView ->{
@@ -113,19 +113,19 @@ class PlayerViewModel @Inject constructor(
             }
 
             PlayerEvents.Check -> {
-                val clientPayload = toClientPayload(MyClientPayloadType.ACTION_CHECK.toString(), null as String?)
+                val clientPayload = toPayload(MyClientPayloadType.ACTION_CHECK.toString(), null as String?)
                 clientManager.sendPayload(clientPayload)
             }
             PlayerEvents.Fold -> {
-                val clientPayload = toClientPayload(MyClientPayloadType.ACTION_FOLD.toString(), null as String?)
+                val clientPayload = toPayload(MyClientPayloadType.ACTION_FOLD.toString(), null as String?)
                 clientManager.sendPayload(clientPayload)
             }
             is PlayerEvents.Call -> {
-                val clientPayload = toClientPayload(MyClientPayloadType.ACTION_CALL.toString(), event.amount)
+                val clientPayload = toPayload(MyClientPayloadType.ACTION_CALL.toString(), event.amount)
                 clientManager.sendPayload(clientPayload)
             }
             is PlayerEvents.Raise -> {
-                val clientPayload = toClientPayload(MyClientPayloadType.ACTION_RAISE.toString(), event.amount)
+                val clientPayload = toPayload(MyClientPayloadType.ACTION_RAISE.toString(), event.amount)
                 clientManager.sendPayload(clientPayload)
             }
         }

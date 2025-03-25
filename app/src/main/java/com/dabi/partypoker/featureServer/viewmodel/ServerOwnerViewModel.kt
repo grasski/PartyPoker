@@ -6,11 +6,11 @@ import com.dabi.easylocalgame.clientSide.data.PlayerConnectionState
 import com.dabi.easylocalgame.payloadUtils.convertFromJsonToType
 import com.dabi.easylocalgame.payloadUtils.data.ClientPayloadType
 import com.dabi.easylocalgame.payloadUtils.data.ServerPayloadType
-import com.dabi.easylocalgame.payloadUtils.fromClientPayload
+import com.dabi.easylocalgame.payloadUtils.fromPayload
 import com.dabi.easylocalgame.payloadUtils.toServerPayload
 import com.dabi.easylocalgame.serverSide.ClientAction
 import com.dabi.easylocalgame.serverSide.ServerViewmodelTemplate
-import com.dabi.easylocalgame.textUtils.UiTexts
+import com.dabi.easylocalgame.composeUtils.UiTexts
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featurePlayer.model.data.PlayerState
 import com.dabi.partypoker.featurePlayer.viewmodel.MyClientPayloadType
@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.JsonElement
 
 
 @HiltViewModel(assistedFactory = ServerOwnerViewModel.ServerOwnerViewModelFactory::class)
@@ -254,7 +253,7 @@ open class ServerOwnerViewModel @AssistedInject constructor(
             is ClientAction.PayloadAction -> {
                 val clientID = clientAction.endpointID
 
-                val result = fromClientPayload<MyClientPayloadType, Any>(clientAction.payload, null)
+                val result = fromPayload<MyClientPayloadType, Any>(clientAction.payload, null)
                 val clientPayloadType = result.first
                 val data = result.second
                 when(clientPayloadType){
@@ -394,7 +393,7 @@ open class ServerOwnerViewModel @AssistedInject constructor(
             is ClientAction.EstablishConnection -> {
                 val clientID = clientAction.endpointID
 
-                val result: Pair<ClientPayloadType, PlayerConnectionState?> = fromClientPayload(clientAction.payload, null)
+                val result: Pair<ClientPayloadType, PlayerConnectionState?> = fromPayload(clientAction.payload, null)
                 result.second?.let {
                     val player = PlayerState(
                         nickname = it.nickname,

@@ -80,7 +80,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.dabi.easylocalgame.serverSide.data.ServerState
 import com.dabi.easylocalgame.serverSide.data.ServerStatusEnum
 import com.dabi.easylocalgame.serverSide.data.ServerType
-import com.dabi.easylocalgame.textUtils.UiTexts
+import com.dabi.easylocalgame.composeUtils.UiTexts
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featurePlayer.model.data.PlayerState
 import com.dabi.partypoker.featurePlayer.viewmodel.PlayerEvents
@@ -258,7 +258,7 @@ fun StateContent(
                                 } else{
                                     UiTexts.StringResource(R.string.try_again).asString()
                                 },
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyLarge
                             )
                         }
                     }
@@ -311,9 +311,11 @@ fun StateContent(
                     ){
                         Text(
                             text = text,
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Center,
-                            color = Color.White,
+                            style = TextStyle(
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                                color = Color.White,
+                                textAlign = TextAlign.Center,
+                            )
                         )
 
                         Button(
@@ -324,13 +326,13 @@ fun StateContent(
                                 .padding(top = 10.dp),
                             shape = RoundedCornerShape(10.dp)
                         ){
-                            AutoSizeText(
+                            Text(
                                 text = if (tryIsCancel) {
                                     UiTexts.StringResource(R.string.cancel).asString()
                                 } else{
                                     UiTexts.StringResource(R.string.try_again).asString()
                                 },
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyLarge
                             )
                         }
                     }
@@ -378,9 +380,11 @@ fun GamePopUpMenu(
     serverStatus: ServerState = ServerState()
 ) {
     var showPopUpMenu by rememberSaveable { mutableStateOf(false) }
-    IconButton(onClick = {
-        showPopUpMenu = true
-    }) {
+    IconButton(
+        onClick = {
+            showPopUpMenu = true
+        }
+    ) {
         Icon(Icons.Default.Menu, contentDescription = "Menu")
     }
     var showSettings by rememberSaveable { mutableStateOf(false) }

@@ -5,7 +5,10 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,7 +27,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.dabi.easylocalgame.serverSide.data.ServerConfiguration
 import com.dabi.easylocalgame.serverSide.data.ServerStatusEnum
 import com.dabi.easylocalgame.serverSide.data.ServerType
-import com.dabi.easylocalgame.textUtils.UiTexts
+import com.dabi.easylocalgame.composeUtils.UiTexts
 import com.dabi.partypoker.MenuScreen
 import com.dabi.partypoker.R
 import com.dabi.partypoker.ServerScreen

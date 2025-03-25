@@ -1,9 +1,14 @@
 package com.dabi.partypoker.featureServer.view
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.safeGestures
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,7 +52,9 @@ fun ServerGameView(
             modifier = Modifier
                 .fillMaxWidth(0.8f)
                 .padding(vertical = 50.dp)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+            ,
             gameState = gameState,
 
             isServer = true,

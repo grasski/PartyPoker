@@ -47,7 +47,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.dabi.easylocalgame.serverSide.data.IGameState
-import com.dabi.easylocalgame.textUtils.UiTexts
+import com.dabi.easylocalgame.composeUtils.UiTexts
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featurePlayer.model.data.PlayerState
 import com.dabi.partypoker.repository.gameSettings.GameSettings

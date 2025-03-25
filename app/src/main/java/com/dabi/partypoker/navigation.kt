@@ -10,18 +10,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.dabi.easylocalgame.serverSide.data.ServerState
-import com.dabi.easylocalgame.serverSide.data.ServerType
-import com.dabi.easylocalgame.textUtils.UiTexts
 import com.dabi.partypoker.featureMenu.view.MenuView
-import com.dabi.partypoker.featurePlayer.model.data.PlayerState
 import com.dabi.partypoker.featurePlayer.view.PlayerView
-import com.dabi.partypoker.featureServer.model.data.GameState
-import com.dabi.partypoker.featureServer.model.data.SeatPosition
-import com.dabi.partypoker.featureServer.view.ServerGameView
 import com.dabi.partypoker.featureServer.view.ServerView
-import com.dabi.partypoker.utils.Card
-import com.dabi.partypoker.utils.CardType
 import kotlinx.serialization.Serializable
 
 

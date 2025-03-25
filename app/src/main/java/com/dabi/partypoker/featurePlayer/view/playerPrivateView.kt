@@ -71,7 +71,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.dabi.easylocalgame.textUtils.UiTexts
+import com.dabi.easylocalgame.composeUtils.UiTexts
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureCore.data.PlayerActionsState
 import com.dabi.partypoker.featureCore.viewModel.PlayerSettingsViewModel
@@ -246,8 +246,7 @@ fun PlayerViewPrivate(
                     .height(70.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .border(1.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.inversePrimary)
-                ,
+                    .background(MaterialTheme.colorScheme.inversePrimary),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {

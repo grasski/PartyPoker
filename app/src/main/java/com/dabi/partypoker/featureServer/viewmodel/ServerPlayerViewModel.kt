@@ -2,7 +2,7 @@ package com.dabi.partypoker.featureServer.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.viewModelScope
-import com.dabi.easylocalgame.payloadUtils.toClientPayload
+import com.dabi.easylocalgame.payloadUtils.toPayload
 import com.dabi.easylocalgame.serverSide.ClientAction
 import com.dabi.partypoker.featureCore.data.PlayerActionsState
 import com.dabi.partypoker.featureCore.interfaces.PlayerCoreInterface
@@ -110,20 +110,20 @@ class ServerPlayerViewModel @AssistedInject constructor(
             }
 
             PlayerEvents.Ready -> {
-                clientAction(ClientAction.PayloadAction(_playerState.value.id, toClientPayload(MyClientPayloadType.ACTION_READY.toString(), null)))
+                clientAction(ClientAction.PayloadAction(_playerState.value.id, toPayload(MyClientPayloadType.ACTION_READY.toString(), null)))
             }
 
             PlayerEvents.Check -> {
-                clientAction(ClientAction.PayloadAction(_playerState.value.id, toClientPayload(MyClientPayloadType.ACTION_CHECK.toString(), null)))
+                clientAction(ClientAction.PayloadAction(_playerState.value.id, toPayload(MyClientPayloadType.ACTION_CHECK.toString(), null)))
             }
             is PlayerEvents.Call -> {
-                clientAction(ClientAction.PayloadAction(_playerState.value.id, toClientPayload(MyClientPayloadType.ACTION_CALL.toString(), event.amount)))
+                clientAction(ClientAction.PayloadAction(_playerState.value.id, toPayload(MyClientPayloadType.ACTION_CALL.toString(), event.amount)))
             }
             is PlayerEvents.Raise -> {
-                clientAction(ClientAction.PayloadAction(_playerState.value.id, toClientPayload(MyClientPayloadType.ACTION_RAISE.toString(), event.amount)))
+                clientAction(ClientAction.PayloadAction(_playerState.value.id, toPayload(MyClientPayloadType.ACTION_RAISE.toString(), event.amount)))
             }
             PlayerEvents.Fold -> {
-                clientAction(ClientAction.PayloadAction(_playerState.value.id, toClientPayload(MyClientPayloadType.ACTION_FOLD.toString(), null)))
+                clientAction(ClientAction.PayloadAction(_playerState.value.id, toPayload(MyClientPayloadType.ACTION_FOLD.toString(), null)))
             }
         }
     }

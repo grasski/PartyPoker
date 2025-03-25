@@ -1,7 +1,7 @@
 package com.dabi.partypoker.managers
 
 import android.util.Log
-import com.dabi.easylocalgame.textUtils.UiTexts
+import com.dabi.easylocalgame.composeUtils.UiTexts
 import com.dabi.partypoker.R
 import com.dabi.partypoker.featureServer.model.data.GameHistoryState
 import com.dabi.partypoker.featureServer.model.data.GameState

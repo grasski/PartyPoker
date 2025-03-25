@@ -3,7 +3,10 @@ package com.dabi.partypoker.featurePlayer.view
 import android.content.res.Configuration
 import androidx.annotation.RawRes
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,7 +23,7 @@ import com.dabi.easylocalgame.clientSide.data.ConnectionStatusEnum
 import com.dabi.easylocalgame.clientSide.data.PlayerConnectionState
 import com.dabi.easylocalgame.serverSide.data.ServerState
 import com.dabi.easylocalgame.serverSide.data.ServerType
-import com.dabi.easylocalgame.textUtils.UiTexts
+import com.dabi.easylocalgame.composeUtils.UiTexts
 import com.dabi.partypoker.MenuScreen
 import com.dabi.partypoker.PlayerScreen
 import com.dabi.partypoker.R
